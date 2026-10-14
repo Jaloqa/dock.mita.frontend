@@ -1,0 +1,16 @@
+{
+  "app": {
+    "description": "Osobisty planer budżetu",
+    "comingSoon": "Aplikacja jest w trakcie konfiguracji. Ekrany wkrótce."
+  },
+  "shared": {
+    "language": "Język",
+    "theme": {
+      "label": "Motyw",
+      "light": "Jasny",
+      "dark": "Ciemny",
+      "system": "Systemowy"
+    },
+    "operations": "{count} operacja | {count} operacje | {count} operacji | {count} operacji"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "app": {
+    "description": "Personal budget planner",
+    "comingSoon": "The app is being set up. Screens are coming soon."
+  },
+  "shared": {
+    "language": "Language",
+    "theme": {
+      "label": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "operations": "no operations | {count} operation | {count} operations"
+  }
+}

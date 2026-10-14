@@ -1,0 +1,13 @@
+name: dock-mita-frontend
+
+services:
+  web:
+    build:
+      context: .
+      target: runtime
+    env_file:
+      - path: .env
+        required: false
+    ports:
+      - '${APP_PORT:-3000}:3000'
+    restart: unless-stopped
