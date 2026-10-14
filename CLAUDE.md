@@ -9,7 +9,7 @@ Frontend of dock.mita. Guidance for working in this repository.
 - Pinia for shared client state
 - Tailwind CSS with Nuxt UI for components
 - Typed API client generated from the backend OpenAPI document (`openapi-typescript` + `openapi-fetch`)
-- Forms: VeeValidate with Zod schemas
+- Forms: Nuxt UI `UForm` with Zod schemas
 - i18n: `@nuxtjs/i18n` (vue-i18n), locales `en` (default), `pl`, `ru`, `uk`
 - Testing: Vitest and Vue Test Utils for units, Playwright for end-to-end
 - ESLint (`@nuxt/eslint`) and Prettier
@@ -59,6 +59,14 @@ Rules:
 - Component files use PascalCase, composables use `useXxx`, one component per file.
 - Prefer Tailwind utility classes. Avoid custom CSS unless a utility cannot express it.
 - Accessibility is required: semantic elements, labels for inputs, keyboard navigation.
+
+## Mocks
+
+Until the backend is ready the app runs on mocks. `runtimeConfig.public.apiMocks` (`NUXT_PUBLIC_API_MOCKS`) switches every feature between the mock and the real API.
+
+- Each feature's `api/` folder exports one interface with two implementations: `http` (generated client) and `mock`. Components and composables depend on the interface only.
+- Mock data lives in the feature, typed with the same generated types the real API uses, and behaves like the API (latency, pagination, validation errors).
+- Removing mocks later means deleting the `mock` implementation; nothing else changes.
 
 ## Internationalization
 
@@ -121,6 +129,8 @@ Chart series, in order: light `#25282F #C43F73 #7C818C #E59AB8 #B5B9C1 #F3D3E0`,
 ## Commands
 
 ```
+docker compose up --build                     # dev: compose.override.yaml adds hot reload
+docker compose -f compose.yaml up -d --build  # preprod / prod: built image, config from .env
 pnpm install
 pnpm dev
 pnpm build

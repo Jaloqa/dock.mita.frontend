@@ -1,0 +1,103 @@
+@import 'tailwindcss';
+@import '@nuxt/ui';
+
+@theme static {
+  --font-sans: 'Manrope', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --color-rose-mita-50: #fcf2f6;
+  --color-rose-mita-100: #f9e3ec;
+  --color-rose-mita-200: #f3c7d9;
+  --color-rose-mita-300: #ef9dbd;
+  --color-rose-mita-400: #e8679a;
+  --color-rose-mita-500: #c43f73;
+  --color-rose-mita-600: #a9325f;
+  --color-rose-mita-700: #8b284e;
+  --color-rose-mita-800: #6f2140;
+  --color-rose-mita-900: #5a1d36;
+  --color-rose-mita-950: #350c1d;
+
+  --color-graphite-50: #f7f8f9;
+  --color-graphite-100: #f2f3f5;
+  --color-graphite-200: #e7e9ee;
+  --color-graphite-300: #c9ccd3;
+  --color-graphite-400: #9da2ad;
+  --color-graphite-500: #7c818c;
+  --color-graphite-600: #5e636e;
+  --color-graphite-700: #40444d;
+  --color-graphite-800: #25282f;
+  --color-graphite-900: #1b1d23;
+  --color-graphite-950: #121317;
+
+  --radius-control: 10px;
+  --radius-card: 16px;
+  --radius-panel: 20px;
+}
+
+:root {
+  --mita-bg: #f2f3f5;
+  --mita-surface: #ffffff;
+  --mita-ink: #15171c;
+  --mita-muted: #5e636e;
+  --mita-border: #e1e3e8;
+  --mita-track: #e7e9ee;
+  --mita-deep: #25282f;
+  --mita-deep-muted: #c9ccd3;
+  --mita-accent: #c43f73;
+  --mita-on-accent: #ffffff;
+  --mita-chart-1: #25282f;
+  --mita-chart-2: #c43f73;
+  --mita-chart-3: #7c818c;
+  --mita-chart-4: #e59ab8;
+  --mita-chart-5: #b5b9c1;
+  --mita-chart-6: #f3d3e0;
+
+  --ui-bg: var(--mita-bg);
+  --ui-bg-elevated: var(--mita-surface);
+  --ui-text: var(--mita-ink);
+  --ui-text-muted: var(--mita-muted);
+  --ui-border: var(--mita-border);
+  --ui-radius: 0.625rem;
+}
+
+.dark {
+  --mita-bg: #121317;
+  --mita-surface: #1b1d23;
+  --mita-ink: #eef0f3;
+  --mita-muted: #9da2ad;
+  --mita-border: #2c2f37;
+  --mita-track: #2c2f37;
+  --mita-deep: #3a1e2c;
+  --mita-deep-muted: #e8b9cc;
+  --mita-accent: #e8679a;
+  --mita-on-accent: #16080f;
+  --mita-chart-1: #e8679a;
+  --mita-chart-2: #f08ab0;
+  --mita-chart-3: #c99ae8;
+  --mita-chart-4: #7fc7d9;
+  --mita-chart-5: #5a5f6b;
+  --mita-chart-6: #3e424b;
+}
+
+@theme inline {
+  --color-bg: var(--mita-bg);
+  --color-surface: var(--mita-surface);
+  --color-ink: var(--mita-ink);
+  --color-muted: var(--mita-muted);
+  --color-border: var(--mita-border);
+  --color-track: var(--mita-track);
+  --color-deep: var(--mita-deep);
+  --color-deep-muted: var(--mita-deep-muted);
+  --color-accent: var(--mita-accent);
+  --color-on-accent: var(--mita-on-accent);
+  --color-chart-1: var(--mita-chart-1);
+  --color-chart-2: var(--mita-chart-2);
+  --color-chart-3: var(--mita-chart-3);
+  --color-chart-4: var(--mita-chart-4);
+  --color-chart-5: var(--mita-chart-5);
+  --color-chart-6: var(--mita-chart-6);
+}
+
+body {
+  @apply bg-bg text-ink font-sans antialiased;
+}

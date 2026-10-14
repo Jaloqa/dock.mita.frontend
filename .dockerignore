@@ -1,0 +1,15 @@
+.git
+.github
+.nuxt
+.output
+.data
+node_modules
+playwright-report
+test-results
+coverage
+.env
+.env.*
+!.env.example
+Dockerfile
+compose*.yaml
+*.md
