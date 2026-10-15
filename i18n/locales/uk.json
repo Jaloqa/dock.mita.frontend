@@ -22,7 +22,11 @@
       "dark": "Темна",
       "system": "Системна"
     },
-    "actions": { "retry": "Спробувати ще раз", "save": "Зберегти", "cancel": "Скасувати" },
+    "actions": {
+      "retry": "Спробувати ще раз",
+      "save": "Зберегти",
+      "cancel": "Скасувати"
+    },
     "error": {
       "title": "Щось пішло не так",
       "description": "Не вдалося завантажити цей розділ.",
@@ -31,7 +35,10 @@
       "server": "Сервер не зміг виконати запит. Спробуйте ще раз.",
       "unknown": "Сталася неочікувана помилка. Спробуйте ще раз."
     },
-    "period": { "label": "Період", "range": "{from} – {to}" },
+    "period": {
+      "label": "Період",
+      "range": "{from} – {to}"
+    },
     "dateInputFormat": "dd.mm.yy",
     "primevue": {
       "firstDayOfWeek": "1",
@@ -58,7 +65,10 @@
     }
   },
   "settings": {
-    "data": { "title": "Дані", "manageCategories": "Керування категоріями" }
+    "data": {
+      "title": "Дані",
+      "manageCategories": "Керування категоріями"
+    }
   },
   "accounts": {
     "total": "Усього {amount}",
@@ -72,7 +82,11 @@
       "showArchived": "Показати архівні ({count})",
       "hideArchived": "Сховати архівні"
     },
-    "type": { "card": "Картка", "cash": "Готівка", "savings": "Накопичувальний" },
+    "type": {
+      "card": "Картка",
+      "cash": "Готівка",
+      "savings": "Накопичувальний"
+    },
     "meta": {
       "card": "•••• {last4}",
       "converted": "≈ {amount}",
@@ -135,10 +149,17 @@
     }
   },
   "categories": {
-    "dialog": { "title": "Категорії" },
-    "kind": { "expense": "Витрати", "income": "Доходи" },
+    "dialog": {
+      "title": "Категорії"
+    },
+    "kind": {
+      "expense": "Витрати",
+      "income": "Доходи"
+    },
     "system": "Системна",
-    "list": { "empty": "Категорій поки немає." },
+    "list": {
+      "empty": "Категорій поки немає."
+    },
     "actions": {
       "add": "Додати категорію",
       "edit": "Змінити {name}",
@@ -157,7 +178,132 @@
       "deleteMessage": "Категорію «{name}» буде видалено. Її операції перейдуть до «{other}».",
       "deleteUnusedMessage": "Категорію «{name}» буде видалено назавжди."
     },
-    "toast": { "created": "Категорію додано", "updated": "Категорію оновлено", "deleted": "Категорію видалено" }
+    "toast": {
+      "created": "Категорію додано",
+      "updated": "Категорію оновлено",
+      "deleted": "Категорію видалено"
+    }
+  },
+  "transactions": {
+    "actions": {
+      "add": "Додати операцію",
+      "addFirst": "Додати першу операцію",
+      "export": "Експорт CSV",
+      "filters": "Фільтри",
+      "resetFilters": "Скинути фільтри",
+      "apply": "Показати результати",
+      "showMore": "Показати ще",
+      "delete": "Видалити"
+    },
+    "filters": {
+      "label": "Фільтри",
+      "search": "Пошук",
+      "searchPlaceholder": "Назва, нотатка або сума",
+      "category": "Категорія",
+      "allCategories": "Усі категорії",
+      "account": "Рахунок",
+      "allAccounts": "Усі рахунки",
+      "kind": "Тип",
+      "period": "Період"
+    },
+    "kind": {
+      "all": "Усі",
+      "expense": "Витрати",
+      "income": "Доходи"
+    },
+    "kindSingle": {
+      "expense": "Витрата",
+      "income": "Дохід"
+    },
+    "period": {
+      "thisPeriod": "Цей місяць",
+      "lastPeriod": "Минулий місяць",
+      "last3Months": "Останні 3 місяці",
+      "thisYear": "Цей рік",
+      "all": "Увесь час"
+    },
+    "summary": {
+      "label": "Підсумки фільтра",
+      "found": "Знайдено: {count}",
+      "count": "{count} операція | {count} операції | {count} операцій",
+      "total": "Сума: {amount}"
+    },
+    "table": {
+      "label": "Операції",
+      "date": "Дата",
+      "description": "Опис",
+      "category": "Категорія",
+      "account": "Рахунок",
+      "amount": "Сума"
+    },
+    "list": {
+      "label": "Операції за днями"
+    },
+    "converted": "≈ {amount}",
+    "day": {
+      "today": "Сьогодні",
+      "yesterday": "Учора"
+    },
+    "empty": {
+      "title": "Операцій поки немає",
+      "description": "Записуйте доходи й витрати, щоб бачити, куди йдуть гроші.",
+      "filteredTitle": "Нічого не знайдено",
+      "filteredDescription": "Немає операцій, що відповідають фільтрам."
+    },
+    "dialog": {
+      "createTitle": "Нова операція",
+      "editTitle": "Редагування операції",
+      "kind": "Тип",
+      "amount": "Сума",
+      "currency": "Валюта",
+      "rate": "Курс ({from} → {to})",
+      "rateHint": "Скільки {to} коштує 1 {from} на вибрану дату. Курс можна виправити.",
+      "accountAmount": "На рахунку: {amount}",
+      "category": "Категорія",
+      "account": "Рахунок",
+      "date": "Дата",
+      "title": "Опис",
+      "note": "Нотатка",
+      "noAccounts": "Спершу додайте рахунок, щоб записувати операції.",
+      "goToAccounts": "Перейти до рахунків"
+    },
+    "add": {
+      "close": "Закрити",
+      "amount": "Сума",
+      "categories": "Категорія",
+      "dateButton": "Дата: {value}",
+      "accountButton": "Рахунок: {value}",
+      "chooseDate": "Виберіть дату",
+      "chooseAccount": "Виберіть рахунок",
+      "keypad": "Клавіатура",
+      "backspace": "Стерти",
+      "decimal": "Десятковий роздільник"
+    },
+    "confirm": {
+      "deleteTitle": "Видалити операцію?",
+      "deleteMessage": "«{title}» буде видалено назавжди."
+    },
+    "toast": {
+      "created": "Операцію збережено",
+      "updated": "Операцію оновлено",
+      "deleted": "Операцію видалено",
+      "exported": "Експортовано {count} операцію | Експортовано {count} операції | Експортовано {count} операцій"
+    },
+    "csv": {
+      "date": "Дата",
+      "kind": "Тип",
+      "title": "Опис",
+      "category": "Категорія",
+      "account": "Рахунок",
+      "amount": "Сума",
+      "currency": "Валюта",
+      "accountAmount": "Сума на рахунку",
+      "accountCurrency": "Валюта рахунку",
+      "rate": "Курс",
+      "baseAmount": "Сума в базовій валюті",
+      "baseCurrency": "Базова валюта",
+      "note": "Нотатка"
+    }
   },
   "validation": {
     "required": "Обов'язкове поле.",
@@ -174,6 +320,9 @@
     "dateTooFar": "Дата може бути не більше ніж на рік уперед.",
     "categoryNameTaken": "Категорія з такою назвою вже існує.",
     "categoryKindLocked": "Тип цієї категорії не можна змінити.",
-    "systemCategory": "Системні категорії не можна видалити."
+    "systemCategory": "Системні категорії не можна видалити.",
+    "titleTooLong": "Не більше 100 символів.",
+    "unknownCategory": "Ця категорія недоступна.",
+    "categoryKindMismatch": "Виберіть категорію того самого типу."
   }
 }

@@ -22,7 +22,11 @@
       "dark": "Ciemny",
       "system": "Systemowy"
     },
-    "actions": { "retry": "Spróbuj ponownie", "save": "Zapisz", "cancel": "Anuluj" },
+    "actions": {
+      "retry": "Spróbuj ponownie",
+      "save": "Zapisz",
+      "cancel": "Anuluj"
+    },
     "error": {
       "title": "Coś poszło nie tak",
       "description": "Nie udało się wczytać tej sekcji.",
@@ -31,7 +35,10 @@
       "server": "Serwer nie mógł wykonać żądania. Spróbuj ponownie.",
       "unknown": "Wystąpił nieoczekiwany błąd. Spróbuj ponownie."
     },
-    "period": { "label": "Okres", "range": "{from} – {to}" },
+    "period": {
+      "label": "Okres",
+      "range": "{from} – {to}"
+    },
     "dateInputFormat": "dd.mm.yy",
     "primevue": {
       "firstDayOfWeek": "1",
@@ -58,7 +65,10 @@
     }
   },
   "settings": {
-    "data": { "title": "Dane", "manageCategories": "Zarządzaj kategoriami" }
+    "data": {
+      "title": "Dane",
+      "manageCategories": "Zarządzaj kategoriami"
+    }
   },
   "accounts": {
     "total": "Razem {amount}",
@@ -72,7 +82,11 @@
       "showArchived": "Pokaż zarchiwizowane ({count})",
       "hideArchived": "Ukryj zarchiwizowane"
     },
-    "type": { "card": "Karta", "cash": "Gotówka", "savings": "Oszczędności" },
+    "type": {
+      "card": "Karta",
+      "cash": "Gotówka",
+      "savings": "Oszczędności"
+    },
     "meta": {
       "card": "•••• {last4}",
       "converted": "≈ {amount}",
@@ -135,10 +149,17 @@
     }
   },
   "categories": {
-    "dialog": { "title": "Kategorie" },
-    "kind": { "expense": "Wydatki", "income": "Przychody" },
+    "dialog": {
+      "title": "Kategorie"
+    },
+    "kind": {
+      "expense": "Wydatki",
+      "income": "Przychody"
+    },
     "system": "Systemowa",
-    "list": { "empty": "Brak kategorii." },
+    "list": {
+      "empty": "Brak kategorii."
+    },
     "actions": {
       "add": "Dodaj kategorię",
       "edit": "Edytuj {name}",
@@ -157,7 +178,132 @@
       "deleteMessage": "Kategoria „{name}” zostanie usunięta. Jej transakcje zostaną przeniesione do „{other}”.",
       "deleteUnusedMessage": "Kategoria „{name}” zostanie trwale usunięta."
     },
-    "toast": { "created": "Dodano kategorię", "updated": "Zaktualizowano kategorię", "deleted": "Usunięto kategorię" }
+    "toast": {
+      "created": "Dodano kategorię",
+      "updated": "Zaktualizowano kategorię",
+      "deleted": "Usunięto kategorię"
+    }
+  },
+  "transactions": {
+    "actions": {
+      "add": "Dodaj operację",
+      "addFirst": "Dodaj pierwszą operację",
+      "export": "Eksport CSV",
+      "filters": "Filtry",
+      "resetFilters": "Wyczyść filtry",
+      "apply": "Pokaż wyniki",
+      "showMore": "Pokaż więcej",
+      "delete": "Usuń"
+    },
+    "filters": {
+      "label": "Filtry",
+      "search": "Szukaj",
+      "searchPlaceholder": "Nazwa, notatka lub kwota",
+      "category": "Kategoria",
+      "allCategories": "Wszystkie kategorie",
+      "account": "Konto",
+      "allAccounts": "Wszystkie konta",
+      "kind": "Typ",
+      "period": "Okres"
+    },
+    "kind": {
+      "all": "Wszystkie",
+      "expense": "Wydatki",
+      "income": "Przychody"
+    },
+    "kindSingle": {
+      "expense": "Wydatek",
+      "income": "Przychód"
+    },
+    "period": {
+      "thisPeriod": "Ten miesiąc",
+      "lastPeriod": "Poprzedni miesiąc",
+      "last3Months": "Ostatnie 3 miesiące",
+      "thisYear": "Ten rok",
+      "all": "Cały okres"
+    },
+    "summary": {
+      "label": "Podsumowanie filtra",
+      "found": "Znaleziono: {count}",
+      "count": "{count} operacja | {count} operacje | {count} operacji",
+      "total": "Suma: {amount}"
+    },
+    "table": {
+      "label": "Operacje",
+      "date": "Data",
+      "description": "Opis",
+      "category": "Kategoria",
+      "account": "Konto",
+      "amount": "Kwota"
+    },
+    "list": {
+      "label": "Operacje według dni"
+    },
+    "converted": "≈ {amount}",
+    "day": {
+      "today": "Dzisiaj",
+      "yesterday": "Wczoraj"
+    },
+    "empty": {
+      "title": "Brak operacji",
+      "description": "Zapisuj przychody i wydatki, aby widzieć, na co idą pieniądze.",
+      "filteredTitle": "Nic nie znaleziono",
+      "filteredDescription": "Żadna operacja nie pasuje do filtrów."
+    },
+    "dialog": {
+      "createTitle": "Nowa operacja",
+      "editTitle": "Edycja operacji",
+      "kind": "Typ",
+      "amount": "Kwota",
+      "currency": "Waluta",
+      "rate": "Kurs wymiany ({from} → {to})",
+      "rateHint": "Ile {to} to 1 {from} w wybranym dniu. Możesz go poprawić.",
+      "accountAmount": "Na koncie: {amount}",
+      "category": "Kategoria",
+      "account": "Konto",
+      "date": "Data",
+      "title": "Opis",
+      "note": "Notatka",
+      "noAccounts": "Najpierw dodaj konto, aby zapisywać operacje.",
+      "goToAccounts": "Przejdź do kont"
+    },
+    "add": {
+      "close": "Zamknij",
+      "amount": "Kwota",
+      "categories": "Kategoria",
+      "dateButton": "Data: {value}",
+      "accountButton": "Konto: {value}",
+      "chooseDate": "Wybierz datę",
+      "chooseAccount": "Wybierz konto",
+      "keypad": "Klawiatura",
+      "backspace": "Usuń znak",
+      "decimal": "Separator dziesiętny"
+    },
+    "confirm": {
+      "deleteTitle": "Usunąć operację?",
+      "deleteMessage": "„{title}” zostanie usunięta na stałe."
+    },
+    "toast": {
+      "created": "Operacja zapisana",
+      "updated": "Operacja zaktualizowana",
+      "deleted": "Operacja usunięta",
+      "exported": "Wyeksportowano {count} operację | Wyeksportowano {count} operacje | Wyeksportowano {count} operacji"
+    },
+    "csv": {
+      "date": "Data",
+      "kind": "Typ",
+      "title": "Opis",
+      "category": "Kategoria",
+      "account": "Konto",
+      "amount": "Kwota",
+      "currency": "Waluta",
+      "accountAmount": "Kwota na koncie",
+      "accountCurrency": "Waluta konta",
+      "rate": "Kurs wymiany",
+      "baseAmount": "Kwota w walucie bazowej",
+      "baseCurrency": "Waluta bazowa",
+      "note": "Notatka"
+    }
   },
   "validation": {
     "required": "To pole jest wymagane.",
@@ -174,6 +320,9 @@
     "dateTooFar": "Data może być najwyżej rok do przodu.",
     "categoryNameTaken": "Kategoria o tej nazwie już istnieje.",
     "categoryKindLocked": "Typu tej kategorii nie można zmienić.",
-    "systemCategory": "Kategorii systemowych nie można usunąć."
+    "systemCategory": "Kategorii systemowych nie można usunąć.",
+    "titleTooLong": "Użyj najwyżej 100 znaków.",
+    "unknownCategory": "Ta kategoria jest niedostępna.",
+    "categoryKindMismatch": "Wybierz kategorię tego samego typu."
   }
 }
