@@ -22,7 +22,11 @@
       "dark": "Dark",
       "system": "System"
     },
-    "actions": { "retry": "Try again", "save": "Save", "cancel": "Cancel" },
+    "actions": {
+      "retry": "Try again",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
     "error": {
       "title": "Something went wrong",
       "description": "We could not load this section.",
@@ -31,7 +35,10 @@
       "server": "The server could not complete the request. Please try again.",
       "unknown": "Something unexpected happened. Please try again."
     },
-    "period": { "label": "Period", "range": "{from} – {to}" },
+    "period": {
+      "label": "Period",
+      "range": "{from} – {to}"
+    },
     "dateInputFormat": "mm/dd/yy",
     "primevue": {
       "firstDayOfWeek": "0",
@@ -58,7 +65,10 @@
     }
   },
   "settings": {
-    "data": { "title": "Data", "manageCategories": "Manage categories" }
+    "data": {
+      "title": "Data",
+      "manageCategories": "Manage categories"
+    }
   },
   "accounts": {
     "total": "Total {amount}",
@@ -72,8 +82,17 @@
       "showArchived": "Show archived ({count})",
       "hideArchived": "Hide archived"
     },
-    "type": { "card": "Card", "cash": "Cash", "savings": "Savings" },
-    "meta": { "card": "•••• {last4}", "converted": "≈ {amount}", "cash": "Cash wallet", "savings": "Savings account" },
+    "type": {
+      "card": "Card",
+      "cash": "Cash",
+      "savings": "Savings"
+    },
+    "meta": {
+      "card": "•••• {last4}",
+      "converted": "≈ {amount}",
+      "cash": "Cash wallet",
+      "savings": "Savings account"
+    },
     "archivedBadge": "Archived",
     "list": {
       "label": "Accounts",
@@ -130,10 +149,17 @@
     }
   },
   "categories": {
-    "dialog": { "title": "Categories" },
-    "kind": { "expense": "Expenses", "income": "Income" },
+    "dialog": {
+      "title": "Categories"
+    },
+    "kind": {
+      "expense": "Expenses",
+      "income": "Income"
+    },
     "system": "System",
-    "list": { "empty": "No categories yet." },
+    "list": {
+      "empty": "No categories yet."
+    },
     "actions": {
       "add": "Add category",
       "edit": "Edit {name}",
@@ -152,7 +178,132 @@
       "deleteMessage": "“{name}” will be deleted. Any transactions in it will move to “{other}”.",
       "deleteUnusedMessage": "“{name}” will be deleted permanently."
     },
-    "toast": { "created": "Category added", "updated": "Category updated", "deleted": "Category deleted" }
+    "toast": {
+      "created": "Category added",
+      "updated": "Category updated",
+      "deleted": "Category deleted"
+    }
+  },
+  "transactions": {
+    "actions": {
+      "add": "Add transaction",
+      "addFirst": "Add your first transaction",
+      "export": "Export CSV",
+      "filters": "Filters",
+      "resetFilters": "Reset filters",
+      "apply": "Show results",
+      "showMore": "Show more",
+      "delete": "Delete"
+    },
+    "filters": {
+      "label": "Filters",
+      "search": "Search",
+      "searchPlaceholder": "Title, note or amount",
+      "category": "Category",
+      "allCategories": "All categories",
+      "account": "Account",
+      "allAccounts": "All accounts",
+      "kind": "Type",
+      "period": "Period"
+    },
+    "kind": {
+      "all": "All",
+      "expense": "Expenses",
+      "income": "Income"
+    },
+    "kindSingle": {
+      "expense": "Expense",
+      "income": "Income"
+    },
+    "period": {
+      "thisPeriod": "This month",
+      "lastPeriod": "Last month",
+      "last3Months": "Last 3 months",
+      "thisYear": "This year",
+      "all": "All time"
+    },
+    "summary": {
+      "label": "Filter summary",
+      "found": "Found: {count}",
+      "count": "{count} transaction | {count} transactions",
+      "total": "Total: {amount}"
+    },
+    "table": {
+      "label": "Transactions",
+      "date": "Date",
+      "description": "Description",
+      "category": "Category",
+      "account": "Account",
+      "amount": "Amount"
+    },
+    "list": {
+      "label": "Transactions by day"
+    },
+    "converted": "≈ {amount}",
+    "day": {
+      "today": "Today",
+      "yesterday": "Yesterday"
+    },
+    "empty": {
+      "title": "No transactions yet",
+      "description": "Record income and expenses to see where your money goes.",
+      "filteredTitle": "Nothing found",
+      "filteredDescription": "No transactions match these filters."
+    },
+    "dialog": {
+      "createTitle": "New transaction",
+      "editTitle": "Edit transaction",
+      "kind": "Type",
+      "amount": "Amount",
+      "currency": "Currency",
+      "rate": "Exchange rate ({from} → {to})",
+      "rateHint": "How many {to} equal 1 {from} on the selected date. You can correct it.",
+      "accountAmount": "On the account: {amount}",
+      "category": "Category",
+      "account": "Account",
+      "date": "Date",
+      "title": "Description",
+      "note": "Note",
+      "noAccounts": "Add an account first to record transactions.",
+      "goToAccounts": "Go to accounts"
+    },
+    "add": {
+      "close": "Close",
+      "amount": "Amount",
+      "categories": "Category",
+      "dateButton": "Date: {value}",
+      "accountButton": "Account: {value}",
+      "chooseDate": "Choose a date",
+      "chooseAccount": "Choose an account",
+      "keypad": "Keypad",
+      "backspace": "Erase",
+      "decimal": "Decimal separator"
+    },
+    "confirm": {
+      "deleteTitle": "Delete transaction?",
+      "deleteMessage": "“{title}” will be deleted permanently."
+    },
+    "toast": {
+      "created": "Transaction saved",
+      "updated": "Transaction updated",
+      "deleted": "Transaction deleted",
+      "exported": "Exported {count} transaction | Exported {count} transactions"
+    },
+    "csv": {
+      "date": "Date",
+      "kind": "Type",
+      "title": "Description",
+      "category": "Category",
+      "account": "Account",
+      "amount": "Amount",
+      "currency": "Currency",
+      "accountAmount": "Account amount",
+      "accountCurrency": "Account currency",
+      "rate": "Exchange rate",
+      "baseAmount": "Amount in base currency",
+      "baseCurrency": "Base currency",
+      "note": "Note"
+    }
   },
   "validation": {
     "required": "This field is required.",
@@ -169,6 +320,9 @@
     "dateTooFar": "The date can be at most one year ahead.",
     "categoryNameTaken": "A category with this name already exists.",
     "categoryKindLocked": "The type of this category cannot change.",
-    "systemCategory": "System categories cannot be deleted."
+    "systemCategory": "System categories cannot be deleted.",
+    "titleTooLong": "Use at most 100 characters.",
+    "unknownCategory": "This category is not available.",
+    "categoryKindMismatch": "Choose a category of the same type."
   }
 }

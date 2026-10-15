@@ -54,5 +54,15 @@ withDefaults(defineProps<{ name: IconName; size?: number; strokeWidth?: number }
     <path v-else-if="name === 'transfer'" d="M7 7h12l-3-3M17 17H5l3 3" />
     <path v-else-if="name === 'edit'" d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3zM13.5 8.5l3 3" />
     <path v-else-if="name === 'trash'" d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
+    <path v-else-if="name === 'download'" d="M12 4v11M7 10l5 5 5-5M5 20h14" />
+    <template v-else-if="name === 'search'">
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-3.5-3.5" />
+    </template>
+    <path v-else-if="name === 'filter'" d="M4 6h16M7 12h10M10 18h4" />
+    <path v-else-if="name === 'close'" d="M6 6l12 12M18 6L6 18" />
+    <path v-else-if="name === 'arrowUp'" d="M12 19V5M6 11l6-6 6 6" />
+    <path v-else-if="name === 'arrowDown'" d="M12 5v14M6 13l6 6 6-6" />
+    <path v-else-if="name === 'backspace'" d="M21 5H9l-6 7 6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1zM12 9l6 6M18 9l-6 6" />
   </svg>
 </template>

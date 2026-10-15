@@ -22,7 +22,11 @@
       "dark": "Тёмная",
       "system": "Системная"
     },
-    "actions": { "retry": "Повторить", "save": "Сохранить", "cancel": "Отмена" },
+    "actions": {
+      "retry": "Повторить",
+      "save": "Сохранить",
+      "cancel": "Отмена"
+    },
     "error": {
       "title": "Что-то пошло не так",
       "description": "Не удалось загрузить этот раздел.",
@@ -31,7 +35,10 @@
       "server": "Сервер не смог выполнить запрос. Попробуйте ещё раз.",
       "unknown": "Произошла непредвиденная ошибка. Попробуйте ещё раз."
     },
-    "period": { "label": "Период", "range": "{from} – {to}" },
+    "period": {
+      "label": "Период",
+      "range": "{from} – {to}"
+    },
     "dateInputFormat": "dd.mm.yy",
     "primevue": {
       "firstDayOfWeek": "1",
@@ -58,7 +65,10 @@
     }
   },
   "settings": {
-    "data": { "title": "Данные", "manageCategories": "Управление категориями" }
+    "data": {
+      "title": "Данные",
+      "manageCategories": "Управление категориями"
+    }
   },
   "accounts": {
     "total": "Всего {amount}",
@@ -72,8 +82,17 @@
       "showArchived": "Показать архивные ({count})",
       "hideArchived": "Скрыть архивные"
     },
-    "type": { "card": "Карта", "cash": "Наличные", "savings": "Накопительный" },
-    "meta": { "card": "•••• {last4}", "converted": "≈ {amount}", "cash": "Кошелёк", "savings": "Накопительный счёт" },
+    "type": {
+      "card": "Карта",
+      "cash": "Наличные",
+      "savings": "Накопительный"
+    },
+    "meta": {
+      "card": "•••• {last4}",
+      "converted": "≈ {amount}",
+      "cash": "Кошелёк",
+      "savings": "Накопительный счёт"
+    },
     "archivedBadge": "В архиве",
     "list": {
       "label": "Счета",
@@ -130,10 +149,17 @@
     }
   },
   "categories": {
-    "dialog": { "title": "Категории" },
-    "kind": { "expense": "Расходы", "income": "Доходы" },
+    "dialog": {
+      "title": "Категории"
+    },
+    "kind": {
+      "expense": "Расходы",
+      "income": "Доходы"
+    },
     "system": "Системная",
-    "list": { "empty": "Категорий пока нет." },
+    "list": {
+      "empty": "Категорий пока нет."
+    },
     "actions": {
       "add": "Добавить категорию",
       "edit": "Изменить {name}",
@@ -152,7 +178,132 @@
       "deleteMessage": "Категория «{name}» будет удалена. Её операции перейдут в «{other}».",
       "deleteUnusedMessage": "Категория «{name}» будет удалена без возможности восстановления."
     },
-    "toast": { "created": "Категория добавлена", "updated": "Категория обновлена", "deleted": "Категория удалена" }
+    "toast": {
+      "created": "Категория добавлена",
+      "updated": "Категория обновлена",
+      "deleted": "Категория удалена"
+    }
+  },
+  "transactions": {
+    "actions": {
+      "add": "Добавить операцию",
+      "addFirst": "Добавить первую операцию",
+      "export": "Экспорт CSV",
+      "filters": "Фильтры",
+      "resetFilters": "Сбросить фильтры",
+      "apply": "Показать результаты",
+      "showMore": "Показать ещё",
+      "delete": "Удалить"
+    },
+    "filters": {
+      "label": "Фильтры",
+      "search": "Поиск",
+      "searchPlaceholder": "Название, заметка или сумма",
+      "category": "Категория",
+      "allCategories": "Все категории",
+      "account": "Счёт",
+      "allAccounts": "Все счета",
+      "kind": "Тип",
+      "period": "Период"
+    },
+    "kind": {
+      "all": "Все",
+      "expense": "Расходы",
+      "income": "Доходы"
+    },
+    "kindSingle": {
+      "expense": "Расход",
+      "income": "Доход"
+    },
+    "period": {
+      "thisPeriod": "Этот месяц",
+      "lastPeriod": "Прошлый месяц",
+      "last3Months": "Последние 3 месяца",
+      "thisYear": "Этот год",
+      "all": "Всё время"
+    },
+    "summary": {
+      "label": "Итоги фильтра",
+      "found": "Найдено: {count}",
+      "count": "{count} операция | {count} операции | {count} операций",
+      "total": "Сумма: {amount}"
+    },
+    "table": {
+      "label": "Операции",
+      "date": "Дата",
+      "description": "Описание",
+      "category": "Категория",
+      "account": "Счёт",
+      "amount": "Сумма"
+    },
+    "list": {
+      "label": "Операции по дням"
+    },
+    "converted": "≈ {amount}",
+    "day": {
+      "today": "Сегодня",
+      "yesterday": "Вчера"
+    },
+    "empty": {
+      "title": "Операций пока нет",
+      "description": "Записывайте доходы и расходы, чтобы видеть, куда уходят деньги.",
+      "filteredTitle": "Ничего не найдено",
+      "filteredDescription": "Нет операций, подходящих под фильтры."
+    },
+    "dialog": {
+      "createTitle": "Новая операция",
+      "editTitle": "Редактирование операции",
+      "kind": "Тип",
+      "amount": "Сумма",
+      "currency": "Валюта",
+      "rate": "Курс ({from} → {to})",
+      "rateHint": "Сколько {to} стоит 1 {from} на выбранную дату. Курс можно исправить.",
+      "accountAmount": "На счёте: {amount}",
+      "category": "Категория",
+      "account": "Счёт",
+      "date": "Дата",
+      "title": "Описание",
+      "note": "Заметка",
+      "noAccounts": "Сначала добавьте счёт, чтобы записывать операции.",
+      "goToAccounts": "Перейти к счетам"
+    },
+    "add": {
+      "close": "Закрыть",
+      "amount": "Сумма",
+      "categories": "Категория",
+      "dateButton": "Дата: {value}",
+      "accountButton": "Счёт: {value}",
+      "chooseDate": "Выберите дату",
+      "chooseAccount": "Выберите счёт",
+      "keypad": "Клавиатура",
+      "backspace": "Стереть",
+      "decimal": "Десятичный разделитель"
+    },
+    "confirm": {
+      "deleteTitle": "Удалить операцию?",
+      "deleteMessage": "«{title}» будет удалена навсегда."
+    },
+    "toast": {
+      "created": "Операция сохранена",
+      "updated": "Операция обновлена",
+      "deleted": "Операция удалена",
+      "exported": "Экспортирована {count} операция | Экспортированы {count} операции | Экспортировано {count} операций"
+    },
+    "csv": {
+      "date": "Дата",
+      "kind": "Тип",
+      "title": "Описание",
+      "category": "Категория",
+      "account": "Счёт",
+      "amount": "Сумма",
+      "currency": "Валюта",
+      "accountAmount": "Сумма на счёте",
+      "accountCurrency": "Валюта счёта",
+      "rate": "Курс",
+      "baseAmount": "Сумма в базовой валюте",
+      "baseCurrency": "Базовая валюта",
+      "note": "Заметка"
+    }
   },
   "validation": {
     "required": "Обязательное поле.",
@@ -169,6 +320,9 @@
     "dateTooFar": "Дата может быть не больше чем на год вперёд.",
     "categoryNameTaken": "Категория с таким названием уже есть.",
     "categoryKindLocked": "Тип этой категории нельзя изменить.",
-    "systemCategory": "Системные категории нельзя удалить."
+    "systemCategory": "Системные категории нельзя удалить.",
+    "titleTooLong": "Не больше 100 символов.",
+    "unknownCategory": "Эта категория недоступна.",
+    "categoryKindMismatch": "Выберите категорию того же типа."
   }
 }
