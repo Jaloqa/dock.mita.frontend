@@ -20,6 +20,8 @@ The agreed stack is in [docs/STACK.md](docs/STACK.md). Do not introduce librarie
 - Analytics: PostHog and Google Analytics
 - Docker images deployed to Kubernetes through Argo CD (GitOps)
 
+PrimeVue stays on 4.x (`primevue`, `@primevue/nuxt-module` 4.x, `@primeuix/themes` 2.x, `primeicons` 7.x), the last MIT-licensed releases. PrimeVue 5 and PrimeIcons 8 moved to the commercial PrimeUI license; do not upgrade without a license decision.
+
 PrimeVue components that need an extra package (`Chart` needs Chart.js, `Editor` needs Quill, `Form`/`FormField` need `@primevue/forms`) are excluded in `nuxt.config.ts`. Remove a component from the exclude list only together with adding its package.
 
 ## Architecture: Vertical Slice
