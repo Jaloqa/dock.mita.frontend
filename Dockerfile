@@ -1,25 +1,29 @@
-FROM oven/bun:1.4-alpine AS base
+FROM oven/bun:1.4-debian AS deps
 WORKDIR /app
-
-FROM base AS deps
 COPY package.json bun.lock ./
-RUN --mount=type=cache,target=/root/.bun/install/cache bun install --frozen-lockfile --ignore-scripts
+RUN --mount=type=cache,target=/root/.bun/install/cache \
+    bun install --frozen-lockfile --ignore-scripts
 
-FROM deps AS dev
+FROM node:26-bookworm-slim AS dev
+WORKDIR /app
+COPY --from=oven/bun:1.4-debian /usr/local/bin/bun /usr/local/bin/bun
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN bun --bun run postinstall
+RUN npx nuxt prepare
 EXPOSE 3000
-CMD ["sh", "-c", "bun install --frozen-lockfile && bun --bun run dev --host 0.0.0.0"]
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 
-FROM deps AS build
+FROM oven/bun:1.4-debian AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN bun --bun run build
+RUN bunx nuxi prepare && bun run build
 
-FROM oven/bun:1.4-alpine AS runtime
+FROM node:26-bookworm-slim AS production
 ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
 WORKDIR /app
-COPY --from=build --chown=bun:bun /app/.output ./.output
-USER bun
+COPY --from=builder --chown=node:node /app/.output ./.output
+USER node
 EXPOSE 3000
-HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1
-CMD ["bun", ".output/server/index.mjs"]
+HEALTHCHECK --interval=30s --timeout=3s CMD node -e "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+CMD ["node", ".output/server/index.mjs"]
