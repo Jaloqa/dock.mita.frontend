@@ -1,7 +1,18 @@
 {
   "app": {
     "description": "Personal budget planner",
-    "comingSoon": "The app is being set up. Screens are coming soon."
+    "comingSoon": "This screen is coming soon."
+  },
+  "navigation": {
+    "label": "Main navigation",
+    "overview": "Overview",
+    "transactions": "Transactions",
+    "budgets": "Budgets",
+    "goals": "Goals",
+    "accounts": "Accounts",
+    "reports": "Reports",
+    "settings": "Settings",
+    "addTransaction": "New transaction"
   },
   "shared": {
     "language": "Language",
@@ -10,7 +21,6 @@
       "light": "Light",
       "dark": "Dark",
       "system": "System"
-    },
-    "operations": "no operations | {count} operation | {count} operations"
+    }
   }
 }

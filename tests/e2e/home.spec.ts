@@ -1,11 +1,12 @@
 import { expect, test } from '@playwright/test'
 
-test('home page renders in English by default', async ({ page }) => {
+test('overview renders in English by default', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByText('Personal budget planner')).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  await expect(page).toHaveTitle('Overview · Mita')
 })
 
-test('home page switches to Ukrainian under its prefix', async ({ page }) => {
+test('overview renders in Ukrainian under its prefix', async ({ page }) => {
   await page.goto('/uk')
-  await expect(page.getByText('Особистий планер бюджету')).toBeVisible()
+  await expect(page).toHaveTitle('Огляд · Mita')
 })
