@@ -1,14 +1,21 @@
 <script setup lang="ts">
-const colorMode = useColorMode()
+const { preference } = useColorMode()
 const { t } = useI18n()
 
-const items = computed(() => [
-  { label: t('shared.theme.system'), value: 'system', icon: 'i-lucide-monitor' },
-  { label: t('shared.theme.light'), value: 'light', icon: 'i-lucide-sun' },
-  { label: t('shared.theme.dark'), value: 'dark', icon: 'i-lucide-moon' },
+const options = computed(() => [
+  { label: t('shared.theme.system'), value: 'system' },
+  { label: t('shared.theme.light'), value: 'light' },
+  { label: t('shared.theme.dark'), value: 'dark' },
 ])
 </script>
 
 <template>
-  <USelect v-model="colorMode.preference" :items="items" :aria-label="t('shared.theme.label')" class="w-40" />
+  <SelectButton
+    v-model="preference"
+    :options="options"
+    option-label="label"
+    option-value="value"
+    :allow-empty="false"
+    :aria-label="t('shared.theme.label')"
+  />
 </template>

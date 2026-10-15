@@ -1,10 +1,30 @@
 export default defineNuxtConfig({
   compatibilityDate: '2026-10-01',
   devtools: { enabled: true },
+  builder: 'rspack',
 
-  modules: ['@nuxt/ui', '@nuxt/eslint', '@nuxtjs/i18n', '@pinia/nuxt', '@nuxt/test-utils/module'],
+  modules: ['@nuxtjs/i18n', '@primevue/nuxt-module'],
 
-  css: ['~/assets/css/main.css'],
+  css: ['~/assets/css/main.css', 'primeicons/primeicons.css'],
+
+  postcss: {
+    plugins: {
+      '@tailwindcss/postcss': {},
+    },
+  },
+
+  app: {
+    head: {
+      link: [
+        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+        {
+          rel: 'stylesheet',
+          href: 'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap',
+        },
+      ],
+    },
+  },
 
   components: [
     { path: '~/shared/components', pathPrefix: false },
@@ -25,10 +45,9 @@ export default defineNuxtConfig({
     },
   },
 
-  colorMode: {
-    preference: 'system',
-    fallback: 'light',
-    storageKey: 'mita-color-mode',
+  primevue: {
+    importTheme: { from: '~/theme/mita-preset.ts' },
+    components: { exclude: ['Form', 'FormField', 'Chart', 'Editor'] },
   },
 
   i18n: {
@@ -44,12 +63,6 @@ export default defineNuxtConfig({
       useCookie: true,
       cookieKey: 'mita-locale',
       redirectOn: 'root',
-    },
-  },
-
-  eslint: {
-    config: {
-      stylistic: false,
     },
   },
 

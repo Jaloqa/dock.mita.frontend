@@ -1,8 +1,0 @@
-.nuxt
-.output
-node_modules
-pnpm-lock.yaml
-app/shared/api/schema.d.ts
-playwright-report
-test-results
-*.md
