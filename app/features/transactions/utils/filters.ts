@@ -23,12 +23,30 @@ export const defaultFilters = (): TransactionFilters => ({
   period: 'thisPeriod',
 })
 
+const hasNonPeriodFilters = (filters: TransactionFilters): boolean =>
+  filters.search.trim() !== '' || filters.categoryId !== null || filters.accountId !== null || filters.kind !== 'all'
+
 export const isDefaultFilters = (filters: TransactionFilters): boolean =>
-  filters.search.trim() === '' &&
-  filters.categoryId === null &&
-  filters.accountId === null &&
-  filters.kind === 'all' &&
-  filters.period === 'thisPeriod'
+  !hasNonPeriodFilters(filters) && filters.period === 'thisPeriod'
+
+export type EmptyState = 'firstUse' | 'period' | 'filtered'
+
+export function emptyStateOf(filters: TransactionFilters, hasHistory: boolean): EmptyState {
+  if (!hasHistory) return 'firstUse'
+  if (hasNonPeriodFilters(filters) || filters.period === 'all') return 'filtered'
+  return 'period'
+}
+
+export const offersAllTime = (filters: TransactionFilters): boolean => filters.period !== 'all'
+
+export const isUnfilteredQuery = (query: TransactionQuery): boolean => Object.keys(query).every((key) => key === 'sort')
+
+export const shouldCheckHistory = (state: {
+  ready: boolean
+  unfiltered: boolean
+  listPending: boolean
+  listCount: number
+}): boolean => state.ready && !state.unfiltered && !state.listPending && state.listCount === 0
 
 export function periodRange(
   preset: PeriodPreset,
