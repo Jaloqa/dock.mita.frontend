@@ -79,10 +79,10 @@ describe('categories', () => {
     for (const category of seedState().categories) expect(categoryColors).toContain(category.color)
   })
 
-  it('never exposes userId', async () => {
+  it('never exposes userId and reports seeded usage', async () => {
     const [category] = (await list(api())).items
     expect(Object.keys(category ?? {}).sort()).toEqual(['color', 'id', 'inUse', 'kind', 'name', 'system'])
-    expect(category).toMatchObject({ inUse: false })
+    expect(category).toMatchObject({ name: 'Spożywcze', inUse: true })
   })
 
   it('filters by kind and rejects an unknown kind', async () => {
