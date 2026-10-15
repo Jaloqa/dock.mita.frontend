@@ -1,4 +1,13 @@
-import type { AccountDto, CategoryDto, RateDto, SettingsDto, TransferDto, UserDto } from '../app/shared/api/contract'
+import type {
+  AccountDto,
+  CategoryDto,
+  RateDto,
+  SettingsDto,
+  TransactionDto,
+  TransferDto,
+  UserDto,
+} from '../app/shared/api/contract'
+import type { Currency } from '../app/shared/money/money'
 
 export type UserRow = UserDto
 
@@ -12,6 +21,8 @@ export type TransferRow = TransferDto & { userId: string }
 
 export type CategoryRow = Omit<CategoryDto, 'inUse'> & { userId: string }
 
+export type TransactionRow = TransactionDto & { userId: string; accountCurrency: Currency; baseCurrency: Currency }
+
 export type MockState = {
   version: 1
   activeUserId: string
@@ -22,6 +33,7 @@ export type MockState = {
   accounts: AccountRow[]
   transfers: TransferRow[]
   categories: CategoryRow[]
+  transactions: TransactionRow[]
 }
 
 export type KeyValueStorage = Pick<Storage, 'getItem' | 'setItem'>

@@ -108,3 +108,46 @@ export type CategoryDto = {
 }
 
 export type CategoryInput = { name: string; kind: CategoryKind; color: CategoryColor }
+
+export type TransactionSort = '-date' | 'date' | '-amount' | 'amount'
+
+export const transactionSorts: readonly TransactionSort[] = ['-date', 'date', '-amount', 'amount']
+
+export type TransactionDto = {
+  id: string
+  kind: CategoryKind
+  date: string
+  title: string
+  note: string | null
+  categoryId: string
+  accountId: string
+  amount: number
+  currency: Currency
+  accountAmount: number
+  rate: number
+  baseAmount: number
+}
+
+export type TransactionInput = {
+  kind: CategoryKind
+  date: string
+  title?: string
+  note?: string
+  categoryId: string
+  accountId: string
+  amount: number
+  currency: Currency
+  rate?: number
+}
+
+export type TransactionQuery = {
+  search?: string
+  categoryId?: string
+  accountId?: string
+  kind?: CategoryKind
+  from?: string
+  to?: string
+  sort?: TransactionSort
+}
+
+export type TransactionPage = Page<TransactionDto> & { sum: number; currency: Currency }
