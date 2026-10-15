@@ -1,33 +1,12 @@
-@import 'tailwindcss';
-@import '@nuxt/ui';
+@layer theme, base, primevue, components, utilities;
+
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme static {
-  --font-sans: 'Manrope', 'Segoe UI', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-
-  --color-rose-mita-50: #fcf2f6;
-  --color-rose-mita-100: #f9e3ec;
-  --color-rose-mita-200: #f3c7d9;
-  --color-rose-mita-300: #ef9dbd;
-  --color-rose-mita-400: #e8679a;
-  --color-rose-mita-500: #c43f73;
-  --color-rose-mita-600: #a9325f;
-  --color-rose-mita-700: #8b284e;
-  --color-rose-mita-800: #6f2140;
-  --color-rose-mita-900: #5a1d36;
-  --color-rose-mita-950: #350c1d;
-
-  --color-graphite-50: #f7f8f9;
-  --color-graphite-100: #f2f3f5;
-  --color-graphite-200: #e7e9ee;
-  --color-graphite-300: #c9ccd3;
-  --color-graphite-400: #9da2ad;
-  --color-graphite-500: #7c818c;
-  --color-graphite-600: #5e636e;
-  --color-graphite-700: #40444d;
-  --color-graphite-800: #25282f;
-  --color-graphite-900: #1b1d23;
-  --color-graphite-950: #121317;
+  --font-sans: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
   --radius-control: 10px;
   --radius-card: 16px;
@@ -43,6 +22,8 @@
   --mita-track: #e7e9ee;
   --mita-deep: #25282f;
   --mita-deep-muted: #c9ccd3;
+  --mita-on-deep: #ffffff;
+  --mita-logo-stroke: #25282f;
   --mita-accent: #c43f73;
   --mita-on-accent: #ffffff;
   --mita-chart-1: #25282f;
@@ -51,13 +32,6 @@
   --mita-chart-4: #e59ab8;
   --mita-chart-5: #b5b9c1;
   --mita-chart-6: #f3d3e0;
-
-  --ui-bg: var(--mita-bg);
-  --ui-bg-elevated: var(--mita-surface);
-  --ui-text: var(--mita-ink);
-  --ui-text-muted: var(--mita-muted);
-  --ui-border: var(--mita-border);
-  --ui-radius: 0.625rem;
 }
 
 .dark {
@@ -69,6 +43,8 @@
   --mita-track: #2c2f37;
   --mita-deep: #3a1e2c;
   --mita-deep-muted: #e8b9cc;
+  --mita-on-deep: #ffffff;
+  --mita-logo-stroke: #eef0f3;
   --mita-accent: #e8679a;
   --mita-on-accent: #16080f;
   --mita-chart-1: #e8679a;
@@ -88,6 +64,8 @@
   --color-track: var(--mita-track);
   --color-deep: var(--mita-deep);
   --color-deep-muted: var(--mita-deep-muted);
+  --color-on-deep: var(--mita-on-deep);
+  --color-logo-stroke: var(--mita-logo-stroke);
   --color-accent: var(--mita-accent);
   --color-on-accent: var(--mita-on-accent);
   --color-chart-1: var(--mita-chart-1);
@@ -98,6 +76,8 @@
   --color-chart-6: var(--mita-chart-6);
 }
 
-body {
-  @apply bg-bg text-ink font-sans antialiased;
+@layer base {
+  body {
+    @apply bg-bg font-sans text-ink antialiased;
+  }
 }

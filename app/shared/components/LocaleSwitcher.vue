@@ -1,16 +1,17 @@
 <script setup lang="ts">
 const { locale, locales, setLocale, t } = useI18n()
 
-const items = computed(() => locales.value.map((l) => ({ label: l.name ?? l.code, value: l.code })))
+const options = computed(() => locales.value.map((l) => ({ label: l.name ?? l.code, value: l.code })))
 </script>
 
 <template>
-  <USelect
+  <Select
     :model-value="locale"
-    :items="items"
+    :options="options"
+    option-label="label"
+    option-value="value"
     :aria-label="t('shared.language')"
-    icon="i-lucide-languages"
-    class="w-40"
+    class="w-44"
     @update:model-value="setLocale"
   />
 </template>
