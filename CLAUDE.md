@@ -8,7 +8,7 @@ The agreed stack is in [docs/STACK.md](docs/STACK.md). Do not introduce librarie
 
 - Nuxt 4 (Vue 3, Composition API, `<script setup lang="ts">`), file-based routing in `pages/`
 - Rspack as the bundler (Nuxt Rspack builder)
-- Bun as the runtime and package manager
+- Bun as the package manager, script runner and build tool; Node 26 runs the dev server and production (`nuxt dev` is not reliable under the Bun runtime)
 - TypeScript in strict mode
 - Tailwind CSS with PrimeVue for components; ShadCN Vue is TBD
 - TanStack Query (`@tanstack/vue-query`) for server state, TanStack Table for tables
