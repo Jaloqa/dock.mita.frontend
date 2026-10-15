@@ -2,6 +2,7 @@ import type { MockRouter } from '../router'
 import { registerAccountHandlers } from './accounts'
 import { registerDemoHandlers } from './demo'
 import { registerRateHandlers } from './rates'
+import { registerTransferHandlers } from './transfers'
 import { registerUserHandlers } from './users'
 
 export const defaultHandlers: ((router: MockRouter) => void)[] = [
@@ -9,4 +10,5 @@ export const defaultHandlers: ((router: MockRouter) => void)[] = [
   registerDemoHandlers,
   registerRateHandlers,
   registerAccountHandlers,
+  registerTransferHandlers,
 ]
