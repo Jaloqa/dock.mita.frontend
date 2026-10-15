@@ -17,4 +17,6 @@ useHead({
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
+  <Toast />
+  <ConfirmDialog />
 </template>

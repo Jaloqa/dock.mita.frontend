@@ -8,3 +8,5 @@ export type IconName =
   | 'settings'
   | 'plus'
   | 'calendar'
+  | 'transfer'
+  | 'edit'

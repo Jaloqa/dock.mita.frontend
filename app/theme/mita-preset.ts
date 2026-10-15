@@ -36,6 +36,7 @@ const MitaPreset = definePreset(Aura, {
   },
   semantic: {
     primary: rose,
+    formField: { paddingY: '0.625rem' },
     colorScheme: {
       light: {
         surface: graphite,
@@ -56,6 +57,10 @@ const MitaPreset = definePreset(Aura, {
         },
       },
     },
+  },
+  components: {
+    button: { root: { iconOnlyWidth: '2.75rem' } },
+    togglebutton: { content: { padding: '0.375rem 0.75rem' } },
   },
 })
 

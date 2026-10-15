@@ -22,9 +22,127 @@
       "dark": "Темна",
       "system": "Системна"
     },
-    "actions": { "retry": "Спробувати ще раз" },
-    "error": { "title": "Щось пішло не так", "description": "Не вдалося завантажити цей розділ." },
-    "period": { "label": "Період", "range": "{from} – {to}" }
+    "actions": { "retry": "Спробувати ще раз", "save": "Зберегти", "cancel": "Скасувати" },
+    "error": {
+      "title": "Щось пішло не так",
+      "description": "Не вдалося завантажити цей розділ.",
+      "validation": "Перевірте позначені поля.",
+      "notFound": "Цей елемент більше не існує.",
+      "server": "Сервер не зміг виконати запит. Спробуйте ще раз.",
+      "unknown": "Сталася неочікувана помилка. Спробуйте ще раз."
+    },
+    "period": { "label": "Період", "range": "{from} – {to}" },
+    "dateInputFormat": "dd.mm.yy",
+    "primevue": {
+      "firstDayOfWeek": "1",
+      "today": "Сьогодні",
+      "clear": "Очистити",
+      "accept": "Так",
+      "reject": "Ні",
+      "weekHeader": "Тиж.",
+      "chooseDate": "Вибрати дату",
+      "chooseMonth": "Вибрати місяць",
+      "chooseYear": "Вибрати рік",
+      "prevMonth": "Попередній місяць",
+      "nextMonth": "Наступний місяць",
+      "prevYear": "Попередній рік",
+      "nextYear": "Наступний рік",
+      "prevDecade": "Попереднє десятиліття",
+      "nextDecade": "Наступне десятиліття",
+      "emptyMessage": "Немає доступних варіантів",
+      "emptyFilterMessage": "Нічого не знайдено",
+      "emptySelectionMessage": "Нічого не вибрано",
+      "searchMessage": "Знайдено результатів: {0}",
+      "selectionMessage": "Вибрано елементів: {0}",
+      "close": "Закрити"
+    }
   },
-  "validation": { "required": "Обов'язкове поле.", "invalidValue": "Неприпустиме значення." }
+  "accounts": {
+    "total": "Усього {amount}",
+    "actions": {
+      "transfer": "Переказ",
+      "add": "Додати рахунок",
+      "edit": "Змінити {name}",
+      "archive": "В архів",
+      "restore": "Відновити",
+      "delete": "Видалити",
+      "showArchived": "Показати архівні ({count})",
+      "hideArchived": "Сховати архівні"
+    },
+    "type": { "card": "Картка", "cash": "Готівка", "savings": "Накопичувальний" },
+    "meta": {
+      "card": "•••• {last4}",
+      "converted": "≈ {amount}",
+      "cash": "Гаманець",
+      "savings": "Накопичувальний рахунок"
+    },
+    "archivedBadge": "В архіві",
+    "list": {
+      "label": "Рахунки",
+      "emptyTitle": "Рахунків поки немає",
+      "emptyDescription": "Додайте перший рахунок, щоб стежити за балансом."
+    },
+    "distribution": {
+      "title": "Розподіл",
+      "item": "{name} {percent}",
+      "empty": "Поки нічого показати.",
+      "unavailable": "Розподіл зараз недоступний."
+    },
+    "transfers": {
+      "title": "Перекази між рахунками",
+      "route": "{from} → {to}",
+      "received": "→ {amount}",
+      "empty": "Переказів поки немає.",
+      "showMore": "Показати ще"
+    },
+    "dialog": {
+      "createTitle": "Новий рахунок",
+      "editTitle": "Редагування рахунку",
+      "name": "Назва",
+      "type": "Тип",
+      "currency": "Валюта",
+      "openingBalance": "Початковий баланс",
+      "cardLast4": "Останні 4 цифри картки",
+      "currencyLocked": "Валюту не можна змінити, якщо за рахунком є історія."
+    },
+    "transferDialog": {
+      "title": "Переказ",
+      "from": "Звідки",
+      "to": "Куди",
+      "amount": "Сума",
+      "date": "Дата",
+      "rate": "Курс обміну",
+      "rateHint": "Курс на обрану дату, його можна виправити.",
+      "receives": "Надійде {amount}",
+      "note": "Нотатка"
+    },
+    "confirm": {
+      "deleteTitle": "Видалити рахунок?",
+      "deleteMessage": "«{name}» буде видалено назавжди.",
+      "archiveTitle": "Перенести рахунок в архів?",
+      "archiveMessage": "Рахунок «{name}» має історію, тому його буде перенесено в архів, а не видалено. Його можна відновити пізніше."
+    },
+    "toast": {
+      "created": "Рахунок додано",
+      "updated": "Рахунок оновлено",
+      "deleted": "Рахунок видалено",
+      "archived": "Рахунок перенесено в архів",
+      "restored": "Рахунок відновлено",
+      "transferCreated": "Переказ збережено"
+    }
+  },
+  "validation": {
+    "required": "Обов'язкове поле.",
+    "invalidValue": "Неприпустиме значення.",
+    "nameTooLong": "Не більше 40 символів.",
+    "noteTooLong": "Не більше 200 символів.",
+    "cardLast4": "Введіть рівно 4 цифри.",
+    "positiveAmount": "Введіть суму більше нуля.",
+    "sameAccount": "Оберіть два різні рахунки.",
+    "unknownAccount": "Цей рахунок недоступний.",
+    "archivedAccount": "Цей рахунок в архіві.",
+    "accountInUse": "За цим рахунком є історія, його можна лише перенести в архів.",
+    "currencyLocked": "Валюту не можна змінити, якщо за рахунком є історія.",
+    "dateTooFar": "Дата може бути не більше ніж на рік уперед."
+  }
 }

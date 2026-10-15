@@ -51,5 +51,7 @@ withDefaults(defineProps<{ name: IconName; size?: number; strokeWidth?: number }
       <rect x="3" y="5" width="18" height="16" rx="2.5" />
       <path d="M3 10h18M8 3v4M16 3v4" />
     </template>
+    <path v-else-if="name === 'transfer'" d="M7 7h12l-3-3M17 17H5l3 3" />
+    <path v-else-if="name === 'edit'" d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3zM13.5 8.5l3 3" />
   </svg>
 </template>

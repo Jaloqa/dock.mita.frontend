@@ -1,0 +1,23 @@
+import { describe, expect, it } from 'bun:test'
+import type { RateDto } from '../../../app/shared/api/contract'
+import { rateFrom, toBaseAmount } from '../../../app/shared/rates/convert'
+
+const rates: RateDto[] = [
+  { date: '2026-10-15', from: 'EUR', to: 'PLN', value: 4.25 },
+  { date: '2026-10-15', from: 'UAH', to: 'PLN', value: 0.0952 },
+]
+
+describe('rate conversion', () => {
+  it('finds the rate of a pair and treats the same currency as 1', () => {
+    expect(rateFrom(rates, 'EUR', 'PLN')).toBe(4.25)
+    expect(rateFrom(rates, 'PLN', 'PLN')).toBe(1)
+    expect(rateFrom(rates, 'USD', 'PLN')).toBeUndefined()
+  })
+
+  it('converts minor units into the base currency with rounding', () => {
+    expect(toBaseAmount(1_000, 'EUR', 'PLN', rates)).toBe(4_250)
+    expect(toBaseAmount(1_005, 'UAH', 'PLN', rates)).toBe(96)
+    expect(toBaseAmount(500, 'PLN', 'PLN', [])).toBe(500)
+    expect(toBaseAmount(500, 'USD', 'PLN', rates)).toBeUndefined()
+  })
+})
