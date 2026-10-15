@@ -4,7 +4,15 @@ export type Movement = { accountId: string; amount: number }
 
 export type Ledger = (state: MockState, userId: string) => Movement[]
 
-export const ledgers: Ledger[] = []
+export const transferMovements: Ledger = (state, userId) =>
+  state.transfers
+    .filter((transfer) => transfer.userId === userId)
+    .flatMap((transfer) => [
+      { accountId: transfer.fromAccountId, amount: -transfer.fromAmount },
+      { accountId: transfer.toAccountId, amount: transfer.toAmount },
+    ])
+
+export const ledgers: Ledger[] = [transferMovements]
 
 const movementsOf = (state: MockState, userId: string): Movement[] => ledgers.flatMap((ledger) => ledger(state, userId))
 
