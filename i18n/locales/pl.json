@@ -21,6 +21,10 @@
       "light": "Jasny",
       "dark": "Ciemny",
       "system": "Systemowy"
-    }
-  }
+    },
+    "actions": { "retry": "Spróbuj ponownie" },
+    "error": { "title": "Coś poszło nie tak", "description": "Nie udało się wczytać tej sekcji." },
+    "period": { "label": "Okres", "range": "{from} – {to}" }
+  },
+  "validation": { "required": "To pole jest wymagane.", "invalidValue": "Ta wartość jest nieprawidłowa." }
 }

@@ -21,6 +21,10 @@
       "light": "Light",
       "dark": "Dark",
       "system": "System"
-    }
-  }
+    },
+    "actions": { "retry": "Try again" },
+    "error": { "title": "Something went wrong", "description": "We could not load this section." },
+    "period": { "label": "Period", "range": "{from} – {to}" }
+  },
+  "validation": { "required": "This field is required.", "invalidValue": "This value is not valid." }
 }
