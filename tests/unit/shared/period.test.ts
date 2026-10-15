@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'bun:test'
-import { daysLeft, periodByKey, periodFor, shiftPeriod, toIsoDate } from '../../../app/shared/period/period'
+import {
+  addDaysIso,
+  daysLeft,
+  fromLocalDate,
+  isIsoDate,
+  periodByKey,
+  periodFor,
+  shiftPeriod,
+  toIsoDate,
+  toLocalDate,
+} from '../../../app/shared/period/period'
 
 describe('period', () => {
   it('formats dates in UTC', () => {
@@ -48,5 +58,25 @@ describe('period', () => {
     expect(daysLeft(october, '2026-10-31')).toBe(1)
     expect(daysLeft(october, '2026-11-02')).toBe(0)
     expect(daysLeft(october, '2026-09-20')).toBe(31)
+  })
+
+  it('shifts ISO dates across month and year boundaries', () => {
+    expect(addDaysIso('2026-12-31', 1)).toBe('2027-01-01')
+    expect(addDaysIso('2026-03-01', -1)).toBe('2026-02-28')
+    expect(addDaysIso('2026-10-15', 0)).toBe('2026-10-15')
+  })
+
+  it('recognises real ISO calendar dates only', () => {
+    expect(isIsoDate('2028-02-29')).toBe(true)
+    expect(isIsoDate('2026-02-30')).toBe(false)
+    expect(isIsoDate('2026-1-05')).toBe(false)
+    expect(isIsoDate(20261005)).toBe(false)
+    expect(isIsoDate('')).toBe(false)
+  })
+
+  it('converts between local calendar dates and ISO dates', () => {
+    expect(fromLocalDate(new Date(2026, 9, 5, 23, 30))).toBe('2026-10-05')
+    const local = toLocalDate('2026-10-05')
+    expect([local.getFullYear(), local.getMonth(), local.getDate()]).toEqual([2026, 9, 5])
   })
 })
