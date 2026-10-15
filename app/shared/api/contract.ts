@@ -80,3 +80,31 @@ export type TransferInput = {
 }
 
 export type RateDto = { date: string; from: Currency; to: Currency; value: number }
+
+export type CategoryKind = 'expense' | 'income'
+
+export const categoryKinds: readonly CategoryKind[] = ['expense', 'income']
+
+export type CategoryColor = 'chart-1' | 'chart-2' | 'chart-3' | 'chart-4' | 'chart-5' | 'chart-6'
+
+export const categoryColors: readonly CategoryColor[] = [
+  'chart-1',
+  'chart-2',
+  'chart-3',
+  'chart-4',
+  'chart-5',
+  'chart-6',
+]
+
+export type SystemCategory = 'transfer' | 'other'
+
+export type CategoryDto = {
+  id: string
+  name: string
+  kind: CategoryKind
+  color: CategoryColor
+  system: SystemCategory | null
+  inUse: boolean
+}
+
+export type CategoryInput = { name: string; kind: CategoryKind; color: CategoryColor }
