@@ -8,7 +8,17 @@ export type CategoryReference = {
   reassign(state: MockState, userId: string, fromId: string, toId: string): void
 }
 
-export const categoryReferences: CategoryReference[] = []
+const transactionReference: CategoryReference = {
+  usedCategoryIds: (state, userId) =>
+    new Set(state.transactions.filter((row) => row.userId === userId).map((row) => row.categoryId)),
+  reassign: (state, userId, fromId, toId) => {
+    for (const row of state.transactions) {
+      if (row.userId === userId && row.categoryId === fromId) row.categoryId = toId
+    }
+  },
+}
+
+export const categoryReferences: CategoryReference[] = [transactionReference]
 
 export function categoriesInUse(state: MockState, userId: string): Set<string> {
   return new Set(categoryReferences.flatMap((reference) => [...reference.usedCategoryIds(state, userId)]))
