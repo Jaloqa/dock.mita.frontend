@@ -70,11 +70,12 @@ Rules:
 
 ## Mocks
 
-Until the backend is ready the app runs on mocks. `runtimeConfig.public.apiMocks` (`NUXT_PUBLIC_API_MOCKS`) switches every feature between the mock and the real API.
+Until the backend is ready the app runs on mocks. `runtimeConfig.public.apiMocks` (`NUXT_PUBLIC_API_MOCKS`) switches the transport of the shared API client between `http` and `mock`. Full design: [docs/superpowers/specs/2026-10-15-frontend-mocks-design.md](docs/superpowers/specs/2026-10-15-frontend-mocks-design.md).
 
-- Each feature's `api/` folder exports one interface with two implementations: `http` (generated client) and `mock`. Components and composables depend on the interface only.
-- Mock data lives in the feature, typed with the same generated types the real API uses, and behaves like the API (latency, pagination, validation errors).
-- Removing mocks later means deleting the `mock` implementation; nothing else changes.
+- Feature API modules (`features/<x>/api`) call `apiClient` only. They never know which transport is active.
+- The mock transport routes requests to handlers in `mocks/handlers`, which work on a `localStorage` database. Business rules (balances, currency conversion, budget statuses, aggregates) live in those handlers, as they will in the backend.
+- Mock handlers behave like the real API: `/v1` paths, `userId` from the session, paginated lists, latency, RFC 9457 ProblemDetails for validation errors.
+- `mocks/` is loaded only when the flag is on. Removing mocks later means deleting `mocks/` and the mock transport; nothing else changes.
 
 ## Internationalization
 
