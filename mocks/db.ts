@@ -1,4 +1,4 @@
-import type { AccountDto, RateDto, SettingsDto, TransferDto, UserDto } from '../app/shared/api/contract'
+import type { AccountDto, CategoryDto, RateDto, SettingsDto, TransferDto, UserDto } from '../app/shared/api/contract'
 
 export type UserRow = UserDto
 
@@ -10,6 +10,8 @@ export type AccountRow = Omit<AccountDto, 'balance' | 'inUse'> & { userId: strin
 
 export type TransferRow = TransferDto & { userId: string }
 
+export type CategoryRow = Omit<CategoryDto, 'inUse'> & { userId: string }
+
 export type MockState = {
   version: 1
   activeUserId: string
@@ -19,6 +21,7 @@ export type MockState = {
   rates: RateRow[]
   accounts: AccountRow[]
   transfers: TransferRow[]
+  categories: CategoryRow[]
 }
 
 export type KeyValueStorage = Pick<Storage, 'getItem' | 'setItem'>
