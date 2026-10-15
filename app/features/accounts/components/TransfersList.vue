@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import type { AccountDto } from '~/shared/api/contract'
 
-const props = defineProps<{ accounts: AccountDto[]; accountsPending: boolean; accountsError: boolean }>()
+const props = defineProps<{
+  accounts: AccountDto[]
+  accountsPending: boolean
+  accountsError: boolean
+  canTransfer: boolean
+}>()
 const emit = defineEmits<{ transfer: []; retry: [] }>()
 const { t, d } = useI18n()
 const { format } = useMoney()
@@ -36,7 +41,13 @@ const day = (iso: string) => d(new Date(`${iso}T00:00:00Z`), 'dayMonth')
     <ErrorState v-else-if="isError || accountsError" @retry="retry" />
     <div v-else-if="items.length === 0" class="flex flex-col items-start gap-3 py-2">
       <p class="m-0 text-sm text-muted">{{ t('accounts.transfers.empty') }}</p>
-      <Button :label="t('accounts.actions.transfer')" severity="secondary" outlined @click="emit('transfer')" />
+      <Button
+        :label="t('accounts.actions.transfer')"
+        severity="secondary"
+        outlined
+        :disabled="!canTransfer"
+        @click="emit('transfer')"
+      />
     </div>
     <template v-else>
       <ul class="m-0 list-none p-0">

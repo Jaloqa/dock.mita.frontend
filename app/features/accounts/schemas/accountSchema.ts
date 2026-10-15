@@ -17,7 +17,12 @@ type Translate = (key: string) => string
 export const isCardLast4 = (value: unknown): boolean =>
   value === '' || value === null || value === undefined || (typeof value === 'string' && /^\d{4}$/.test(value))
 
-export const accountRules = (t: Translate) => {
+export const isCardLast4For =
+  (type: () => AccountType) =>
+  (value: unknown): boolean =>
+    type() !== 'card' || isCardLast4(value)
+
+export const accountRules = (t: Translate, form: Pick<AccountForm, 'type'>) => {
   const requiredField = helpers.withMessage(() => t('validation.required'), required)
   return {
     name: {
@@ -27,6 +32,11 @@ export const accountRules = (t: Translate) => {
     type: { required: requiredField },
     currency: { required: requiredField },
     openingBalance: { required: requiredField },
-    cardLast4: { cardLast4: helpers.withMessage(() => t('validation.cardLast4'), isCardLast4) },
+    cardLast4: {
+      cardLast4: helpers.withMessage(
+        () => t('validation.cardLast4'),
+        isCardLast4For(() => form.type),
+      ),
+    },
   }
 }

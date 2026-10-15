@@ -106,8 +106,8 @@
       "to": "To",
       "amount": "Amount",
       "date": "Date",
-      "rate": "Exchange rate",
-      "rateHint": "Rate for the selected date, you can correct it.",
+      "rate": "Exchange rate ({from} → {to})",
+      "rateHint": "How many {to} you get for 1 {from} on the selected date. You can correct it.",
       "receives": "Receives {amount}",
       "note": "Note"
     },
