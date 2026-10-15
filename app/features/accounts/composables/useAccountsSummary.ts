@@ -31,6 +31,7 @@ export function useAccountsSummary() {
       ready.value ? accountShares(active.value, rates.rates.value, settings.baseCurrency.value) : [],
     ),
     baseAmountOf: (account: AccountDto) => (ready.value ? rates.toBase(account.balance, account.currency) : undefined),
+    settingsReady,
     accountsPending: accounts.isPending,
     accountsError: accounts.isError,
     isPending: computed(
