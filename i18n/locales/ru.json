@@ -57,6 +57,9 @@
       "close": "Закрыть"
     }
   },
+  "settings": {
+    "data": { "title": "Данные", "manageCategories": "Управление категориями" }
+  },
   "accounts": {
     "total": "Всего {amount}",
     "actions": {
@@ -126,6 +129,31 @@
       "transferCreated": "Перевод сохранён"
     }
   },
+  "categories": {
+    "dialog": { "title": "Категории" },
+    "kind": { "expense": "Расходы", "income": "Доходы" },
+    "system": "Системная",
+    "list": { "empty": "Категорий пока нет." },
+    "actions": {
+      "add": "Добавить категорию",
+      "edit": "Изменить {name}",
+      "delete": "Удалить {name}",
+      "confirmDelete": "Удалить"
+    },
+    "form": {
+      "createTitle": "Новая категория",
+      "editTitle": "Изменение категории",
+      "name": "Название",
+      "color": "Цвет",
+      "colorOption": "Цвет {index}"
+    },
+    "confirm": {
+      "deleteTitle": "Удалить категорию?",
+      "deleteMessage": "Категория «{name}» будет удалена. Её операции перейдут в «{other}».",
+      "deleteUnusedMessage": "Категория «{name}» будет удалена без возможности восстановления."
+    },
+    "toast": { "created": "Категория добавлена", "updated": "Категория обновлена", "deleted": "Категория удалена" }
+  },
   "validation": {
     "required": "Обязательное поле.",
     "invalidValue": "Недопустимое значение.",
@@ -138,6 +166,9 @@
     "archivedAccount": "Этот счёт в архиве.",
     "accountInUse": "По этому счёту есть история, его можно только отправить в архив.",
     "currencyLocked": "Валюту нельзя изменить, если по счёту есть история.",
-    "dateTooFar": "Дата может быть не больше чем на год вперёд."
+    "dateTooFar": "Дата может быть не больше чем на год вперёд.",
+    "categoryNameTaken": "Категория с таким названием уже есть.",
+    "categoryKindLocked": "Тип этой категории нельзя изменить.",
+    "systemCategory": "Системные категории нельзя удалить."
   }
 }
