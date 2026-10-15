@@ -21,6 +21,10 @@
       "light": "Светлая",
       "dark": "Тёмная",
       "system": "Системная"
-    }
-  }
+    },
+    "actions": { "retry": "Повторить" },
+    "error": { "title": "Что-то пошло не так", "description": "Не удалось загрузить этот раздел." },
+    "period": { "label": "Период", "range": "{from} – {to}" }
+  },
+  "validation": { "required": "Обязательное поле.", "invalidValue": "Недопустимое значение." }
 }
