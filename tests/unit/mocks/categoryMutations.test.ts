@@ -105,9 +105,8 @@ describe('category mutations', () => {
 
   it('changes the kind of a user category only while it is unused', async () => {
     const mock = api()
-    expect(await update(mock, 'cat_anna_expense_sport', { ...books, name: 'Sport', kind: 'income' })).toMatchObject({
-      kind: 'income',
-    })
+    const created = (await create(mock, books)) as CategoryDto
+    expect(await update(mock, created.id, { ...books, kind: 'income' })).toMatchObject({ kind: 'income' })
     register(usage({ tx1: { userId: 'usr_anna', categoryId: 'cat_anna_expense_gifts' } }))
     expect(
       await failure(update(mock, 'cat_anna_expense_gifts', { name: 'Prezenty', kind: 'income', color: 'chart-2' })),
