@@ -1,7 +1,18 @@
 {
   "app": {
     "description": "Особистий планер бюджету",
-    "comingSoon": "Застосунок налаштовується. Екрани скоро з'являться."
+    "comingSoon": "Цей екран скоро з'явиться."
+  },
+  "navigation": {
+    "label": "Головне меню",
+    "overview": "Огляд",
+    "transactions": "Операції",
+    "budgets": "Бюджети",
+    "goals": "Цілі",
+    "accounts": "Рахунки",
+    "reports": "Звіти",
+    "settings": "Налаштування",
+    "addTransaction": "Нова операція"
   },
   "shared": {
     "language": "Мова",
@@ -10,7 +21,6 @@
       "light": "Світла",
       "dark": "Темна",
       "system": "Системна"
-    },
-    "operations": "{count} операція | {count} операції | {count} операцій | {count} операції"
+    }
   }
 }

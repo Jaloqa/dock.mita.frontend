@@ -1,7 +1,18 @@
 {
   "app": {
     "description": "Osobisty planer budżetu",
-    "comingSoon": "Aplikacja jest w trakcie konfiguracji. Ekrany wkrótce."
+    "comingSoon": "Ten ekran pojawi się wkrótce."
+  },
+  "navigation": {
+    "label": "Menu główne",
+    "overview": "Przegląd",
+    "transactions": "Operacje",
+    "budgets": "Budżety",
+    "goals": "Cele",
+    "accounts": "Konta",
+    "reports": "Raporty",
+    "settings": "Ustawienia",
+    "addTransaction": "Nowa operacja"
   },
   "shared": {
     "language": "Język",
@@ -10,7 +21,6 @@
       "light": "Jasny",
       "dark": "Ciemny",
       "system": "Systemowy"
-    },
-    "operations": "{count} operacja | {count} operacje | {count} operacji | {count} operacji"
+    }
   }
 }

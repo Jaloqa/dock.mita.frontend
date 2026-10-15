@@ -1,7 +1,18 @@
 {
   "app": {
     "description": "Личный планер бюджета",
-    "comingSoon": "Приложение настраивается. Экраны скоро появятся."
+    "comingSoon": "Этот экран скоро появится."
+  },
+  "navigation": {
+    "label": "Главное меню",
+    "overview": "Обзор",
+    "transactions": "Операции",
+    "budgets": "Бюджеты",
+    "goals": "Цели",
+    "accounts": "Счета",
+    "reports": "Отчёты",
+    "settings": "Настройки",
+    "addTransaction": "Новая операция"
   },
   "shared": {
     "language": "Язык",
@@ -10,7 +21,6 @@
       "light": "Светлая",
       "dark": "Тёмная",
       "system": "Системная"
-    },
-    "operations": "{count} операция | {count} операции | {count} операций | {count} операции"
+    }
   }
 }

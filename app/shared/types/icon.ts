@@ -1,0 +1,10 @@
+export type IconName =
+  | 'overview'
+  | 'transactions'
+  | 'budgets'
+  | 'goals'
+  | 'accounts'
+  | 'reports'
+  | 'settings'
+  | 'plus'
+  | 'calendar'
