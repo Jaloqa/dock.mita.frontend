@@ -33,3 +33,50 @@ export type DemoStateDto = {
   users: { id: string; name: string }[]
   simulateErrors: boolean
 }
+
+export type AccountType = 'card' | 'cash' | 'savings'
+
+export const accountTypes: readonly AccountType[] = ['card', 'cash', 'savings']
+
+export type AccountDto = {
+  id: string
+  name: string
+  type: AccountType
+  currency: Currency
+  openingBalance: number
+  balance: number
+  cardLast4: string | null
+  archived: boolean
+  inUse: boolean
+}
+
+export type AccountInput = {
+  name: string
+  type: AccountType
+  currency: Currency
+  openingBalance: number
+  cardLast4?: string | null
+  archived?: boolean
+}
+
+export type TransferDto = {
+  id: string
+  date: string
+  fromAccountId: string
+  toAccountId: string
+  fromAmount: number
+  toAmount: number
+  rate: number
+  note: string | null
+}
+
+export type TransferInput = {
+  date: string
+  fromAccountId: string
+  toAccountId: string
+  fromAmount: number
+  rate?: number
+  note?: string
+}
+
+export type RateDto = { date: string; from: Currency; to: Currency; value: number }
