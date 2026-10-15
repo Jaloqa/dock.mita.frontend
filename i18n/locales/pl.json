@@ -193,6 +193,7 @@
       "resetFilters": "Wyczyść filtry",
       "apply": "Pokaż wyniki",
       "showMore": "Pokaż więcej",
+      "showAllTime": "Pokaż cały okres",
       "delete": "Usuń"
     },
     "filters": {
@@ -248,7 +249,8 @@
       "title": "Brak operacji",
       "description": "Zapisuj przychody i wydatki, aby widzieć, na co idą pieniądze.",
       "filteredTitle": "Nic nie znaleziono",
-      "filteredDescription": "Żadna operacja nie pasuje do filtrów."
+      "filteredDescription": "Żadna operacja nie pasuje do filtrów.",
+      "periodDescription": "Brak operacji w tym okresie. Starsze nadal są dostępne."
     },
     "dialog": {
       "createTitle": "Nowa operacja",

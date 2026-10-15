@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'bun:test'
 import {
   defaultFilters,
+  emptyStateOf,
   isDefaultFilters,
+  isUnfilteredQuery,
+  offersAllTime,
   periodKeyOf,
   periodRange,
+  shouldCheckHistory,
   toQuery,
 } from '../../../../app/features/transactions/utils/filters'
 
@@ -44,5 +48,46 @@ describe('transaction filters', () => {
     expect(isDefaultFilters({ ...defaultFilters(), search: '   ' })).toBe(true)
     expect(isDefaultFilters({ ...defaultFilters(), kind: 'income' })).toBe(false)
     expect(isDefaultFilters({ ...defaultFilters(), period: 'all' })).toBe(false)
+  })
+
+  it('invites to add the first transaction only when there is no history at all', () => {
+    expect(emptyStateOf(defaultFilters(), false)).toBe('firstUse')
+    expect(emptyStateOf({ ...defaultFilters(), search: 'lidl' }, false)).toBe('firstUse')
+  })
+
+  it('offers all time when only the period hides existing transactions', () => {
+    expect(emptyStateOf(defaultFilters(), true)).toBe('period')
+    expect(emptyStateOf({ ...defaultFilters(), period: 'lastPeriod' }, true)).toBe('period')
+    expect(emptyStateOf({ ...defaultFilters(), search: '  ' }, true)).toBe('period')
+  })
+
+  it('offers a reset when other filters hide existing transactions', () => {
+    expect(emptyStateOf({ ...defaultFilters(), search: 'zzzz' }, true)).toBe('filtered')
+    expect(emptyStateOf({ ...defaultFilters(), kind: 'income', period: 'all' }, true)).toBe('filtered')
+    expect(emptyStateOf({ ...defaultFilters(), accountId: 'acc_1' }, true)).toBe('filtered')
+    expect(emptyStateOf({ ...defaultFilters(), categoryId: 'cat_1' }, true)).toBe('filtered')
+    expect(emptyStateOf({ ...defaultFilters(), period: 'all' }, true)).toBe('filtered')
+  })
+
+  it('offers all time next to a reset whenever a period bound applies', () => {
+    expect(offersAllTime({ ...defaultFilters(), search: 'lidl' })).toBe(true)
+    expect(offersAllTime({ ...defaultFilters(), kind: 'income', period: 'last3Months' })).toBe(true)
+    expect(offersAllTime({ ...defaultFilters(), search: 'lidl', period: 'all' })).toBe(false)
+  })
+
+  it('treats a query with only a sort as unfiltered', () => {
+    expect(isUnfilteredQuery({ sort: '-date' })).toBe(true)
+    expect(isUnfilteredQuery({ sort: 'amount' })).toBe(true)
+    expect(isUnfilteredQuery({ search: 'lidl', sort: '-date' })).toBe(false)
+    expect(isUnfilteredQuery({ from: '2026-10-01', to: '2026-10-31', sort: '-date' })).toBe(false)
+  })
+
+  it('checks the history only when a filtered list has loaded empty', () => {
+    const empty = { ready: true, unfiltered: false, listPending: false, listCount: 0 }
+    expect(shouldCheckHistory(empty)).toBe(true)
+    expect(shouldCheckHistory({ ...empty, ready: false })).toBe(false)
+    expect(shouldCheckHistory({ ...empty, unfiltered: true })).toBe(false)
+    expect(shouldCheckHistory({ ...empty, listPending: true })).toBe(false)
+    expect(shouldCheckHistory({ ...empty, listCount: 3 })).toBe(false)
   })
 })

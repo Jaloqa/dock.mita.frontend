@@ -193,6 +193,7 @@
       "resetFilters": "Reset filters",
       "apply": "Show results",
       "showMore": "Show more",
+      "showAllTime": "Show all time",
       "delete": "Delete"
     },
     "filters": {
@@ -248,7 +249,8 @@
       "title": "No transactions yet",
       "description": "Record income and expenses to see where your money goes.",
       "filteredTitle": "Nothing found",
-      "filteredDescription": "No transactions match these filters."
+      "filteredDescription": "No transactions match these filters.",
+      "periodDescription": "No transactions in this period. Older ones are still there."
     },
     "dialog": {
       "createTitle": "New transaction",
