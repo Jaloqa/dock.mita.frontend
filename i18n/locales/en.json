@@ -57,6 +57,9 @@
       "close": "Close"
     }
   },
+  "settings": {
+    "data": { "title": "Data", "manageCategories": "Manage categories" }
+  },
   "accounts": {
     "total": "Total {amount}",
     "actions": {
@@ -126,6 +129,31 @@
       "transferCreated": "Transfer saved"
     }
   },
+  "categories": {
+    "dialog": { "title": "Categories" },
+    "kind": { "expense": "Expenses", "income": "Income" },
+    "system": "System",
+    "list": { "empty": "No categories yet." },
+    "actions": {
+      "add": "Add category",
+      "edit": "Edit {name}",
+      "delete": "Delete {name}",
+      "confirmDelete": "Delete"
+    },
+    "form": {
+      "createTitle": "New category",
+      "editTitle": "Edit category",
+      "name": "Name",
+      "color": "Color",
+      "colorOption": "Color {index}"
+    },
+    "confirm": {
+      "deleteTitle": "Delete category?",
+      "deleteMessage": "“{name}” will be deleted. Any transactions in it will move to “{other}”.",
+      "deleteUnusedMessage": "“{name}” will be deleted permanently."
+    },
+    "toast": { "created": "Category added", "updated": "Category updated", "deleted": "Category deleted" }
+  },
   "validation": {
     "required": "This field is required.",
     "invalidValue": "This value is not valid.",
@@ -138,6 +166,9 @@
     "archivedAccount": "This account is archived.",
     "accountInUse": "This account has history and can only be archived.",
     "currencyLocked": "The currency cannot change once the account has history.",
-    "dateTooFar": "The date can be at most one year ahead."
+    "dateTooFar": "The date can be at most one year ahead.",
+    "categoryNameTaken": "A category with this name already exists.",
+    "categoryKindLocked": "The type of this category cannot change.",
+    "systemCategory": "System categories cannot be deleted."
   }
 }

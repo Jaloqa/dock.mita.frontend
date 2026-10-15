@@ -57,6 +57,9 @@
       "close": "Zamknij"
     }
   },
+  "settings": {
+    "data": { "title": "Dane", "manageCategories": "Zarządzaj kategoriami" }
+  },
   "accounts": {
     "total": "Razem {amount}",
     "actions": {
@@ -131,6 +134,31 @@
       "transferCreated": "Przelew zapisany"
     }
   },
+  "categories": {
+    "dialog": { "title": "Kategorie" },
+    "kind": { "expense": "Wydatki", "income": "Przychody" },
+    "system": "Systemowa",
+    "list": { "empty": "Brak kategorii." },
+    "actions": {
+      "add": "Dodaj kategorię",
+      "edit": "Edytuj {name}",
+      "delete": "Usuń {name}",
+      "confirmDelete": "Usuń"
+    },
+    "form": {
+      "createTitle": "Nowa kategoria",
+      "editTitle": "Edycja kategorii",
+      "name": "Nazwa",
+      "color": "Kolor",
+      "colorOption": "Kolor {index}"
+    },
+    "confirm": {
+      "deleteTitle": "Usunąć kategorię?",
+      "deleteMessage": "Kategoria „{name}” zostanie usunięta. Jej transakcje zostaną przeniesione do „{other}”.",
+      "deleteUnusedMessage": "Kategoria „{name}” zostanie trwale usunięta."
+    },
+    "toast": { "created": "Dodano kategorię", "updated": "Zaktualizowano kategorię", "deleted": "Usunięto kategorię" }
+  },
   "validation": {
     "required": "To pole jest wymagane.",
     "invalidValue": "Ta wartość jest nieprawidłowa.",
@@ -143,6 +171,9 @@
     "archivedAccount": "To konto jest zarchiwizowane.",
     "accountInUse": "To konto ma historię i można je tylko zarchiwizować.",
     "currencyLocked": "Waluty nie można zmienić, gdy konto ma historię.",
-    "dateTooFar": "Data może być najwyżej rok do przodu."
+    "dateTooFar": "Data może być najwyżej rok do przodu.",
+    "categoryNameTaken": "Kategoria o tej nazwie już istnieje.",
+    "categoryKindLocked": "Typu tej kategorii nie można zmienić.",
+    "systemCategory": "Kategorii systemowych nie można usunąć."
   }
 }

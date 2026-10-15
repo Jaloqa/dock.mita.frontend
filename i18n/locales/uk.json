@@ -57,6 +57,9 @@
       "close": "Закрити"
     }
   },
+  "settings": {
+    "data": { "title": "Дані", "manageCategories": "Керування категоріями" }
+  },
   "accounts": {
     "total": "Усього {amount}",
     "actions": {
@@ -131,6 +134,31 @@
       "transferCreated": "Переказ збережено"
     }
   },
+  "categories": {
+    "dialog": { "title": "Категорії" },
+    "kind": { "expense": "Витрати", "income": "Доходи" },
+    "system": "Системна",
+    "list": { "empty": "Категорій поки немає." },
+    "actions": {
+      "add": "Додати категорію",
+      "edit": "Змінити {name}",
+      "delete": "Видалити {name}",
+      "confirmDelete": "Видалити"
+    },
+    "form": {
+      "createTitle": "Нова категорія",
+      "editTitle": "Зміна категорії",
+      "name": "Назва",
+      "color": "Колір",
+      "colorOption": "Колір {index}"
+    },
+    "confirm": {
+      "deleteTitle": "Видалити категорію?",
+      "deleteMessage": "Категорію «{name}» буде видалено. Її операції перейдуть до «{other}».",
+      "deleteUnusedMessage": "Категорію «{name}» буде видалено назавжди."
+    },
+    "toast": { "created": "Категорію додано", "updated": "Категорію оновлено", "deleted": "Категорію видалено" }
+  },
   "validation": {
     "required": "Обов'язкове поле.",
     "invalidValue": "Неприпустиме значення.",
@@ -143,6 +171,9 @@
     "archivedAccount": "Цей рахунок в архіві.",
     "accountInUse": "За цим рахунком є історія, його можна лише перенести в архів.",
     "currencyLocked": "Валюту не можна змінити, якщо за рахунком є історія.",
-    "dateTooFar": "Дата може бути не більше ніж на рік уперед."
+    "dateTooFar": "Дата може бути не більше ніж на рік уперед.",
+    "categoryNameTaken": "Категорія з такою назвою вже існує.",
+    "categoryKindLocked": "Тип цієї категорії не можна змінити.",
+    "systemCategory": "Системні категорії не можна видалити."
   }
 }
