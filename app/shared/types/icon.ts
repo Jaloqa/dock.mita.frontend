@@ -10,3 +10,4 @@ export type IconName =
   | 'calendar'
   | 'transfer'
   | 'edit'
+  | 'trash'

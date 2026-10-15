@@ -53,5 +53,6 @@ withDefaults(defineProps<{ name: IconName; size?: number; strokeWidth?: number }
     </template>
     <path v-else-if="name === 'transfer'" d="M7 7h12l-3-3M17 17H5l3 3" />
     <path v-else-if="name === 'edit'" d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3zM13.5 8.5l3 3" />
+    <path v-else-if="name === 'trash'" d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
   </svg>
 </template>
