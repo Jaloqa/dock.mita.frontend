@@ -22,9 +22,122 @@
       "dark": "Dark",
       "system": "System"
     },
-    "actions": { "retry": "Try again" },
-    "error": { "title": "Something went wrong", "description": "We could not load this section." },
-    "period": { "label": "Period", "range": "{from} – {to}" }
+    "actions": { "retry": "Try again", "save": "Save", "cancel": "Cancel" },
+    "error": {
+      "title": "Something went wrong",
+      "description": "We could not load this section.",
+      "validation": "Some fields need attention.",
+      "notFound": "This item no longer exists.",
+      "server": "The server could not complete the request. Please try again.",
+      "unknown": "Something unexpected happened. Please try again."
+    },
+    "period": { "label": "Period", "range": "{from} – {to}" },
+    "dateInputFormat": "mm/dd/yy",
+    "primevue": {
+      "firstDayOfWeek": "0",
+      "today": "Today",
+      "clear": "Clear",
+      "accept": "Yes",
+      "reject": "No",
+      "weekHeader": "Wk",
+      "chooseDate": "Choose date",
+      "chooseMonth": "Choose month",
+      "chooseYear": "Choose year",
+      "prevMonth": "Previous month",
+      "nextMonth": "Next month",
+      "prevYear": "Previous year",
+      "nextYear": "Next year",
+      "prevDecade": "Previous decade",
+      "nextDecade": "Next decade",
+      "emptyMessage": "No available options",
+      "emptyFilterMessage": "No results found",
+      "emptySelectionMessage": "Nothing selected",
+      "searchMessage": "Results available: {0}",
+      "selectionMessage": "Items selected: {0}",
+      "close": "Close"
+    }
   },
-  "validation": { "required": "This field is required.", "invalidValue": "This value is not valid." }
+  "accounts": {
+    "total": "Total {amount}",
+    "actions": {
+      "transfer": "Transfer",
+      "add": "Add account",
+      "edit": "Edit {name}",
+      "archive": "Archive",
+      "restore": "Restore",
+      "delete": "Delete",
+      "showArchived": "Show archived ({count})",
+      "hideArchived": "Hide archived"
+    },
+    "type": { "card": "Card", "cash": "Cash", "savings": "Savings" },
+    "meta": { "card": "•••• {last4}", "converted": "≈ {amount}", "cash": "Cash wallet", "savings": "Savings account" },
+    "archivedBadge": "Archived",
+    "list": {
+      "label": "Accounts",
+      "emptyTitle": "No accounts yet",
+      "emptyDescription": "Add your first account to start tracking balances."
+    },
+    "distribution": {
+      "title": "Distribution",
+      "item": "{name} {percent}",
+      "empty": "Nothing to show yet.",
+      "unavailable": "Distribution is not available right now."
+    },
+    "transfers": {
+      "title": "Transfers between accounts",
+      "route": "{from} → {to}",
+      "received": "→ {amount}",
+      "empty": "No transfers yet.",
+      "showMore": "Show more"
+    },
+    "dialog": {
+      "createTitle": "New account",
+      "editTitle": "Edit account",
+      "name": "Name",
+      "type": "Type",
+      "currency": "Currency",
+      "openingBalance": "Opening balance",
+      "cardLast4": "Last 4 digits of the card",
+      "currencyLocked": "The currency cannot change once the account has history."
+    },
+    "transferDialog": {
+      "title": "Transfer",
+      "from": "From",
+      "to": "To",
+      "amount": "Amount",
+      "date": "Date",
+      "rate": "Exchange rate",
+      "rateHint": "Rate for the selected date, you can correct it.",
+      "receives": "Receives {amount}",
+      "note": "Note"
+    },
+    "confirm": {
+      "deleteTitle": "Delete account?",
+      "deleteMessage": "“{name}” will be deleted permanently.",
+      "archiveTitle": "Archive account?",
+      "archiveMessage": "“{name}” has history, so it will be archived instead of deleted. You can restore it later."
+    },
+    "toast": {
+      "created": "Account created",
+      "updated": "Account updated",
+      "deleted": "Account deleted",
+      "archived": "Account archived",
+      "restored": "Account restored",
+      "transferCreated": "Transfer saved"
+    }
+  },
+  "validation": {
+    "required": "This field is required.",
+    "invalidValue": "This value is not valid.",
+    "nameTooLong": "Use at most 40 characters.",
+    "noteTooLong": "Use at most 200 characters.",
+    "cardLast4": "Enter exactly 4 digits.",
+    "positiveAmount": "Enter an amount above zero.",
+    "sameAccount": "Choose two different accounts.",
+    "unknownAccount": "This account is not available.",
+    "archivedAccount": "This account is archived.",
+    "accountInUse": "This account has history and can only be archived.",
+    "currencyLocked": "The currency cannot change once the account has history.",
+    "dateTooFar": "The date can be at most one year ahead."
+  }
 }

@@ -22,9 +22,122 @@
       "dark": "Тёмная",
       "system": "Системная"
     },
-    "actions": { "retry": "Повторить" },
-    "error": { "title": "Что-то пошло не так", "description": "Не удалось загрузить этот раздел." },
-    "period": { "label": "Период", "range": "{from} – {to}" }
+    "actions": { "retry": "Повторить", "save": "Сохранить", "cancel": "Отмена" },
+    "error": {
+      "title": "Что-то пошло не так",
+      "description": "Не удалось загрузить этот раздел.",
+      "validation": "Проверьте отмеченные поля.",
+      "notFound": "Этот элемент больше не существует.",
+      "server": "Сервер не смог выполнить запрос. Попробуйте ещё раз.",
+      "unknown": "Произошла непредвиденная ошибка. Попробуйте ещё раз."
+    },
+    "period": { "label": "Период", "range": "{from} – {to}" },
+    "dateInputFormat": "dd.mm.yy",
+    "primevue": {
+      "firstDayOfWeek": "1",
+      "today": "Сегодня",
+      "clear": "Очистить",
+      "accept": "Да",
+      "reject": "Нет",
+      "weekHeader": "Нед.",
+      "chooseDate": "Выбрать дату",
+      "chooseMonth": "Выбрать месяц",
+      "chooseYear": "Выбрать год",
+      "prevMonth": "Предыдущий месяц",
+      "nextMonth": "Следующий месяц",
+      "prevYear": "Предыдущий год",
+      "nextYear": "Следующий год",
+      "prevDecade": "Предыдущее десятилетие",
+      "nextDecade": "Следующее десятилетие",
+      "emptyMessage": "Нет доступных вариантов",
+      "emptyFilterMessage": "Ничего не найдено",
+      "emptySelectionMessage": "Ничего не выбрано",
+      "searchMessage": "Найдено результатов: {0}",
+      "selectionMessage": "Выбрано элементов: {0}",
+      "close": "Закрыть"
+    }
   },
-  "validation": { "required": "Обязательное поле.", "invalidValue": "Недопустимое значение." }
+  "accounts": {
+    "total": "Всего {amount}",
+    "actions": {
+      "transfer": "Перевод",
+      "add": "Добавить счёт",
+      "edit": "Изменить {name}",
+      "archive": "В архив",
+      "restore": "Восстановить",
+      "delete": "Удалить",
+      "showArchived": "Показать архивные ({count})",
+      "hideArchived": "Скрыть архивные"
+    },
+    "type": { "card": "Карта", "cash": "Наличные", "savings": "Накопительный" },
+    "meta": { "card": "•••• {last4}", "converted": "≈ {amount}", "cash": "Кошелёк", "savings": "Накопительный счёт" },
+    "archivedBadge": "В архиве",
+    "list": {
+      "label": "Счета",
+      "emptyTitle": "Счетов пока нет",
+      "emptyDescription": "Добавьте первый счёт, чтобы следить за балансом."
+    },
+    "distribution": {
+      "title": "Распределение",
+      "item": "{name} {percent}",
+      "empty": "Пока нечего показать.",
+      "unavailable": "Распределение сейчас недоступно."
+    },
+    "transfers": {
+      "title": "Переводы между счетами",
+      "route": "{from} → {to}",
+      "received": "→ {amount}",
+      "empty": "Переводов пока нет.",
+      "showMore": "Показать ещё"
+    },
+    "dialog": {
+      "createTitle": "Новый счёт",
+      "editTitle": "Редактирование счёта",
+      "name": "Название",
+      "type": "Тип",
+      "currency": "Валюта",
+      "openingBalance": "Начальный баланс",
+      "cardLast4": "Последние 4 цифры карты",
+      "currencyLocked": "Валюту нельзя изменить, если по счёту есть история."
+    },
+    "transferDialog": {
+      "title": "Перевод",
+      "from": "Откуда",
+      "to": "Куда",
+      "amount": "Сумма",
+      "date": "Дата",
+      "rate": "Курс обмена",
+      "rateHint": "Курс на выбранную дату, его можно исправить.",
+      "receives": "Поступит {amount}",
+      "note": "Заметка"
+    },
+    "confirm": {
+      "deleteTitle": "Удалить счёт?",
+      "deleteMessage": "«{name}» будет удалён без возможности восстановления.",
+      "archiveTitle": "Отправить счёт в архив?",
+      "archiveMessage": "У счёта «{name}» есть история, поэтому он будет перенесён в архив, а не удалён. Его можно восстановить позже."
+    },
+    "toast": {
+      "created": "Счёт добавлен",
+      "updated": "Счёт обновлён",
+      "deleted": "Счёт удалён",
+      "archived": "Счёт перенесён в архив",
+      "restored": "Счёт восстановлен",
+      "transferCreated": "Перевод сохранён"
+    }
+  },
+  "validation": {
+    "required": "Обязательное поле.",
+    "invalidValue": "Недопустимое значение.",
+    "nameTooLong": "Не больше 40 символов.",
+    "noteTooLong": "Не больше 200 символов.",
+    "cardLast4": "Введите ровно 4 цифры.",
+    "positiveAmount": "Введите сумму больше нуля.",
+    "sameAccount": "Выберите два разных счёта.",
+    "unknownAccount": "Этот счёт недоступен.",
+    "archivedAccount": "Этот счёт в архиве.",
+    "accountInUse": "По этому счёту есть история, его можно только отправить в архив.",
+    "currencyLocked": "Валюту нельзя изменить, если по счёту есть история.",
+    "dateTooFar": "Дата может быть не больше чем на год вперёд."
+  }
 }

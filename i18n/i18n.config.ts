@@ -9,6 +9,7 @@ const dates = {
   short: { day: 'numeric', month: 'short' },
   long: { day: 'numeric', month: 'long', year: 'numeric' },
   monthYear: { month: 'long', year: 'numeric' },
+  dayMonth: { day: 'numeric', month: 'long', timeZone: 'UTC' },
 } as const
 
 export default defineI18nConfig(() => ({

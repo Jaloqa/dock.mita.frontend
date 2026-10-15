@@ -22,9 +22,127 @@
       "dark": "Ciemny",
       "system": "Systemowy"
     },
-    "actions": { "retry": "Spróbuj ponownie" },
-    "error": { "title": "Coś poszło nie tak", "description": "Nie udało się wczytać tej sekcji." },
-    "period": { "label": "Okres", "range": "{from} – {to}" }
+    "actions": { "retry": "Spróbuj ponownie", "save": "Zapisz", "cancel": "Anuluj" },
+    "error": {
+      "title": "Coś poszło nie tak",
+      "description": "Nie udało się wczytać tej sekcji.",
+      "validation": "Popraw zaznaczone pola.",
+      "notFound": "Ten element już nie istnieje.",
+      "server": "Serwer nie mógł wykonać żądania. Spróbuj ponownie.",
+      "unknown": "Wystąpił nieoczekiwany błąd. Spróbuj ponownie."
+    },
+    "period": { "label": "Okres", "range": "{from} – {to}" },
+    "dateInputFormat": "dd.mm.yy",
+    "primevue": {
+      "firstDayOfWeek": "1",
+      "today": "Dziś",
+      "clear": "Wyczyść",
+      "accept": "Tak",
+      "reject": "Nie",
+      "weekHeader": "Tydz.",
+      "chooseDate": "Wybierz datę",
+      "chooseMonth": "Wybierz miesiąc",
+      "chooseYear": "Wybierz rok",
+      "prevMonth": "Poprzedni miesiąc",
+      "nextMonth": "Następny miesiąc",
+      "prevYear": "Poprzedni rok",
+      "nextYear": "Następny rok",
+      "prevDecade": "Poprzednia dekada",
+      "nextDecade": "Następna dekada",
+      "emptyMessage": "Brak dostępnych opcji",
+      "emptyFilterMessage": "Brak wyników",
+      "emptySelectionMessage": "Nic nie wybrano",
+      "searchMessage": "Dostępne wyniki: {0}",
+      "selectionMessage": "Wybrane elementy: {0}",
+      "close": "Zamknij"
+    }
   },
-  "validation": { "required": "To pole jest wymagane.", "invalidValue": "Ta wartość jest nieprawidłowa." }
+  "accounts": {
+    "total": "Razem {amount}",
+    "actions": {
+      "transfer": "Przelew",
+      "add": "Dodaj konto",
+      "edit": "Edytuj {name}",
+      "archive": "Archiwizuj",
+      "restore": "Przywróć",
+      "delete": "Usuń",
+      "showArchived": "Pokaż zarchiwizowane ({count})",
+      "hideArchived": "Ukryj zarchiwizowane"
+    },
+    "type": { "card": "Karta", "cash": "Gotówka", "savings": "Oszczędności" },
+    "meta": {
+      "card": "•••• {last4}",
+      "converted": "≈ {amount}",
+      "cash": "Portfel",
+      "savings": "Konto oszczędnościowe"
+    },
+    "archivedBadge": "Zarchiwizowane",
+    "list": {
+      "label": "Konta",
+      "emptyTitle": "Nie masz jeszcze kont",
+      "emptyDescription": "Dodaj pierwsze konto, aby śledzić salda."
+    },
+    "distribution": {
+      "title": "Podział",
+      "item": "{name} {percent}",
+      "empty": "Na razie nie ma czego pokazać.",
+      "unavailable": "Podział jest teraz niedostępny."
+    },
+    "transfers": {
+      "title": "Przelewy między kontami",
+      "route": "{from} → {to}",
+      "received": "→ {amount}",
+      "empty": "Nie ma jeszcze przelewów.",
+      "showMore": "Pokaż więcej"
+    },
+    "dialog": {
+      "createTitle": "Nowe konto",
+      "editTitle": "Edycja konta",
+      "name": "Nazwa",
+      "type": "Typ",
+      "currency": "Waluta",
+      "openingBalance": "Saldo początkowe",
+      "cardLast4": "Ostatnie 4 cyfry karty",
+      "currencyLocked": "Waluty nie można zmienić, gdy konto ma historię."
+    },
+    "transferDialog": {
+      "title": "Przelew",
+      "from": "Z konta",
+      "to": "Na konto",
+      "amount": "Kwota",
+      "date": "Data",
+      "rate": "Kurs wymiany",
+      "rateHint": "Kurs z wybranego dnia, możesz go poprawić.",
+      "receives": "Wpłynie {amount}",
+      "note": "Notatka"
+    },
+    "confirm": {
+      "deleteTitle": "Usunąć konto?",
+      "deleteMessage": "„{name}” zostanie trwale usunięte.",
+      "archiveTitle": "Zarchiwizować konto?",
+      "archiveMessage": "„{name}” ma historię, więc zostanie zarchiwizowane zamiast usunięte. Możesz je później przywrócić."
+    },
+    "toast": {
+      "created": "Konto dodane",
+      "updated": "Konto zaktualizowane",
+      "deleted": "Konto usunięte",
+      "archived": "Konto zarchiwizowane",
+      "restored": "Konto przywrócone",
+      "transferCreated": "Przelew zapisany"
+    }
+  },
+  "validation": {
+    "required": "To pole jest wymagane.",
+    "invalidValue": "Ta wartość jest nieprawidłowa.",
+    "nameTooLong": "Użyj najwyżej 40 znaków.",
+    "noteTooLong": "Użyj najwyżej 200 znaków.",
+    "cardLast4": "Wpisz dokładnie 4 cyfry.",
+    "positiveAmount": "Wpisz kwotę większą od zera.",
+    "sameAccount": "Wybierz dwa różne konta.",
+    "unknownAccount": "To konto jest niedostępne.",
+    "archivedAccount": "To konto jest zarchiwizowane.",
+    "accountInUse": "To konto ma historię i można je tylko zarchiwizować.",
+    "currencyLocked": "Waluty nie można zmienić, gdy konto ma historię.",
+    "dateTooFar": "Data może być najwyżej rok do przodu."
+  }
 }
