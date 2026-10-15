@@ -18,7 +18,7 @@ const fields = ['name', 'type', 'currency', 'openingBalance', 'cardLast4'] as co
 type Field = (typeof fields)[number]
 
 const form = reactive<AccountForm>({ name: '', type: 'card', currency: 'PLN', openingBalance: null, cardLast4: '' })
-const v$ = useVuelidate(accountRules(t), form)
+const v$ = useVuelidate(accountRules(t, form), form)
 const formEl = ref<HTMLFormElement | null>(null)
 
 const isEdit = computed(() => props.account !== undefined)

@@ -1,4 +1,5 @@
-import { useInfiniteQuery } from '@tanstack/vue-query'
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
+import { invalidateAfter } from '~/shared/api/invalidation'
 import { transferKeys } from '../api/keys'
 import { transfersApi } from '../api/transfersApi'
 
@@ -22,4 +23,11 @@ export function useTransfers() {
     isFetchingNextPage: query.isFetchingNextPage,
     fetchNextPage: () => query.fetchNextPage(),
   }
+}
+
+export function useCreateTransfer() {
+  const api = transfersApi(useApi())
+  const queryClient = useQueryClient()
+
+  return useMutation({ mutationFn: api.create, onSuccess: () => invalidateAfter(queryClient, 'transfers') })
 }

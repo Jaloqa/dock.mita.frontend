@@ -2,9 +2,10 @@
 import type { AccountShare } from '../utils/summary'
 
 const props = defineProps<{ shares: AccountShare[]; isPending: boolean; isError: boolean }>()
+const emit = defineEmits<{ retry: [] }>()
 const { t, n } = useI18n()
 
-const swatches = ['bg-chart-2', 'bg-chart-5', 'bg-chart-1', 'bg-chart-3', 'bg-chart-4', 'bg-chart-6']
+const swatches = ['bg-chart-2', 'bg-chart-5', 'bg-chart-3', 'bg-chart-4', 'bg-chart-1', 'bg-chart-6']
 const swatch = (index: number) => swatches[index % swatches.length]
 const percent = (value: number) => n(value / 100, 'percent')
 const summary = computed(() =>
@@ -24,7 +25,10 @@ const summary = computed(() =>
       <Skeleton height="14px" border-radius="7px" />
       <Skeleton v-for="index in 3" :key="index" height="1.25rem" />
     </div>
-    <p v-else-if="isError" class="m-0 text-sm text-muted">{{ t('accounts.distribution.unavailable') }}</p>
+    <div v-else-if="isError" class="flex flex-col items-start gap-2">
+      <p class="m-0 text-sm text-muted">{{ t('accounts.distribution.unavailable') }}</p>
+      <Button :label="t('shared.actions.retry')" severity="secondary" outlined @click="emit('retry')" />
+    </div>
     <p v-else-if="shares.length === 0" class="m-0 text-sm text-muted">{{ t('accounts.distribution.empty') }}</p>
     <template v-else>
       <div role="img" :aria-label="summary" class="flex h-3.5 gap-0.75 overflow-hidden rounded-[7px]">

@@ -111,8 +111,8 @@
       "to": "Na konto",
       "amount": "Kwota",
       "date": "Data",
-      "rate": "Kurs wymiany",
-      "rateHint": "Kurs z wybranego dnia, możesz go poprawić.",
+      "rate": "Kurs wymiany ({from} → {to})",
+      "rateHint": "Ile {to} otrzymasz za 1 {from} w wybranym dniu. Kurs możesz poprawić.",
       "receives": "Wpłynie {amount}",
       "note": "Notatka"
     },
