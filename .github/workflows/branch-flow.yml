@@ -2,7 +2,11 @@ name: Branch flow
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, edited]
     branches: [prod, preprod, develop]
+
+permissions:
+  contents: read
 
 jobs:
   check-source-branch:
@@ -15,8 +19,8 @@ jobs:
         run: |
           case "$BASE" in
             prod)
-              [[ "$HEAD" == "preprod" || "$HEAD" == hotfix/* ]] || { echo "::error::PR do prod tylko z preprod lub hotfix/*"; exit 1; } ;;
+              [[ "$HEAD" == "preprod" || "$HEAD" == hotfix/* ]] || { echo "::error::PRs into prod must come from preprod or hotfix/*"; exit 1; } ;;
             preprod)
-              [[ "$HEAD" == "develop" || "$HEAD" == hotfix/* ]] || { echo "::error::PR do preprod tylko z develop lub hotfix/*"; exit 1; } ;;
+              [[ "$HEAD" == "develop" || "$HEAD" == hotfix/* ]] || { echo "::error::PRs into preprod must come from develop or hotfix/*"; exit 1; } ;;
           esac
           echo "OK: $HEAD → $BASE"
