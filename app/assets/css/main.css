@@ -14,24 +14,47 @@
 }
 
 :root {
-  --mita-bg: #f2f3f5;
-  --mita-surface: #ffffff;
-  --mita-ink: #15171c;
-  --mita-muted: #5e636e;
-  --mita-border: #e1e3e8;
-  --mita-track: #e7e9ee;
-  --mita-deep: #25282f;
-  --mita-deep-muted: #c9ccd3;
-  --mita-on-deep: #ffffff;
-  --mita-logo-stroke: #25282f;
-  --mita-accent: #c43f73;
-  --mita-on-accent: #ffffff;
-  --mita-chart-1: #25282f;
-  --mita-chart-2: #c43f73;
-  --mita-chart-3: #7c818c;
-  --mita-chart-4: #e59ab8;
-  --mita-chart-5: #b5b9c1;
-  --mita-chart-6: #f3d3e0;
+  --mita-light-bg: #f2f3f5;
+  --mita-light-surface: #ffffff;
+  --mita-light-ink: #15171c;
+  --mita-light-muted: #5e636e;
+  --mita-light-border: #e1e3e8;
+  --mita-light-track: #e7e9ee;
+  --mita-light-deep: #25282f;
+  --mita-light-deep-muted: #c9ccd3;
+  --mita-light-on-deep: #ffffff;
+  --mita-light-logo-stroke: #25282f;
+  --mita-light-accent: #c43f73;
+  --mita-light-on-accent: #ffffff;
+  --mita-light-chart-1: #25282f;
+  --mita-light-chart-2: #c43f73;
+  --mita-light-chart-3: #7c818c;
+  --mita-light-chart-4: #e59ab8;
+  --mita-light-chart-5: #b5b9c1;
+  --mita-light-chart-6: #f3d3e0;
+  --mita-light-chart-income: var(--mita-light-accent);
+  --mita-light-chart-expense: var(--mita-light-deep);
+
+  --mita-bg: var(--mita-light-bg);
+  --mita-surface: var(--mita-light-surface);
+  --mita-ink: var(--mita-light-ink);
+  --mita-muted: var(--mita-light-muted);
+  --mita-border: var(--mita-light-border);
+  --mita-track: var(--mita-light-track);
+  --mita-deep: var(--mita-light-deep);
+  --mita-deep-muted: var(--mita-light-deep-muted);
+  --mita-on-deep: var(--mita-light-on-deep);
+  --mita-logo-stroke: var(--mita-light-logo-stroke);
+  --mita-accent: var(--mita-light-accent);
+  --mita-on-accent: var(--mita-light-on-accent);
+  --mita-chart-1: var(--mita-light-chart-1);
+  --mita-chart-2: var(--mita-light-chart-2);
+  --mita-chart-3: var(--mita-light-chart-3);
+  --mita-chart-4: var(--mita-light-chart-4);
+  --mita-chart-5: var(--mita-light-chart-5);
+  --mita-chart-6: var(--mita-light-chart-6);
+  --mita-chart-income: var(--mita-light-chart-income);
+  --mita-chart-expense: var(--mita-light-chart-expense);
 }
 
 .dark {
@@ -53,6 +76,8 @@
   --mita-chart-4: #7fc7d9;
   --mita-chart-5: #5a5f6b;
   --mita-chart-6: #3e424b;
+  --mita-chart-income: var(--mita-accent);
+  --mita-chart-expense: var(--mita-ink);
 }
 
 @theme inline {
@@ -74,6 +99,8 @@
   --color-chart-4: var(--mita-chart-4);
   --color-chart-5: var(--mita-chart-5);
   --color-chart-6: var(--mita-chart-6);
+  --color-chart-income: var(--mita-chart-income);
+  --color-chart-expense: var(--mita-chart-expense);
 }
 
 @layer base {
