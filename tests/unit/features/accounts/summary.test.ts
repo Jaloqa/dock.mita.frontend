@@ -13,6 +13,7 @@ const account = (id: string, currency: Currency, balance: number): AccountDto =>
   cardLast4: null,
   archived: false,
   inUse: false,
+  linkedGoals: 0,
 })
 
 const rates: RateDto[] = [{ date: '2026-10-15', from: 'EUR', to: 'PLN', value: 4.25 }]

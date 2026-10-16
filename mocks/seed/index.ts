@@ -25,5 +25,7 @@ export const seedState = (today: string = todayIso()): MockState => {
     categories: demoCategories(),
     transactions,
     budgets: demoBudgets(today, settings),
+    goals: [],
+    goalContributions: [],
   }
 }
