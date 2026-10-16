@@ -336,8 +336,8 @@
     },
     "card": {
       "of": "of {amount}",
-      "left": "Left {amount}",
-      "overspent": "Overspent {amount}",
+      "left": "{amount} left",
+      "overspent": "Overspent by {amount}",
       "perDay": "≈ {amount} per day",
       "progress": "{name}: share of the limit spent"
     },
