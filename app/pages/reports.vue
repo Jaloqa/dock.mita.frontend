@@ -46,6 +46,7 @@ useHead({ title: () => t('navigation.reports') })
   </EmptyState>
   <div v-else class="hidden flex-col gap-6 lg:flex">
     <ReportStats variant="full" :report="report" />
+    <ReportTrendCard :report="report" :range-label="covered" />
     <ReportStructure :report="report" />
   </div>
 </template>

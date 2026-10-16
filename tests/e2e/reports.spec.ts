@@ -1,4 +1,4 @@
-import { expect, type Page, test } from '@playwright/test'
+import { expect, type Locator, type Page, test } from '@playwright/test'
 
 const MOCK_DB = 'mita-mock-db-v1'
 
@@ -159,4 +159,70 @@ test('a failed report shows one error and recovers on retry', async ({ page, isM
   await alert.getByRole('button', { name: 'Try again' }).click()
   await expect(alert).toHaveCount(0)
   await expect(page.getByTestId('report-savings-rate').filter({ visible: true })).toBeVisible()
+})
+
+const table = (page: Page) => page.getByRole('table', { name: 'Income and expenses by month' })
+
+const tokenPixel = (page: Page, token: string) =>
+  page.evaluate((name) => {
+    const context = document.createElement('canvas').getContext('2d')
+    if (!context) return []
+    context.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+    context.fillRect(0, 0, 1, 1)
+    return Array.from(context.getImageData(0, 0, 1, 1).data)
+  }, `--mita-${token}`)
+
+const colorPixels = (canvas: Locator, rgba: number[]) =>
+  canvas.evaluate((element: HTMLCanvasElement, target) => {
+    const context = element.getContext('2d')
+    if (!context || element.width === 0 || element.height === 0) return 0
+    const { data } = context.getImageData(0, 0, element.width, element.height)
+    let count = 0
+    for (let index = 0; index < data.length; index += 4) {
+      if (
+        data[index] === target[0] &&
+        data[index + 1] === target[1] &&
+        data[index + 2] === target[2] &&
+        data[index + 3] === 255
+      ) {
+        count += 1
+      }
+    }
+    return count
+  }, rgba)
+
+test('the chart lists every period of the selected range', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'mobile layout')
+  await page.goto('/reports')
+  await expect(table(page).getByRole('row')).toHaveCount(7)
+  await expect(table(page).getByRole('row').last()).toContainText(longMonth(monthAt(0), true))
+  await expect(
+    page.getByRole('img', { name: new RegExp(`^Income and expenses, ${coveredLabel(6)}: total income PLN`) }),
+  ).toBeVisible()
+  await pressed(page, '3 months').click()
+  await expect(table(page).getByRole('row')).toHaveCount(4)
+  await pressed(page, 'Year').click()
+  await expect(table(page).getByRole('row')).toHaveCount(13)
+  await expect(table(page).getByRole('row').nth(1)).toContainText(longMonth(monthAt(-11), true))
+})
+
+test('the chart follows the theme', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'desktop chart')
+  await page.goto('/reports?range=12m')
+  const chart = page.getByRole('img', { name: /^Income and expenses, / })
+  await expect(chart).toBeVisible()
+  const lightIncome = await tokenPixel(page, 'chart-income')
+  const lightExpense = await tokenPixel(page, 'chart-expense')
+  await expect.poll(() => colorPixels(chart, lightIncome)).toBeGreaterThan(0)
+  await expect.poll(() => colorPixels(chart, lightExpense)).toBeGreaterThan(0)
+
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await expect(page.locator('html')).toHaveClass(/dark/)
+  const darkIncome = await tokenPixel(page, 'chart-income')
+  const darkExpense = await tokenPixel(page, 'chart-expense')
+  expect(darkIncome).not.toEqual(lightIncome)
+  expect(darkExpense).not.toEqual(lightExpense)
+  await expect.poll(() => colorPixels(chart, darkIncome)).toBeGreaterThan(0)
+  await expect.poll(() => colorPixels(chart, darkExpense)).toBeGreaterThan(0)
+  await expect.poll(() => colorPixels(chart, lightIncome)).toBe(0)
 })
