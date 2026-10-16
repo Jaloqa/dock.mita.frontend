@@ -6,8 +6,22 @@ import { rateOn } from '../rates'
 type Planned = { userId: string; daysAgo: number; from: string; to: string; amount: number; note?: string }
 
 const planned: Planned[] = [
-  { userId: 'usr_anna', daysAgo: 98, from: 'acc_anna_card', to: 'acc_anna_savings', amount: 100_000 },
-  { userId: 'usr_anna', daysAgo: 68, from: 'acc_anna_card', to: 'acc_anna_savings', amount: 100_000 },
+  {
+    userId: 'usr_anna',
+    daysAgo: 98,
+    from: 'acc_anna_card',
+    to: 'acc_anna_savings',
+    amount: 320_000,
+    note: 'Fundusz awaryjny',
+  },
+  {
+    userId: 'usr_anna',
+    daysAgo: 68,
+    from: 'acc_anna_card',
+    to: 'acc_anna_savings',
+    amount: 100_000,
+    note: 'Fundusz awaryjny',
+  },
   {
     userId: 'usr_anna',
     daysAgo: 52,
@@ -17,10 +31,31 @@ const planned: Planned[] = [
     note: 'Wakacje w Hiszpanii',
   },
   { userId: 'usr_anna', daysAgo: 45, from: 'acc_anna_card', to: 'acc_anna_cash', amount: 30_000 },
-  { userId: 'usr_anna', daysAgo: 38, from: 'acc_anna_card', to: 'acc_anna_savings', amount: 100_000 },
+  {
+    userId: 'usr_anna',
+    daysAgo: 38,
+    from: 'acc_anna_card',
+    to: 'acc_anna_savings',
+    amount: 100_000,
+    note: 'Fundusz awaryjny',
+  },
   { userId: 'usr_anna', daysAgo: 14, from: 'acc_anna_card', to: 'acc_anna_cash', amount: 30_000 },
-  { userId: 'usr_anna', daysAgo: 8, from: 'acc_anna_card', to: 'acc_anna_savings', amount: 100_000 },
-  { userId: 'usr_oleh', daysAgo: 80, from: 'acc_oleh_card', to: 'acc_oleh_usd', amount: 1_000_000 },
+  {
+    userId: 'usr_anna',
+    daysAgo: 8,
+    from: 'acc_anna_card',
+    to: 'acc_anna_savings',
+    amount: 100_000,
+    note: 'Fundusz awaryjny',
+  },
+  {
+    userId: 'usr_oleh',
+    daysAgo: 80,
+    from: 'acc_oleh_card',
+    to: 'acc_oleh_usd',
+    amount: 1_000_000,
+    note: 'Ноутбук',
+  },
   { userId: 'usr_oleh', daysAgo: 36, from: 'acc_oleh_card', to: 'acc_oleh_cash', amount: 200_000 },
   {
     userId: 'usr_oleh',
@@ -28,7 +63,7 @@ const planned: Planned[] = [
     from: 'acc_oleh_card',
     to: 'acc_oleh_usd',
     amount: 1_000_000,
-    note: 'Відкладаю на ноутбук',
+    note: 'Ноутбук',
   },
   { userId: 'usr_oleh', daysAgo: 5, from: 'acc_oleh_card', to: 'acc_oleh_cash', amount: 200_000 },
 ]
