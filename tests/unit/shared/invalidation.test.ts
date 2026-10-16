@@ -31,4 +31,14 @@ describe('invalidation map', () => {
       expect(invalidationMap[change]).toContainEqual(['overview'])
     }
   })
+
+  it('refreshes reports only after changes that feed them', () => {
+    for (const change of ['transactions', 'accounts', 'categories', 'settings'] as const) {
+      expect(invalidationMap[change]).toContainEqual(['reports'])
+    }
+    for (const change of ['transfers', 'budgets', 'goals', 'goalContributions'] as const) {
+      expect(invalidationMap[change]).not.toContainEqual(['reports'])
+    }
+    expect(invalidationMap.demo).toEqual([[]])
+  })
 })

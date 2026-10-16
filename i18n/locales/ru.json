@@ -535,6 +535,46 @@
       "add": "Добавить операцию"
     }
   },
+  "reports": {
+    "eyebrow": "Аналитика",
+    "range": { "label": "Диапазон", "months": "{count} месяц | {count} месяца | {count} месяцев", "year": "Год" },
+    "export": "Экспорт PDF",
+    "printRange": "Период отчёта: {range}",
+    "stats": {
+      "label": "Показатели",
+      "averageIncome": "Средний доход",
+      "averageExpense": "Средний расход",
+      "savingsRate": "Норма сбережений",
+      "savings": "Сбережения",
+      "none": "—"
+    },
+    "chart": {
+      "title": "Доходы и расходы по месяцам",
+      "short": "По месяцам",
+      "income": "Доходы",
+      "expense": "Расходы",
+      "incomeShort": "Доход",
+      "expenseShort": "Расход",
+      "month": "Месяц",
+      "label": "Доходы и расходы, {range}: всего доходов {income}, всего расходов {expense}"
+    },
+    "structure": {
+      "plain": "Структура расходов",
+      "title": "Структура расходов · {month}",
+      "short": "Расходы · {month}",
+      "empty": "Нет расходов за период: {month}."
+    },
+    "empty": {
+      "title": "Отчётов пока нет",
+      "description": "Отчёты появятся, когда вы запишете доходы или расходы.",
+      "action": "Добавить операцию"
+    },
+    "noData": {
+      "title": "Нет данных за этот период",
+      "description": "За период {range} ничего не записано.",
+      "showYear": "Показать год"
+    }
+  },
   "validation": {
     "required": "Обязательное поле.",
     "invalidValue": "Недопустимое значение.",

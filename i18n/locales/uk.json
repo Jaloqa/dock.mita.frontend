@@ -535,6 +535,46 @@
       "add": "Додати операцію"
     }
   },
+  "reports": {
+    "eyebrow": "Аналітика",
+    "range": { "label": "Діапазон", "months": "{count} місяць | {count} місяці | {count} місяців", "year": "Рік" },
+    "export": "Експорт PDF",
+    "printRange": "Період звіту: {range}",
+    "stats": {
+      "label": "Показники",
+      "averageIncome": "Середній дохід",
+      "averageExpense": "Середня витрата",
+      "savingsRate": "Норма заощаджень",
+      "savings": "Заощадження",
+      "none": "—"
+    },
+    "chart": {
+      "title": "Доходи й витрати за місяцями",
+      "short": "За місяцями",
+      "income": "Доходи",
+      "expense": "Витрати",
+      "incomeShort": "Дохід",
+      "expenseShort": "Витрата",
+      "month": "Місяць",
+      "label": "Доходи й витрати, {range}: усього доходів {income}, усього витрат {expense}"
+    },
+    "structure": {
+      "plain": "Структура витрат",
+      "title": "Структура витрат · {month}",
+      "short": "Витрати · {month}",
+      "empty": "Немає витрат за період: {month}."
+    },
+    "empty": {
+      "title": "Звітів поки немає",
+      "description": "Звіти з'являться, коли ви запишете доходи або витрати.",
+      "action": "Додати операцію"
+    },
+    "noData": {
+      "title": "Немає даних за цей період",
+      "description": "За період {range} нічого не записано.",
+      "showYear": "Показати рік"
+    }
+  },
   "validation": {
     "required": "Обов'язкове поле.",
     "invalidValue": "Неприпустиме значення.",
