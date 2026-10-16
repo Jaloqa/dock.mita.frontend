@@ -2,7 +2,7 @@ export type Currency = 'PLN' | 'EUR' | 'USD' | 'UAH'
 
 export const currencies: readonly Currency[] = ['PLN', 'EUR', 'USD', 'UAH']
 
-function roundHalfAwayFromZero(value: number): number {
+export function roundHalfAwayFromZero(value: number): number {
   const stabilized = Math.round(Math.abs(value) * 1e6) / 1e6
   const rounded = Math.round(stabilized)
   if (rounded === 0) return 0

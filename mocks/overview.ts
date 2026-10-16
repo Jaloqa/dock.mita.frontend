@@ -215,3 +215,8 @@ export function overviewOf(db: MockDb, userId: string, range: OverviewRange, tod
     hasTransactions: state.transactions.some((row) => row.userId === userId),
   }
 }
+
+export function lastPeriods(today: string, monthStart: MonthStart, count: number): Period[] {
+  const current = periodFor(today, monthStart)
+  return Array.from({ length: count }, (_, index) => shiftPeriod(current.key, index - count + 1, monthStart))
+}

@@ -276,3 +276,43 @@ export type OverviewDto = {
   goalCount: number
   hasTransactions: boolean
 }
+
+export type ReportRange = '3m' | '6m' | '12m'
+
+export const reportRanges: readonly ReportRange[] = ['3m', '6m', '12m']
+
+export const reportRangePeriods: Readonly<Record<ReportRange, number>> = { '3m': 3, '6m': 6, '12m': 12 }
+
+export const isReportRange = (value: unknown): value is ReportRange => reportRanges.includes(value as ReportRange)
+
+export type ReportPeriodDto = { period: string; from: string; to: string; income: number; expense: number }
+
+export type ReportStructureItemDto = {
+  categoryId: string
+  name: string
+  color: CategoryColor
+  amount: number
+  percent: number
+}
+
+export type ReportStructureDto = {
+  period: string
+  from: string
+  to: string
+  total: number
+  items: ReportStructureItemDto[]
+}
+
+export type ReportDto = {
+  range: ReportRange
+  from: string
+  to: string
+  currency: Currency
+  periods: ReportPeriodDto[]
+  totals: { income: number; expense: number }
+  averageIncome: number
+  averageExpense: number
+  savingsRate: number | null
+  structure: ReportStructureDto
+  hasTransactions: boolean
+}
