@@ -393,7 +393,8 @@
       "target": "Cel",
       "amounts": "{saved} / {target}",
       "progress": "{name}: odłożona część celu",
-      "reached": "Osiągnięty"
+      "reached": "Osiągnięty",
+      "overdue": "Po terminie"
     },
     "hint": {
       "monthly": "Odkładaj {amount} miesięcznie, aby zdążyć",

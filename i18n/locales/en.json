@@ -393,7 +393,8 @@
       "target": "Target",
       "amounts": "{saved} / {target}",
       "progress": "{name}: share of the target saved",
-      "reached": "Reached"
+      "reached": "Reached",
+      "overdue": "Overdue"
     },
     "hint": {
       "monthly": "Save {amount} a month to make it on time",

@@ -393,7 +393,8 @@
       "target": "Ціль",
       "amounts": "{saved} / {target}",
       "progress": "{name}: накопичена частка цілі",
-      "reached": "Досягнуто"
+      "reached": "Досягнуто",
+      "overdue": "Прострочено"
     },
     "hint": {
       "monthly": "Щоб встигнути, відкладай {amount} на місяць",
