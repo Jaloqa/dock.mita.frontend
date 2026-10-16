@@ -1,4 +1,4 @@
-import { expect, type Page, test } from '@playwright/test'
+import { expect, type Locator, type Page, test } from '@playwright/test'
 
 const keyOf = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
 const shift = (months: number) => {
@@ -65,10 +65,16 @@ const openNewBudget = async (page: Page, trigger: string) => {
   return dialog
 }
 
+const chooseCategory = async (page: Page, dialog: Locator, name: string) => {
+  const combobox = dialog.getByRole('combobox', { name: 'Category' })
+  await combobox.click()
+  await page.getByRole('option', { name, exact: true }).click()
+  await expect(combobox).toHaveAttribute('aria-expanded', 'false')
+}
+
 const addBudget = async (page: Page, category: string, limit: string) => {
   const dialog = await openNewBudget(page, 'Add category')
-  await dialog.getByRole('combobox', { name: 'Category' }).click()
-  await page.getByRole('option', { name: category, exact: true }).click()
+  await chooseCategory(page, dialog, category)
   await dialog.getByLabel('Monthly limit').pressSequentially(limit)
   await dialog.getByRole('button', { name: 'Save' }).click()
   await expect(dialog).toBeHidden()
@@ -80,8 +86,7 @@ test('creates, edits and deletes a budget', async ({ page }) => {
   const dialog = await openNewBudget(page, 'New budget')
   await dialog.getByRole('button', { name: 'Save' }).click()
   await expect(dialog.getByText('This field is required.')).toHaveCount(2)
-  await dialog.getByRole('combobox', { name: 'Category' }).click()
-  await page.getByRole('option', { name: 'Sport', exact: true }).click()
+  await chooseCategory(page, dialog, 'Sport')
   await dialog.getByLabel('Monthly limit').pressSequentially('250')
   await dialog.getByRole('button', { name: 'Save' }).click()
   await expect(page.getByText('Budget created')).toBeVisible()
