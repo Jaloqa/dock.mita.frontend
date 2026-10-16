@@ -92,7 +92,8 @@
       "card": "•••• {last4}",
       "converted": "≈ {amount}",
       "cash": "Cash wallet",
-      "savings": "Savings account"
+      "savings": "Savings account",
+      "linkedToGoals": "Linked to goals"
     },
     "archivedBadge": "Archived",
     "list": {
