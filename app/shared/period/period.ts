@@ -76,3 +76,9 @@ export function daysLeft(period: Period, today: string): number {
   const from = today < period.from ? period.from : today
   return Math.round((parseIsoDate(period.to).getTime() - parseIsoDate(from).getTime()) / DAY_MS) + 1
 }
+
+const PERIOD_KEY = /^(?:19[7-9]\d|20\d\d)-(?:0[1-9]|1[0-2])$/
+
+export const isPeriodKey = (value: unknown): value is string => typeof value === 'string' && PERIOD_KEY.test(value)
+
+export const currentPeriodKey = (start: MonthStart, today: string = todayIso()): string => periodFor(today, start).key

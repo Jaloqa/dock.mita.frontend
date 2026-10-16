@@ -1,4 +1,5 @@
 import { type CategoryKind, type Locale, locales } from '../app/shared/api/contract'
+import { budgetReference } from './budgets'
 import type { CategoryRow, MockDb, MockState } from './db'
 import { newId } from './ids'
 import { starterCategories } from './seed/categories'
@@ -18,7 +19,7 @@ const transactionReference: CategoryReference = {
   },
 }
 
-export const categoryReferences: CategoryReference[] = [transactionReference]
+export const categoryReferences: CategoryReference[] = [transactionReference, budgetReference]
 
 export function categoriesInUse(state: MockState, userId: string): Set<string> {
   return new Set(categoryReferences.flatMap((reference) => [...reference.usedCategoryIds(state, userId)]))

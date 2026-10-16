@@ -23,6 +23,15 @@ export type CategoryRow = Omit<CategoryDto, 'inUse'> & { userId: string }
 
 export type TransactionRow = TransactionDto & { userId: string; accountCurrency: Currency; baseCurrency: Currency }
 
+export type BudgetRow = {
+  id: string
+  userId: string
+  categoryId: string
+  period: string
+  limit: number
+  currency: Currency
+}
+
 export type MockState = {
   version: 1
   activeUserId: string
@@ -34,6 +43,7 @@ export type MockState = {
   transfers: TransferRow[]
   categories: CategoryRow[]
   transactions: TransactionRow[]
+  budgets: BudgetRow[]
 }
 
 export type KeyValueStorage = Pick<Storage, 'getItem' | 'setItem'>
