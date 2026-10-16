@@ -1,7 +1,6 @@
 {
   "app": {
-    "description": "Osobisty planer budżetu",
-    "comingSoon": "Ten ekran pojawi się wkrótce."
+    "description": "Osobisty planer budżetu"
   },
   "navigation": {
     "label": "Menu główne",

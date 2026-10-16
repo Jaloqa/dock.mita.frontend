@@ -1,7 +1,6 @@
 {
   "app": {
-    "description": "Personal budget planner",
-    "comingSoon": "This screen is coming soon."
+    "description": "Personal budget planner"
   },
   "navigation": {
     "label": "Main navigation",
