@@ -1,6 +1,6 @@
 <script setup lang="ts">
-defineProps<{ exporting: boolean }>()
-const emit = defineEmits<{ export: []; import: []; manageCategories: [] }>()
+defineProps<{ exporting: boolean; canDeleteAccount: boolean }>()
+const emit = defineEmits<{ export: []; import: []; manageCategories: []; deleteAccount: [] }>()
 const { t } = useI18n()
 
 const actionClass =
@@ -27,6 +27,14 @@ const actionClass =
       <button type="button" :class="actionClass" @click="emit('manageCategories')">
         <AppIcon name="budgets" />
         {{ t('settings.data.manageCategories') }}
+      </button>
+      <button
+        v-if="canDeleteAccount"
+        type="button"
+        class="mt-2 min-h-11 self-start rounded-(--radius-control) px-1 text-sm font-semibold text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        @click="emit('deleteAccount')"
+      >
+        {{ t('settings.data.deleteAccount') }}
       </button>
     </div>
   </SettingsCard>

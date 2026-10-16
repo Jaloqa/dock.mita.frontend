@@ -1,7 +1,7 @@
 import { expect, type Locator, type Page, test } from '@playwright/test'
 
-const sectionTitles = ['Profile', 'Currency and region', 'Data']
-const ukSectionTitles = ['Профіль', 'Валюта і регіон', 'Дані']
+const sectionTitles = ['Profile', 'Currency and region', 'Notifications', 'Data']
+const ukSectionTitles = ['Профіль', 'Валюта і регіон', 'Сповіщення', 'Дані']
 
 const section = (page: Page, name: string) => page.getByRole('region', { name, exact: true })
 const profile = (page: Page) => section(page, 'Profile')
@@ -34,8 +34,16 @@ const periodTitle = (startDay: number) => {
   return `${shortDay(from)} – ${shortDay(to)}`
 }
 
+const mainNav = (page: Page) => page.getByRole('navigation', { name: 'Main navigation' }).filter({ visible: true })
+
+const openSettingsInApp = async (page: Page, isMobile: boolean) => {
+  if (isMobile) await page.goBack()
+  else await mainNav(page).getByRole('link', { name: 'Settings', exact: true }).click()
+  await expect(page).toHaveURL('/settings')
+}
+
 const openBudgets = async (page: Page, isMobile: boolean) => {
-  const nav = page.getByRole('navigation', { name: 'Main navigation' }).filter({ visible: true })
+  const nav = mainNav(page)
   if (isMobile) {
     await nav.getByRole('link', { name: 'Overview', exact: true }).click()
     await expect(page).toHaveURL('/')
@@ -161,4 +169,53 @@ test('settings are localized', async ({ page }) => {
     await expect(page.getByRole('heading', { level: 2, name, exact: true })).toBeVisible()
   }
   await expect(combobox(page, 'Початок фінансового місяця')).toHaveText('День 1')
+})
+
+test('a notification preference is saved at once and persists after a reload', async ({ page }) => {
+  await openSettings(page)
+  const weekly = page.getByRole('switch', { name: 'Weekly report' })
+  const budgetAlerts = page.getByRole('switch', { name: 'Budget alerts' })
+  await expect(weekly).not.toBeChecked()
+  await expect(budgetAlerts).toBeChecked()
+  await expect(page.getByText('Summary every Sunday')).toBeVisible()
+
+  await weekly.check()
+  await expect(page.getByText('Settings saved')).toBeVisible()
+  await expect(budgetAlerts).toBeEnabled()
+  await page.reload()
+  await expect(weekly).toBeChecked()
+  await expect(budgetAlerts).toBeChecked()
+})
+
+test('deleting the account needs the email and restores the demo data', async ({ page, isMobile }) => {
+  await openSettings(page)
+  await page.evaluate(() => Reflect.set(window, 'mitaSamePage', true))
+  await nameField(page).fill('Anna Kowalska')
+  await profile(page).getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByText('Profile saved')).toBeVisible()
+
+  const trigger = section(page, 'Data').getByRole('button', { name: 'Delete account' })
+  const dialog = page.getByRole('dialog', { name: 'Delete account' })
+  const confirmation = dialog.getByLabel('Type anna@demo.mita.app to confirm')
+  await trigger.click()
+  await expect(confirmation).toBeFocused()
+  await dialog.getByRole('button', { name: 'Cancel' }).click()
+  await expect(dialog).toBeHidden()
+
+  await trigger.click()
+  await expect(confirmation).toBeFocused()
+  await expect(dialog).toContainText('accounts, transactions, budgets, goals, categories and settings')
+  const submit = dialog.getByRole('button', { name: 'Delete account' })
+  await expect(submit).toBeDisabled()
+  await confirmation.fill('anna@demo.mita')
+  await expect(submit).toBeDisabled()
+  await confirmation.fill(' ANNA@demo.mita.app ')
+  await expect(submit).toBeEnabled()
+  await submit.click()
+
+  await expect(page).toHaveURL('/')
+  await expect(page.getByText('Account deleted. Demo data restored.')).toBeVisible()
+  await openSettingsInApp(page, isMobile)
+  await expect(nameField(page)).toHaveValue('Anna Nowak')
+  expect(await page.evaluate(() => Reflect.get(window, 'mitaSamePage'))).toBe(true)
 })
