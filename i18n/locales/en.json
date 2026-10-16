@@ -65,9 +65,66 @@
     }
   },
   "settings": {
+    "eyebrow": "Account",
+    "saved": "Settings saved",
+    "profile": {
+      "title": "Profile",
+      "name": "Name",
+      "email": "Email",
+      "saved": "Profile saved"
+    },
+    "region": {
+      "title": "Currency and region",
+      "baseCurrency": "Base currency",
+      "monthStart": "Start of the financial month",
+      "monthStartDay": "Day {day}",
+      "lastWorkingDay": "Last working day"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "budgetLimit": {
+        "title": "Budget alerts",
+        "description": "When a category reaches 85% and 100%"
+      },
+      "dailyReminder": {
+        "title": "Entry reminder",
+        "description": "Every evening at 9 pm if there were no transactions"
+      },
+      "weeklyReport": {
+        "title": "Weekly report",
+        "description": "Summary every Sunday"
+      },
+      "goals": {
+        "title": "Goals",
+        "description": "When a goal is reached or falls behind plan"
+      }
+    },
     "data": {
       "title": "Data",
-      "manageCategories": "Manage categories"
+      "export": "Export all transactions (CSV)",
+      "import": "Import bank statement",
+      "importSoon": "Bank statement import is coming soon",
+      "manageCategories": "Manage categories",
+      "deleteAccount": "Delete account"
+    },
+    "delete": {
+      "title": "Delete account",
+      "description": "Your accounts, transactions, budgets, goals, categories and settings will be erased and the demo data restored. This cannot be undone.",
+      "confirmLabel": "Type {email} to confirm",
+      "confirm": "Delete account",
+      "done": "Account deleted. Demo data restored."
+    },
+    "demo": {
+      "title": "Demo",
+      "caption": "This section exists only in demo mode.",
+      "user": "Demo user",
+      "switched": "Switched to {name}",
+      "reset": "Reset demo data",
+      "resetTitle": "Reset demo data?",
+      "resetMessage": "All changes will be lost and the demo data restored.",
+      "resetDone": "Demo data restored",
+      "simulateErrors": "Simulate network errors",
+      "simulateErrorsHint": "About 1 in 5 requests fails"
     }
   },
   "accounts": {
