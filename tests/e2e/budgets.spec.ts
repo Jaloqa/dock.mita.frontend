@@ -57,3 +57,104 @@ test('budgets are localized', async ({ page }) => {
   await expect(page.getByRole('region', { name: 'Podsumowanie okresu' })).toContainText(/7\s?000,00\s?zł/)
   await expect(page.getByRole('region', { name: 'Kategorie budżetu' }).getByRole('article')).toHaveCount(8)
 })
+
+const openNewBudget = async (page: Page, trigger: string) => {
+  await page.getByRole('button', { name: trigger, exact: true }).click()
+  const dialog = page.getByRole('dialog', { name: 'New budget' })
+  await expect(dialog).toBeVisible()
+  return dialog
+}
+
+const addBudget = async (page: Page, category: string, limit: string) => {
+  const dialog = await openNewBudget(page, 'Add category')
+  await dialog.getByRole('combobox', { name: 'Category' }).click()
+  await page.getByRole('option', { name: category, exact: true }).click()
+  await dialog.getByLabel('Monthly limit').pressSequentially(limit)
+  await dialog.getByRole('button', { name: 'Save' }).click()
+  await expect(dialog).toBeHidden()
+}
+
+test('creates, edits and deletes a budget', async ({ page }) => {
+  await page.goto(`/budgets?period=${shift(2)}`)
+  await expect(page.getByRole('heading', { name: 'No budgets for this period' })).toBeVisible()
+  const dialog = await openNewBudget(page, 'New budget')
+  await dialog.getByRole('button', { name: 'Save' }).click()
+  await expect(dialog.getByText('This field is required.')).toHaveCount(2)
+  await dialog.getByRole('combobox', { name: 'Category' }).click()
+  await page.getByRole('option', { name: 'Sport', exact: true }).click()
+  await dialog.getByLabel('Monthly limit').pressSequentially('250')
+  await dialog.getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByText('Budget created')).toBeVisible()
+  const sport = card(page, 'Sport')
+  await expect(sport).toContainText('of PLN 250.00')
+  await expect(sport).toContainText('On track')
+  await expect(sport).toContainText('PLN 250.00 left')
+
+  await sport.getByRole('button', { name: 'Edit budget Sport' }).click()
+  const edit = page.getByRole('dialog', { name: 'Edit budget' })
+  await expect(edit.getByLabel('Category')).toHaveValue('Sport')
+  const limit = edit.getByLabel('Monthly limit')
+  await limit.fill('')
+  await limit.pressSequentially('300')
+  await edit.getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByText('Budget updated')).toBeVisible()
+  await expect(sport).toContainText('of PLN 300.00')
+
+  await sport.getByRole('button', { name: 'Edit budget Sport' }).click()
+  await edit.getByRole('button', { name: 'Delete' }).click()
+  const confirm = page.getByRole('alertdialog')
+  await expect(confirm).toContainText('Sport')
+  await confirm.getByRole('button', { name: 'Delete' }).click()
+  await expect(page.getByText('Budget deleted')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'No budgets for this period' })).toBeVisible()
+})
+
+test('copies budgets from the previous period into an empty one', async ({ page }) => {
+  await page.goto(`/budgets?period=${shift(1)}`)
+  await page.getByRole('button', { name: `Copy budgets from ${monthName(shift(0))}` }).click()
+  await expect(page.getByText('8 budgets copied')).toBeVisible()
+  await expect(cards(page)).toHaveCount(8)
+  await expect(card(page, 'Mieszkanie')).toContainText('of PLN 2,160.00')
+})
+
+test('does not offer copying when the previous period is empty', async ({ page }) => {
+  await page.goto(`/budgets?period=${shift(2)}`)
+  await expect(page.getByRole('button', { name: 'Create a budget' })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Copy budgets from/ })).toHaveCount(0)
+})
+
+test('the add tile offers only expense categories without a budget', async ({ page }) => {
+  await page.goto('/budgets')
+  const dialog = await openNewBudget(page, 'Add category')
+  await dialog.getByRole('combobox', { name: 'Category' }).click()
+  await expect(page.getByRole('option')).toHaveCount(2)
+  await expect(page.getByRole('option', { name: 'Sport', exact: true })).toBeVisible()
+  await expect(page.getByRole('option', { name: 'Inne', exact: true })).toBeVisible()
+})
+
+test('offers the category manager when every expense category has a budget', async ({ page }) => {
+  await page.goto('/budgets')
+  await addBudget(page, 'Sport', '100')
+  await addBudget(page, 'Inne', '100')
+  await expect(cards(page)).toHaveCount(10)
+  const dialog = await openNewBudget(page, 'Add category')
+  await expect(dialog).toContainText('Every expense category already has a budget')
+  await dialog.getByRole('button', { name: 'Manage categories' }).click()
+  await expect(page.getByRole('dialog', { name: 'Categories' })).toBeVisible()
+})
+
+test('a new expense updates the budget of its category', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'the sidebar button exists on desktop only')
+  await page.goto('/budgets')
+  const gifts = card(page, 'Prezenty')
+  await expect(gifts).toContainText('of PLN 500.00')
+  await page.getByRole('button', { name: 'New transaction' }).click()
+  const dialog = page.getByRole('dialog', { name: 'New transaction' })
+  await dialog.getByLabel('Amount').pressSequentially('600')
+  await dialog.getByRole('combobox', { name: 'Category' }).click()
+  await page.getByRole('option', { name: 'Prezenty', exact: true }).click()
+  await dialog.getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByText('Transaction saved')).toBeVisible()
+  await expect(gifts).toContainText('Over budget')
+  await expect(gifts).toContainText(/Overspent by PLN\s\d/)
+})
