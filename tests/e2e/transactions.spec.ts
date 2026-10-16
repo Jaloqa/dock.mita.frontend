@@ -14,6 +14,7 @@ const showAllTime = async (page: Page) => {
 const addQuickTransaction = async (page: Page) => {
   await page.getByRole('button', { name: 'Add transaction' }).click()
   const dialog = page.getByRole('dialog', { name: 'New transaction' })
+  await expect(dialog.getByRole('button', { name: 'Close', exact: true })).toBeFocused()
   await dialog.getByLabel('Amount').pressSequentially('1')
   await dialog.getByRole('button', { name: 'Save' }).click()
   await expect(page.getByText('Transaction saved')).toBeVisible()
@@ -70,6 +71,7 @@ test('adds a transaction from the header, edits it from its row and deletes it',
   await page.goto('/transactions')
   await page.getByRole('button', { name: 'Add transaction' }).click()
   const dialog = page.getByRole('dialog', { name: 'New transaction' })
+  await expect(dialog.getByRole('button', { name: 'Close', exact: true })).toBeFocused()
   await dialog.getByLabel('Amount').pressSequentially('12.5')
   await dialog.getByLabel('Description').fill('Kiosk Ruch')
   await dialog.getByRole('button', { name: 'Save' }).click()
@@ -81,6 +83,7 @@ test('adds a transaction from the header, edits it from its row and deletes it',
   await row.getByRole('button', { name: 'Kiosk Ruch' }).click()
   const edit = page.getByRole('dialog', { name: 'Edit transaction' })
   await expect(edit.getByLabel('Description')).toHaveValue('Kiosk Ruch')
+  await expect(edit.getByRole('button', { name: 'Close', exact: true })).toBeFocused()
   await edit.getByLabel('Note').fill('Gazeta')
   await edit.getByRole('button', { name: 'Save' }).click()
   await expect(page.getByText('Transaction updated')).toBeVisible()

@@ -76,7 +76,7 @@ test('goals are localized', async ({ page }) => {
 const contributeTo = async (page: Page, name: string) => {
   await card(page, name).getByRole('button', { name: 'Contribute' }).click()
   const dialog = page.getByRole('dialog', { name: `Contribute to ${name}` })
-  await expect(dialog).toBeVisible()
+  await expect(dialog.getByRole('button', { name: 'Close', exact: true })).toBeFocused()
   await expect(dialog.getByLabel('Amount')).toBeEnabled()
   return dialog
 }
@@ -93,6 +93,7 @@ test('creates a goal with a deadline, edits it and deletes it', async ({ page, i
   await expect(cards(page)).toHaveCount(3)
   await page.getByRole('button', { name: 'New goal' }).first().click()
   const dialog = page.getByRole('dialog', { name: 'New goal' })
+  await expect(dialog.getByRole('button', { name: 'Close', exact: true })).toBeFocused()
   await dialog.getByRole('button', { name: 'Save' }).click()
   await expect(dialog.getByText('This field is required.')).toHaveCount(2)
   const name = dialog.getByLabel('Name', { exact: true })
@@ -115,6 +116,7 @@ test('creates a goal with a deadline, edits it and deletes it', async ({ page, i
   const edit = page.getByRole('dialog', { name: 'Edit goal' })
   const editName = edit.getByLabel('Name', { exact: true })
   await expect(editName).toHaveValue('Rower')
+  await expect(edit.getByRole('button', { name: 'Close', exact: true })).toBeFocused()
   await editName.fill('Rower górski')
   const target = edit.getByLabel('Target amount')
   await target.fill('')

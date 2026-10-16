@@ -8,7 +8,7 @@ const card = (page: Page, name: string) =>
 const openDialog = async (page: Page) => {
   await page.getByRole('button', { name: 'New transaction' }).click()
   const dialog = page.getByRole('dialog', { name: 'New transaction' })
-  await expect(dialog).toBeVisible()
+  await expect(dialog.getByRole('button', { name: 'Close', exact: true })).toBeFocused()
   return dialog
 }
 
@@ -37,6 +37,7 @@ test('editing a EUR expense keeps its custom exchange rate', async ({ page }) =>
   await page.goto('/transactions')
   await page.getByRole('button', { name: 'Add transaction' }).click()
   const dialog = page.getByRole('dialog', { name: 'New transaction' })
+  await expect(dialog.getByRole('button', { name: 'Close', exact: true })).toBeFocused()
   await dialog.getByLabel('Amount').pressSequentially('50')
   await dialog.getByRole('combobox', { name: 'Currency' }).click()
   await page.getByRole('option', { name: 'EUR', exact: true }).click()
@@ -59,6 +60,7 @@ test('editing a EUR expense keeps its custom exchange rate', async ({ page }) =>
   const editRate = edit.getByLabel('Exchange rate (EUR → PLN)')
   await expect(editRate).toHaveValue('4.00')
   await expect(edit.getByText('On the account: PLN 200.00')).toBeVisible()
+  await expect(edit.getByRole('button', { name: 'Close', exact: true })).toBeFocused()
   await edit.getByLabel('Note').fill('Stare wydanie')
   await edit.getByRole('button', { name: 'Save' }).click()
   await expect(edit).toBeHidden()

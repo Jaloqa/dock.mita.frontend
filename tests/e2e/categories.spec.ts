@@ -1,10 +1,16 @@
 import { expect, type Page, test } from '@playwright/test'
 
-const openManager = async (page: Page, path = '/settings', button = 'Manage categories', title = 'Categories') => {
+const openManager = async (
+  page: Page,
+  path = '/settings',
+  button = 'Manage categories',
+  title = 'Categories',
+  close = 'Close',
+) => {
   await page.goto(path)
   await page.getByRole('button', { name: button }).click()
   const dialog = page.getByRole('dialog', { name: title })
-  await expect(dialog).toBeVisible()
+  await expect(dialog.getByRole('button', { name: close, exact: true })).toBeFocused()
   return dialog
 }
 
@@ -24,7 +30,7 @@ test('category manager lists expense and income categories of the demo user', as
 })
 
 test('category manager is localized', async ({ page }) => {
-  const dialog = await openManager(page, '/uk/settings', 'Керування категоріями', 'Категорії')
+  const dialog = await openManager(page, '/uk/settings', 'Керування категоріями', 'Категорії', 'Закрити')
   await expect(dialog.getByRole('tab', { name: 'Витрати' })).toHaveAttribute('aria-selected', 'true')
   await expect(dialog.getByRole('tab', { name: 'Доходи' })).toBeVisible()
   await expect(dialog.getByRole('list', { name: 'Витрати' }).getByText('Системна').first()).toBeVisible()
