@@ -13,5 +13,7 @@ test('overview renders in Ukrainian under its prefix', async ({ page }) => {
 
 test('settings show the demo user served by the mock backend', async ({ page }) => {
   await page.goto('/settings')
-  await expect(page.getByTestId('current-user')).toHaveText('Anna Nowak')
+  await expect(
+    page.getByRole('region', { name: 'Profile', exact: true }).getByLabel('Name', { exact: true }),
+  ).toHaveValue('Anna Nowak')
 })
