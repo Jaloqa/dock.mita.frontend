@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'bun:test'
 import {
   groupByDay,
+  orderDayGroups,
   signedAccountAmount,
   signedAmount,
   signedBaseAmount,
 } from '../../../../app/features/transactions/utils/group'
-import type { TransactionDto } from '../../../../app/shared/api/contract'
+import type { TransactionDto, TransactionSort } from '../../../../app/shared/api/contract'
 
 const transaction = (id: string, date: string, kind: TransactionDto['kind'], baseAmount: number): TransactionDto => ({
   id,
@@ -42,5 +43,22 @@ describe('day grouping', () => {
       ['2026-10-16', ['a', 'b', 'd'], -16_840],
       ['2026-10-10', ['c'], 740_000],
     ])
+  })
+
+  it('orders day groups by date, ascending only for the ascending date sort', () => {
+    const items = [
+      transaction('a', '2026-10-10', 'expense', 900),
+      transaction('b', '2026-10-16', 'expense', 500),
+      transaction('c', '2026-10-12', 'expense', 300),
+      transaction('d', '2026-10-10', 'expense', 100),
+    ]
+    const groups = groupByDay(items, (item) => item)
+    const dates = (sort: TransactionSort) => orderDayGroups(groups, sort).map((group) => group.date)
+    expect(dates('-amount')).toEqual(['2026-10-16', '2026-10-12', '2026-10-10'])
+    expect(dates('amount')).toEqual(['2026-10-16', '2026-10-12', '2026-10-10'])
+    expect(dates('-date')).toEqual(['2026-10-16', '2026-10-12', '2026-10-10'])
+    expect(dates('date')).toEqual(['2026-10-10', '2026-10-12', '2026-10-16'])
+    expect(orderDayGroups(groups, '-amount')[2]?.items.map((item) => item.id)).toEqual(['a', 'd'])
+    expect(groups.map((group) => group.date)).toEqual(['2026-10-10', '2026-10-16', '2026-10-12'])
   })
 })
