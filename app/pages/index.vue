@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const monthLabel = useMonthLabel()
 const rangeLabel = useOverviewRangeLabel()
 const range = useOverviewRange()
@@ -10,8 +10,12 @@ const failed = computed(() => isError.value && !overview.value)
 const title = computed(() =>
   overview.value ? rangeLabel(overview.value.from, overview.value.to) : t('navigation.overview'),
 )
+const capitalized = (label: string) => {
+  const first = Array.from(label)[0] ?? ''
+  return first.toLocaleUpperCase(locale.value) + label.slice(first.length)
+}
 const mobileTitle = computed(() =>
-  overview.value ? monthLabel(overview.value.month.period) : t('navigation.overview'),
+  overview.value ? capitalized(monthLabel(overview.value.month.period)) : t('navigation.overview'),
 )
 
 useHead({ title: () => t('navigation.overview') })
@@ -69,5 +73,10 @@ useHead({ title: () => t('navigation.overview') })
       <RecentTransactions :overview="overview" :failed="failed" @retry="refetch()" />
       <OverviewGoals :overview="overview" :failed="failed" @retry="refetch()" />
     </div>
+  </div>
+  <div class="flex flex-col gap-4.5 lg:hidden">
+    <MobileSummary :overview="overview" :failed="failed" @retry="refetch()" />
+    <OverviewBudgets variant="compact" :overview="overview" :failed="failed" @retry="refetch()" />
+    <TodayTransactions :overview="overview" :failed="failed" @retry="refetch()" />
   </div>
 </template>
