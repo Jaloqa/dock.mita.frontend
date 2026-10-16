@@ -597,6 +597,8 @@
     "budgetExists": "Ta kategoria ma już budżet w tym okresie.",
     "nothingToCopy": "Poprzedni okres nie ma budżetów do skopiowania.",
     "deadlinePast": "Wybierz bieżący lub późniejszy miesiąc.",
-    "savingsAccountOnly": "Wybierz konto oszczędnościowe."
+    "savingsAccountOnly": "Wybierz konto oszczędnościowe.",
+    "invalidEmail": "Wpisz poprawny adres e-mail.",
+    "emailTaken": "Ten adres e-mail jest już używany."
   }
 }

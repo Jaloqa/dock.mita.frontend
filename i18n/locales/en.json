@@ -597,6 +597,8 @@
     "budgetExists": "This category already has a budget for this period.",
     "nothingToCopy": "The previous period has no budgets to copy.",
     "deadlinePast": "Choose this month or a later one.",
-    "savingsAccountOnly": "Choose a savings account."
+    "savingsAccountOnly": "Choose a savings account.",
+    "invalidEmail": "Enter a valid email address.",
+    "emailTaken": "This email is already in use."
   }
 }

@@ -5,6 +5,7 @@ import {
   type SettingsDto,
   type ThemePreference,
   themePreferences,
+  type UpdateMeRequest,
   type UserDto,
 } from '../../app/shared/api/contract'
 import { type Currency, currencies } from '../../app/shared/money/money'
@@ -12,6 +13,11 @@ import type { MonthStart } from '../../app/shared/period/period'
 import type { MockDb, SettingsRow } from '../db'
 import { badRequest, notFound } from '../errors'
 import type { MockRouter } from '../router'
+import { collectErrors, isMissing, objectBody } from '../validation'
+
+const PROFILE_NAME_MAX = 40
+const EMAIL_MAX = 254
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const notificationKeys: (keyof NotificationPrefs)[] = ['budgetLimit', 'dailyReminder', 'weeklyReport', 'goals']
 
@@ -51,12 +57,39 @@ function validateSettings(body: unknown): SettingsDto {
   }
 }
 
+const emailTakenBy = (db: MockDb, userId: string, email: string): boolean =>
+  db.state.users.some((user) => user.id !== userId && user.email.toLowerCase() === email.toLowerCase())
+
+function validateProfile(db: MockDb, userId: string, body: unknown): UpdateMeRequest {
+  const { name, email } = objectBody(body)
+  const errors = collectErrors()
+  if (isMissing(name)) errors.add('name', 'validation.required')
+  else if (typeof name !== 'string') errors.add('name', 'validation.invalidValue')
+  else if (name.trim().length > PROFILE_NAME_MAX) errors.add('name', 'validation.nameTooLong')
+  if (isMissing(email)) errors.add('email', 'validation.required')
+  else if (typeof email !== 'string') errors.add('email', 'validation.invalidValue')
+  else {
+    const address = email.trim()
+    if (address.length > EMAIL_MAX || !EMAIL_PATTERN.test(address)) errors.add('email', 'validation.invalidEmail')
+    else if (emailTakenBy(db, userId, address)) errors.add('email', 'validation.emailTaken')
+  }
+  errors.throwIfAny()
+  return { name: (name as string).trim(), email: (email as string).trim() }
+}
+
 export function registerUserHandlers(router: MockRouter) {
   router.on(
     'GET',
     '/v1/me',
     ({ db, userId }): UserDto => db.state.users.find((user) => user.id === userId) ?? notFound(),
   )
+
+  router.on('PUT', '/v1/me', ({ db, userId, body }): UserDto => {
+    const user = db.state.users.find((row) => row.id === userId) ?? notFound()
+    Object.assign(user, validateProfile(db, userId, body))
+    db.save()
+    return user
+  })
 
   router.on('GET', '/v1/settings', ({ db, userId }) => toSettingsDto(findSettings(db, userId)))
 
