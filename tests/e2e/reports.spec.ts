@@ -331,3 +331,35 @@ test('printing from a phone repaints the hidden desktop chart in light colours',
   await expect.poll(() => colorPixels(chart, lightIncome)).toBeGreaterThan(0)
   expect(await colorPixels(chart, darkIncome)).toBe(0)
 })
+
+const amountOf = (text: string | null) => Number((text ?? '').replace(/[^\d.-]/g, ''))
+const currentExpense = async (page: Page) =>
+  amountOf(await table(page).locator('tbody tr').last().locator('td').nth(1).textContent())
+
+test('a transaction added elsewhere updates the report without a reload', async ({ page, isMobile }) => {
+  await page.goto('/reports')
+  await expect(table(page).getByRole('row')).toHaveCount(7)
+  const before = await currentExpense(page)
+  await page.evaluate(() => Reflect.set(window, 'mitaSamePage', true))
+
+  if (isMobile) {
+    await page.getByRole('link', { name: 'New transaction' }).click()
+    await expect(page).toHaveURL('/transactions/new')
+    await expect(page.getByRole('button', { name: /^Account: / })).toBeVisible()
+    const keypad = page.getByRole('group', { name: 'Keypad' })
+    for (const key of ['1', '0', '0']) await keypad.getByRole('button', { name: key, exact: true }).click()
+    await page.getByRole('button', { name: 'Kawiarnie' }).click()
+    await page.getByRole('button', { name: 'Save' }).click()
+    await expect(page).toHaveURL('/reports')
+  } else {
+    await page.getByRole('button', { name: 'New transaction' }).click()
+    const dialog = page.getByRole('dialog', { name: 'New transaction' })
+    await expect(dialog.getByRole('combobox', { name: 'Account' })).toContainText('Konto główne')
+    await dialog.getByLabel('Amount').pressSequentially('100')
+    await dialog.getByRole('button', { name: 'Save' }).click()
+    await expect(dialog).toBeHidden()
+  }
+
+  await expect.poll(() => currentExpense(page)).toBeCloseTo(before + 100, 2)
+  expect(await page.evaluate(() => Reflect.get(window, 'mitaSamePage'))).toBe(true)
+})
