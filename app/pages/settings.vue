@@ -4,6 +4,7 @@ const notify = useNotify()
 const { exporting, exportCsv } = useTransactionExport()
 const categoriesOpen = ref(false)
 const deleteOpen = ref(false)
+const mocks = useRuntimeConfig().public.apiMocks
 
 useHead({ title: () => t('navigation.settings') })
 </script>
@@ -22,6 +23,7 @@ useHead({ title: () => t('navigation.settings') })
       @manage-categories="categoriesOpen = true"
       @delete-account="deleteOpen = true"
     />
+    <DemoSection v-if="mocks" />
   </div>
   <CategoryManagerDialog v-model:visible="categoriesOpen" />
   <DeleteAccountDialog v-if="mocks" v-model:visible="deleteOpen" />
