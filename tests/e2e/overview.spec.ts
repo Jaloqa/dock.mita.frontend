@@ -230,3 +230,45 @@ test('spending donut shows the top categories, their shares and an accessible de
     `vs ${new Date(new Date().getFullYear(), new Date().getMonth() - 1, 15).toLocaleString('en-US', { month: 'long' })}`,
   )
 })
+
+test('quick add validates, records an expense, resets and refreshes the overview', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'desktop layout')
+  await page.goto('/')
+  const panel = page.getByRole('region', { name: 'Quick add' })
+  await expect(panel.getByRole('button', { name: 'Expense', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await panel.getByRole('button', { name: 'Save' }).click()
+  await expect(panel.getByText('This field is required.')).toBeVisible()
+  await expect(panel.getByLabel('Amount')).toBeFocused()
+
+  await panel.getByRole('button', { name: 'Income', exact: true }).click()
+  await expect(panel.getByRole('combobox', { name: 'Category' })).toContainText('Wynagrodzenie')
+  await panel.getByRole('button', { name: 'Expense', exact: true }).click()
+
+  await panel.getByLabel('Amount').pressSequentially('42.5')
+  await panel.getByRole('combobox', { name: 'Category' }).click()
+  await page.getByRole('listbox').getByRole('option', { name: 'Kawiarnie' }).click()
+  await expect(panel.getByRole('combobox', { name: 'Account' })).toContainText('Konto główne')
+  await panel.getByLabel('Note').fill('Flat white')
+  await panel.getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByText('Transaction saved')).toBeVisible()
+  await expect(panel.getByLabel('Amount')).toHaveValue('')
+  await expect(panel.getByLabel('Note')).toHaveValue('')
+  await expect(panel.getByText('This field is required.')).toHaveCount(0)
+
+  const latest = page.getByRole('region', { name: 'Recent transactions' }).getByRole('listitem').first()
+  await expect(latest).toContainText('Kawiarnie')
+  await expect(latest).toContainText('-PLN 42.50')
+  await expect(latest).toContainText('Kawiarnie · today')
+})
+
+test('quick add has its own error and retry, independent of the overview sections', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'desktop layout')
+  await failEveryRequest(page, isMobile)
+  await page.goto('/')
+  const panel = page.getByRole('region', { name: 'Quick add' })
+  await expect(panel.getByRole('alert')).toContainText('Something went wrong')
+  await recover(page)
+  await panel.getByRole('button', { name: 'Try again' }).click()
+  await expect(panel.getByLabel('Amount')).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Recent transactions' }).getByRole('alert')).toBeVisible()
+})
