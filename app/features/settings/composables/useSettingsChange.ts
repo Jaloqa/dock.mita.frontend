@@ -8,7 +8,7 @@ export function useSettingsChange() {
   const { preference } = useColorMode()
   const notify = useNotify()
   const queryClient = useQueryClient()
-  const { settings, isPending, isError, refetch } = useUserSettings()
+  const { settings, isPending, isError, hasData, refetch } = useUserSettings()
   const update = useUpdateSettings()
   const mutating = useIsMutating({ mutationKey: userKeys.settings })
   const saving = computed(() => mutating.value > 0)
@@ -39,5 +39,5 @@ export function useSettingsChange() {
     )
   }
 
-  return { settings, isPending, isError, refetch, draft, saving, change }
+  return { settings, isPending, isError, hasData, refetch, draft, saving, change }
 }

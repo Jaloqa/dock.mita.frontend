@@ -23,6 +23,7 @@ export function useUserSettings() {
     monthStart: computed(() => settings.value.monthStartDay),
     isPending: query.isPending,
     isError: query.isError,
+    hasData: computed(() => query.data.value !== undefined),
     refetch: query.refetch,
   }
 }
