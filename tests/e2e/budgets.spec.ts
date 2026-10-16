@@ -61,7 +61,7 @@ test('budgets are localized', async ({ page }) => {
 const openNewBudget = async (page: Page, trigger: string) => {
   await page.getByRole('button', { name: trigger, exact: true }).click()
   const dialog = page.getByRole('dialog', { name: 'New budget' })
-  await expect(dialog).toBeVisible()
+  await expect(dialog.getByRole('button', { name: 'Close', exact: true })).toBeFocused()
   return dialog
 }
 
@@ -98,6 +98,7 @@ test('creates, edits and deletes a budget', async ({ page }) => {
   await sport.getByRole('button', { name: 'Edit budget Sport' }).click()
   const edit = page.getByRole('dialog', { name: 'Edit budget' })
   await expect(edit.getByLabel('Category')).toHaveValue('Sport')
+  await expect(edit.getByRole('button', { name: 'Close', exact: true })).toBeFocused()
   const limit = edit.getByLabel('Monthly limit')
   await limit.fill('')
   await limit.pressSequentially('300')
@@ -155,6 +156,7 @@ test('a new expense updates the budget of its category', async ({ page, isMobile
   await expect(gifts).toContainText('of PLN 500.00')
   await page.getByRole('button', { name: 'New transaction' }).click()
   const dialog = page.getByRole('dialog', { name: 'New transaction' })
+  await expect(dialog.getByRole('button', { name: 'Close', exact: true })).toBeFocused()
   await dialog.getByLabel('Amount').pressSequentially('600')
   await dialog.getByRole('combobox', { name: 'Category' }).click()
   await page.getByRole('option', { name: 'Prezenty', exact: true }).click()
