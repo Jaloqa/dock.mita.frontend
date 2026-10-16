@@ -5,6 +5,8 @@ export const GOAL_NAME_MAX = 40
 
 export const GOAL_TARGET_MAX = 1_000_000_000
 
+export const GOAL_DEADLINE_MAX_MONTHS = 600
+
 export type GoalForm = { name: string; target: number | null; deadline: Date | null; accountId: string | null }
 
 type Translate = (key: string) => string
