@@ -20,6 +20,7 @@ useHead({ title: () => t('navigation.reports') })
     </template>
   </PageHeader>
   <PageHeader class="lg:hidden!" :eyebrow="covered || t('reports.eyebrow')" :title="t('navigation.reports')" />
+  <ReportRangeSwitch v-model="range" class="self-start lg:hidden!" />
   <ErrorState v-if="failed" @retry="refetch()" />
   <EmptyState
     v-else-if="state === 'noTransactions'"
@@ -44,9 +45,16 @@ useHead({ title: () => t('navigation.reports') })
       <Button :label="t('reports.noData.showYear')" class="min-h-11" @click="range = '12m'" />
     </template>
   </EmptyState>
-  <div v-else class="hidden flex-col gap-6 lg:flex">
-    <ReportStats variant="full" :report="report" />
-    <ReportTrendCard :report="report" :range-label="covered" />
-    <ReportStructure :report="report" />
-  </div>
+  <template v-else>
+    <div class="hidden flex-col gap-6 lg:flex">
+      <ReportStats variant="full" :report="report" />
+      <ReportTrendCard :report="report" :range-label="covered" />
+      <ReportStructure :report="report" />
+    </div>
+    <div class="flex flex-col gap-4 lg:hidden">
+      <ReportStats variant="compact" :report="report" />
+      <ReportTrendCard compact :report="report" :range-label="covered" />
+      <ReportStructure compact :report="report" />
+    </div>
+  </template>
 </template>

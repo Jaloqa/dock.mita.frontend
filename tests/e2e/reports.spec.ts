@@ -94,8 +94,7 @@ test('the desktop report shows the averages, the savings rate and the spending s
   await expect(structure.getByRole('listitem').first()).toContainText(/\d+\.\d%/)
 })
 
-test('the range is kept in the URL and an unknown one falls back to six months', async ({ page, isMobile }) => {
-  test.skip(isMobile, 'mobile layout')
+test('the range is kept in the URL and an unknown one falls back to six months', async ({ page }) => {
   await page.goto('/reports')
   await pressed(page, '3 months').click()
   await expect(page).toHaveURL(/\/reports\?range=3m$/)
@@ -147,7 +146,6 @@ test('a range without data offers the whole year', async ({ page, isMobile }) =>
 })
 
 test('a failed report shows one error and recovers on retry', async ({ page, isMobile }) => {
-  test.skip(isMobile, 'mobile layout')
   await failEveryRequest(page, isMobile)
   await page.goto('/reports')
   await expect(page.getByRole('heading', { level: 1, name: 'Reports' })).toBeVisible()
@@ -191,8 +189,7 @@ const colorPixels = (canvas: Locator, rgba: number[]) =>
     return count
   }, rgba)
 
-test('the chart lists every period of the selected range', async ({ page, isMobile }) => {
-  test.skip(isMobile, 'mobile layout')
+test('the chart lists every period of the selected range', async ({ page }) => {
   await page.goto('/reports')
   await expect(table(page).getByRole('row')).toHaveCount(7)
   await expect(table(page).getByRole('row').last()).toContainText(longMonth(monthAt(0), true))
@@ -225,4 +222,23 @@ test('the chart follows the theme', async ({ page, isMobile }) => {
   await expect.poll(() => colorPixels(chart, darkIncome)).toBeGreaterThan(0)
   await expect.poll(() => colorPixels(chart, darkExpense)).toBeGreaterThan(0)
   await expect.poll(() => colorPixels(chart, lightIncome)).toBe(0)
+})
+
+test('the mobile report shows the range, two cards, the chart and the structure', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'mobile layout')
+  await page.goto('/reports')
+  await expect(page.getByRole('heading', { level: 1, name: 'Reports' })).toBeVisible()
+  await expect(page.getByText(coveredLabel(6), { exact: true })).toBeVisible()
+
+  const stats = page.getByRole('region', { name: 'Key figures' })
+  await expect(stats.getByTestId('report-average-expense')).toContainText(/PLN\s[\d,]+\.\d{2}/)
+  await expect(stats.getByTestId('report-savings-rate')).toContainText('Savings')
+  await expect(stats.getByTestId('report-average-income')).toHaveCount(0)
+
+  await expect(page.getByRole('region', { name: 'By month' }).getByRole('img')).toBeVisible()
+  const structure = page.getByRole('region', { name: `Spending · ${monthName}` })
+  await expect(structure.getByRole('listitem').first()).toContainText(/\d+\.\d%/)
+
+  await pressed(page, '3 months').click()
+  await expect(page.getByText(coveredLabel(3), { exact: true })).toBeVisible()
 })
