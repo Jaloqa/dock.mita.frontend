@@ -8,4 +8,12 @@ describe('invalidation map', () => {
       expect(invalidationMap[change]).toContainEqual(['budgets'])
     }
   })
+
+  it('refreshes goals, linked accounts and transfers after goal changes and contributions', () => {
+    expect(invalidationMap.goals).toEqual([['goals'], ['accounts'], ['overview']])
+    expect(invalidationMap.goalContributions).toEqual([['goals'], ['accounts'], ['transfers'], ['overview']])
+    for (const change of ['settings', 'accounts'] as const) {
+      expect(invalidationMap[change]).toContainEqual(['goals'])
+    }
+  })
 })

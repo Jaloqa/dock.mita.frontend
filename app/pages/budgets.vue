@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { BudgetDto } from '~/shared/api/contract'
 
-const { t, d } = useI18n()
+const { t } = useI18n()
 const notify = useNotify()
 const { period, previousKey, monthStart, page, cards, available, isPending, isError, isEmpty, canCopy, ready, retry } =
   useBudgetsScreen()
@@ -11,16 +11,9 @@ const dialogOpen = ref(false)
 const categoriesOpen = ref(false)
 const editing = ref<BudgetDto>()
 
-const monthOf = (key: string, withYear: boolean) => {
-  const [year, month] = key.split('-').map(Number)
-  return d(new Date(Date.UTC(year ?? 0, (month ?? 1) - 1, 15)), {
-    month: 'long',
-    ...(withYear ? { year: 'numeric' } : {}),
-    timeZone: 'UTC',
-  })
-}
+const monthLabel = useMonthLabel()
 
-const eyebrow = computed(() => (ready.value ? monthOf(period.value, true) : undefined))
+const eyebrow = computed(() => (ready.value ? monthLabel(period.value, { withYear: true }) : undefined))
 const editingName = computed(() => cards.value.find((card) => card.budget.id === editing.value?.id)?.name)
 
 function openCreate() {
@@ -71,7 +64,7 @@ useHead({ title: () => t('navigation.budgets') })
         <Button :label="t('budgets.actions.addFirst')" class="min-h-11" @click="openCreate" />
         <Button
           v-if="canCopy"
-          :label="t('budgets.actions.copy', { month: monthOf(previousKey, false) })"
+          :label="t('budgets.actions.copy', { month: monthLabel(previousKey) })"
           severity="secondary"
           outlined
           class="min-h-11"

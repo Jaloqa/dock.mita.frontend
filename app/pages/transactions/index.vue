@@ -1,5 +1,6 @@
 <script setup lang="ts">
-const { t, d } = useI18n()
+const { t } = useI18n()
+const monthLabel = useMonthLabel()
 const screen = useTransactionsScreen()
 const { filters, sort, rows, total, sum, currency, isPending, isError, emptyState, hasNextPage, isFetchingNextPage } =
   screen
@@ -7,14 +8,9 @@ const dialog = useTransactionDialog()
 const exporter = useTransactionExport()
 const filtersOpen = ref(false)
 
-const monthLabel = (key: string) => {
-  const [year, month] = key.split('-').map(Number)
-  return d(new Date(Date.UTC(year ?? 0, (month ?? 1) - 1, 15)), { month: 'long', year: 'numeric', timeZone: 'UTC' })
-}
-
 const eyebrow = computed(() => {
   const key = screen.periodKey.value
-  return key ? monthLabel(key) : t(`transactions.period.${filters.value.period}`)
+  return key ? monthLabel(key, { withYear: true }) : t(`transactions.period.${filters.value.period}`)
 })
 
 const exportCsv = () => exporter.exportCsv(screen.query.value)
