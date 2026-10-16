@@ -6,6 +6,7 @@ export function useNotify() {
 
   return {
     success: (summary: string) => toast.add({ severity: 'success', summary, life: 3000 }),
+    info: (summary: string) => toast.add({ severity: 'info', summary, life: 3000 }),
     error: (error: unknown) =>
       toast.add({ severity: 'error', summary: t('shared.error.title'), detail: t(errorMessageKey(error)), life: 6000 }),
   }

@@ -65,9 +65,66 @@
     }
   },
   "settings": {
+    "eyebrow": "Konto",
+    "saved": "Ustawienia zapisane",
+    "profile": {
+      "title": "Profil",
+      "name": "Imię",
+      "email": "E-mail",
+      "saved": "Profil zapisany"
+    },
+    "region": {
+      "title": "Waluta i region",
+      "baseCurrency": "Waluta bazowa",
+      "monthStart": "Początek miesiąca finansowego",
+      "monthStartDay": "Dzień {day}",
+      "lastWorkingDay": "Ostatni dzień roboczy"
+    },
+    "notifications": {
+      "title": "Powiadomienia",
+      "budgetLimit": {
+        "title": "Alerty budżetowe",
+        "description": "Gdy wydatki w kategorii osiągną 85% i 100% limitu"
+      },
+      "dailyReminder": {
+        "title": "Przypomnienie o wpisie",
+        "description": "Każdego wieczoru o 21:00, jeśli nie było operacji"
+      },
+      "weeklyReport": {
+        "title": "Raport tygodniowy",
+        "description": "Podsumowanie w każdą niedzielę"
+      },
+      "goals": {
+        "title": "Cele",
+        "description": "Gdy cel zostanie osiągnięty lub zacznie odstawać od planu"
+      }
+    },
     "data": {
       "title": "Dane",
-      "manageCategories": "Zarządzaj kategoriami"
+      "export": "Eksportuj wszystkie operacje (CSV)",
+      "import": "Importuj wyciąg bankowy",
+      "importSoon": "Import wyciągów bankowych będzie dostępny wkrótce",
+      "manageCategories": "Zarządzaj kategoriami",
+      "deleteAccount": "Usuń konto"
+    },
+    "delete": {
+      "title": "Usuń konto",
+      "description": "Wszystkie Twoje konta, operacje, budżety, cele, kategorie i ustawienia zostaną usunięte, a dane demonstracyjne przywrócone. Tego nie można cofnąć.",
+      "confirmLabel": "Wpisz {email}, aby potwierdzić",
+      "confirm": "Usuń konto",
+      "done": "Konto usunięte. Przywrócono dane demonstracyjne."
+    },
+    "demo": {
+      "title": "Demo",
+      "caption": "Ta sekcja istnieje tylko w trybie demonstracyjnym.",
+      "user": "Użytkownik demo",
+      "switched": "Przełączono na: {name}",
+      "reset": "Przywróć dane demonstracyjne",
+      "resetTitle": "Przywrócić dane demonstracyjne?",
+      "resetMessage": "Wszystkie zmiany zostaną utracone, a dane demonstracyjne przywrócone.",
+      "resetDone": "Przywrócono dane demonstracyjne",
+      "simulateErrors": "Symuluj błędy sieci",
+      "simulateErrorsHint": "Około 1 na 5 żądań kończy się błędem"
     }
   },
   "accounts": {

@@ -32,6 +32,7 @@ export function useUpdateSettings() {
   const queryClient = useQueryClient()
 
   return useMutation({
+    mutationKey: userKeys.settings,
     mutationFn: api.updateSettings,
     onSuccess: async (settings) => {
       queryClient.setQueryData(userKeys.settings, settings)

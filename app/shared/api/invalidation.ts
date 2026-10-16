@@ -2,6 +2,7 @@ import type { QueryClient, QueryKey } from '@tanstack/vue-query'
 
 export type DataChange =
   | 'settings'
+  | 'profile'
   | 'demo'
   | 'accounts'
   | 'transfers'
@@ -13,6 +14,7 @@ export type DataChange =
 
 export const invalidationMap: Record<DataChange, readonly QueryKey[]> = {
   settings: [['overview'], ['budgets'], ['reports'], ['transactions'], ['accounts'], ['goals']],
+  profile: [['demo']],
   demo: [[]],
   accounts: [['accounts'], ['transfers'], ['transactions'], ['overview'], ['reports'], ['goals']],
   transfers: [['transfers'], ['accounts'], ['overview']],

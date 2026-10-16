@@ -41,4 +41,8 @@ describe('invalidation map', () => {
     }
     expect(invalidationMap.demo).toEqual([[]])
   })
+
+  it('refreshes only the demo users after a profile change because the response replaces the current user', () => {
+    expect(invalidationMap.profile).toEqual([['demo']])
+  })
 })
