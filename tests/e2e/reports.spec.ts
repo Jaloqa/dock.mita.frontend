@@ -242,3 +242,92 @@ test('the mobile report shows the range, two cards, the chart and the structure'
   await pressed(page, '3 months').click()
   await expect(page.getByText(coveredLabel(3), { exact: true })).toBeVisible()
 })
+
+test('export prints the report and is unavailable without data', async ({ page, isMobile }) => {
+  await page.addInitScript(() => {
+    window.print = () => {
+      Reflect.set(window, 'mitaPrinted', true)
+    }
+  })
+  await page.goto('/reports')
+  const exportButton = page.getByRole('button', { name: 'Export PDF' })
+  await expect(table(page).getByRole('row')).toHaveCount(7)
+  await expect(exportButton).toBeEnabled()
+  await exportButton.click()
+  expect(await page.evaluate(() => Reflect.get(window, 'mitaPrinted'))).toBe(true)
+
+  await startAsNewUser(page, isMobile)
+  await expect(page.getByRole('heading', { name: 'No reports yet' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Export PDF' })).toBeDisabled()
+})
+
+test('export is unavailable while the report failed to load', async ({ page, isMobile }) => {
+  await failEveryRequest(page, isMobile)
+  await page.goto('/reports')
+  await expect(page.getByRole('alert')).toContainText('Something went wrong')
+  await expect(page.getByRole('button', { name: 'Export PDF' })).toBeDisabled()
+})
+
+test('print shows the desktop report in light colours without navigation and controls', async ({ page, isMobile }) => {
+  await page.goto('/reports')
+  await expect(table(page).getByRole('row')).toHaveCount(7)
+  const savings = () => page.getByTestId('report-savings-rate').filter({ visible: true })
+
+  await page.emulateMedia({ media: 'screen', colorScheme: 'dark' })
+  await expect(page.locator('html')).toHaveClass(/dark/)
+  await expect(savings()).toHaveCSS('background-color', 'rgb(27, 29, 35)')
+
+  await page.emulateMedia({ media: 'print', colorScheme: 'dark' })
+  await expect(page.getByRole('navigation', { name: 'Main navigation' })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Export PDF' })).toHaveCount(0)
+  await expect(pressed(page, '6 months')).toHaveCount(0)
+  await expect(page.getByText(`Period covered: ${coveredLabel(6)}`, { exact: true })).toBeVisible()
+  for (const id of ['report-average-income', 'report-average-expense', 'report-savings-rate']) {
+    await expect(page.getByTestId(id).filter({ visible: true })).toHaveCount(1)
+  }
+  await expect(savings()).toContainText('Savings rate')
+  await expect(savings()).toHaveCSS('background-color', 'rgb(255, 255, 255)')
+  await expect(savings()).toHaveCSS('color', 'rgb(21, 23, 28)')
+  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(255, 255, 255)')
+  await expect(page.getByRole('region', { name: `Spending structure · ${monthName}` })).toBeVisible()
+  if (!isMobile) await expect(page.getByRole('img', { name: /^Income and expenses, / })).toBeVisible()
+})
+
+test('the chart switches to light colours for print and back', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'desktop chart')
+  await page.goto('/reports?range=12m')
+  const chart = page.getByRole('img', { name: /^Income and expenses, / })
+  await expect(chart).toBeVisible()
+  const lightIncome = await tokenPixel(page, 'chart-income')
+  const lightExpense = await tokenPixel(page, 'chart-expense')
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await expect(page.locator('html')).toHaveClass(/dark/)
+  const darkIncome = await tokenPixel(page, 'chart-income')
+  await expect.poll(() => colorPixels(chart, darkIncome)).toBeGreaterThan(0)
+  expect(await tokenPixel(page, 'light-chart-income')).toEqual(lightIncome)
+
+  await page.evaluate(() => window.dispatchEvent(new Event('beforeprint')))
+  expect(await colorPixels(chart, lightIncome)).toBeGreaterThan(0)
+  expect(await colorPixels(chart, lightExpense)).toBeGreaterThan(0)
+  expect(await colorPixels(chart, darkIncome)).toBe(0)
+
+  await page.evaluate(() => window.dispatchEvent(new Event('afterprint')))
+  await expect.poll(() => colorPixels(chart, darkIncome)).toBeGreaterThan(0)
+  expect(await colorPixels(chart, lightIncome)).toBe(0)
+})
+
+test('printing from a phone repaints the hidden desktop chart in light colours', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'phone viewport')
+  await page.goto('/reports?range=12m')
+  const chart = page.getByRole('img', { name: /^Income and expenses, / }).first()
+  const lightIncome = await tokenPixel(page, 'chart-income')
+  await page.emulateMedia({ media: 'screen', colorScheme: 'dark' })
+  await expect(page.locator('html')).toHaveClass(/dark/)
+  const darkIncome = await tokenPixel(page, 'chart-income')
+  expect(darkIncome).not.toEqual(lightIncome)
+  await expect.poll(() => colorPixels(chart, darkIncome)).toBeGreaterThan(0)
+  await page.emulateMedia({ media: 'print', colorScheme: 'dark' })
+  await page.evaluate(() => window.dispatchEvent(new Event('beforeprint')))
+  await expect.poll(() => colorPixels(chart, lightIncome)).toBeGreaterThan(0)
+  expect(await colorPixels(chart, darkIncome)).toBe(0)
+})
