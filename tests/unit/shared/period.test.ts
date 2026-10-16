@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'bun:test'
 import {
   addDaysIso,
+  currentPeriodKey,
   daysLeft,
   fromLocalDate,
   isIsoDate,
+  isPeriodKey,
   periodByKey,
   periodFor,
   shiftPeriod,
@@ -78,5 +80,30 @@ describe('period', () => {
     expect(fromLocalDate(new Date(2026, 9, 5, 23, 30))).toBe('2026-10-05')
     const local = toLocalDate('2026-10-05')
     expect([local.getFullYear(), local.getMonth(), local.getDate()]).toEqual([2026, 9, 5])
+  })
+
+  it('accepts period keys between 1970 and 2099 only', () => {
+    expect(['2026-10', '1970-01', '2099-12'].map((value) => isPeriodKey(value))).toEqual([true, true, true])
+    const invalid: unknown[] = [
+      '2026-13',
+      '2026-00',
+      '2026-1',
+      '0026-10',
+      '0000-01',
+      '2100-01',
+      '2026-10-01',
+      '',
+      202610,
+      null,
+      undefined,
+      ['2026-10'],
+    ]
+    expect(invalid.map((value) => isPeriodKey(value))).toEqual(invalid.map(() => false))
+  })
+
+  it('names the current period by the month start', () => {
+    expect(currentPeriodKey(1, '2026-10-05')).toBe('2026-10')
+    expect(currentPeriodKey(10, '2026-10-05')).toBe('2026-09')
+    expect(currentPeriodKey(10, '2026-10-16')).toBe('2026-10')
   })
 })

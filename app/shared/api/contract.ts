@@ -151,3 +151,34 @@ export type TransactionQuery = {
 }
 
 export type TransactionPage = Page<TransactionDto> & { sum: number; currency: Currency }
+
+export type BudgetStatus = 'on_track' | 'almost_spent' | 'over_budget'
+
+export const budgetStatuses: readonly BudgetStatus[] = ['on_track', 'almost_spent', 'over_budget']
+
+export type BudgetDto = {
+  id: string
+  categoryId: string
+  period: string
+  limit: number
+  spent: number
+  remaining: number
+  status: BudgetStatus
+  perDay: number | null
+}
+
+export type BudgetInput = { categoryId: string; period: string; limit: number }
+
+export type BudgetSummary = { planned: number; spent: number; left: number; daysLeft: number }
+
+export type BudgetPage = Page<BudgetDto> & {
+  period: string
+  from: string
+  to: string
+  currency: Currency
+  summary: BudgetSummary
+}
+
+export type BudgetCopyInput = { period: string }
+
+export type BudgetCopyResult = { copied: number }
