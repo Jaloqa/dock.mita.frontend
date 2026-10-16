@@ -1,4 +1,5 @@
 import { type Currency, convertMinor } from '../app/shared/money/money'
+import type { Period } from '../app/shared/period/period'
 import type { MockState, RateRow, TransactionRow } from './db'
 import { rateOn, roundRate } from './rates'
 
@@ -45,3 +46,10 @@ export function baseAmountOf(state: MockState, row: TransactionRow, base: Curren
 
 export const signed = (row: Pick<TransactionRow, 'kind'>, amount: number): number =>
   row.kind === 'income' ? amount : -amount
+
+export const transactionsIn = (
+  state: MockState,
+  userId: string,
+  range: Pick<Period, 'from' | 'to'>,
+): TransactionRow[] =>
+  state.transactions.filter((row) => row.userId === userId && row.date >= range.from && row.date <= range.to)

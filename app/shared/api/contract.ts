@@ -209,3 +209,70 @@ export type GoalSummary = { saved: number; monthly: number; active: number }
 export type GoalPage = Page<GoalDto> & { currency: Currency; summary: GoalSummary }
 
 export type GoalContributionInput = { amount: number; date: string; fromAccountId?: string; rate?: number }
+
+export type OverviewRange = 'week' | 'month' | 'year'
+
+export const overviewRanges: readonly OverviewRange[] = ['week', 'month', 'year']
+
+export const isOverviewRange = (value: unknown): value is OverviewRange =>
+  overviewRanges.includes(value as OverviewRange)
+
+export type OverviewTotal = { amount: number; count: number; change: number | null }
+
+export type SpendingSlice = { categoryId: string | null; name: string | null; amount: number; percent: number }
+
+export type OverviewMonth = {
+  period: string
+  from: string
+  to: string
+  planned: number
+  spent: number
+  left: number
+  daysLeft: number
+  perDay: number | null
+  budgets: number
+}
+
+export type OverviewBudgetDto = {
+  id: string
+  categoryId: string
+  name: string
+  limit: number
+  spent: number
+  remaining: number
+  status: BudgetStatus
+}
+
+export type OverviewTransactionDto = {
+  id: string
+  kind: CategoryKind
+  date: string
+  title: string
+  categoryName: string
+  accountName: string
+  amount: number
+}
+
+export type OverviewGoalDto = Pick<GoalDto, 'id' | 'name' | 'target' | 'saved' | 'percent' | 'status' | 'deadline'>
+
+export type OverviewDto = {
+  range: OverviewRange
+  from: string
+  to: string
+  previousFrom: string
+  previousTo: string
+  currency: Currency
+  balance: { amount: number; accounts: number }
+  income: OverviewTotal
+  expense: OverviewTotal
+  averageExpense: number | null
+  transactionCount: number
+  spending: SpendingSlice[]
+  month: OverviewMonth
+  topBudgets: OverviewBudgetDto[]
+  recent: OverviewTransactionDto[]
+  today: OverviewTransactionDto[]
+  goals: OverviewGoalDto[]
+  goalCount: number
+  hasTransactions: boolean
+}
