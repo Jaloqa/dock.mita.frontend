@@ -57,27 +57,30 @@
   --mita-chart-expense: var(--mita-light-chart-expense);
 }
 
-.dark {
-  --mita-bg: #121317;
-  --mita-surface: #1b1d23;
-  --mita-ink: #eef0f3;
-  --mita-muted: #9da2ad;
-  --mita-border: #2c2f37;
-  --mita-track: #2c2f37;
-  --mita-deep: #3a1e2c;
-  --mita-deep-muted: #e8b9cc;
-  --mita-on-deep: #ffffff;
-  --mita-logo-stroke: #eef0f3;
-  --mita-accent: #e8679a;
-  --mita-on-accent: #16080f;
-  --mita-chart-1: #e8679a;
-  --mita-chart-2: #f08ab0;
-  --mita-chart-3: #c99ae8;
-  --mita-chart-4: #7fc7d9;
-  --mita-chart-5: #5a5f6b;
-  --mita-chart-6: #3e424b;
-  --mita-chart-income: var(--mita-accent);
-  --mita-chart-expense: var(--mita-ink);
+/* Dark tokens are screen-only so a printed or saved PDF is always light, whatever the theme. */
+@media screen {
+  .dark {
+    --mita-bg: #121317;
+    --mita-surface: #1b1d23;
+    --mita-ink: #eef0f3;
+    --mita-muted: #9da2ad;
+    --mita-border: #2c2f37;
+    --mita-track: #2c2f37;
+    --mita-deep: #3a1e2c;
+    --mita-deep-muted: #e8b9cc;
+    --mita-on-deep: #ffffff;
+    --mita-logo-stroke: #eef0f3;
+    --mita-accent: #e8679a;
+    --mita-on-accent: #16080f;
+    --mita-chart-1: #e8679a;
+    --mita-chart-2: #f08ab0;
+    --mita-chart-3: #c99ae8;
+    --mita-chart-4: #7fc7d9;
+    --mita-chart-5: #5a5f6b;
+    --mita-chart-6: #3e424b;
+    --mita-chart-income: var(--mita-accent);
+    --mita-chart-expense: var(--mita-ink);
+  }
 }
 
 @theme inline {
@@ -106,5 +109,21 @@
 @layer base {
   body {
     @apply bg-bg font-sans text-ink antialiased;
+  }
+}
+
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
+@media print {
+  body {
+    background-color: var(--mita-surface);
+  }
+
+  html {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }

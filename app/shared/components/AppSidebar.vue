@@ -15,7 +15,7 @@ const linkClass = (to: string) => [
 <template>
   <nav
     :aria-label="t('navigation.label')"
-    class="sticky top-0 hidden h-dvh w-58 shrink-0 flex-col gap-7 px-5 py-7 lg:flex"
+    class="sticky top-0 hidden h-dvh w-58 shrink-0 flex-col gap-7 px-5 py-7 lg:flex print:hidden!"
   >
     <NuxtLinkLocale to="/" class="px-2 no-underline">
       <AppLogo />

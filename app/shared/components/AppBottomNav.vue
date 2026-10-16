@@ -14,7 +14,7 @@ const linkClass = (to: string) => [
 <template>
   <nav
     :aria-label="t('navigation.label')"
-    class="fixed inset-x-0 bottom-0 z-10 grid grid-cols-5 items-center border-t border-border bg-surface px-3 pt-2 pb-[max(env(safe-area-inset-bottom),12px)] lg:hidden"
+    class="fixed inset-x-0 bottom-0 z-10 grid grid-cols-5 items-center border-t border-border bg-surface px-3 pt-2 pb-[max(env(safe-area-inset-bottom),12px)] lg:hidden print:hidden!"
   >
     <NuxtLinkLocale
       v-for="item in mobileNavigation.start"
