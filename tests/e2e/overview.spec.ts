@@ -272,3 +272,73 @@ test('quick add has its own error and retry, independent of the overview section
   await expect(panel.getByLabel('Amount')).toBeVisible()
   await expect(page.getByRole('region', { name: 'Recent transactions' }).getByRole('alert')).toBeVisible()
 })
+
+test('mobile overview shows the month left, the daily allowance, budgets and today', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'mobile layout')
+  await page.goto('/')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(monthName)
+  await expect(page.getByText('Budget for', { exact: true })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Budgets by period' })).toHaveAttribute('href', '/budgets')
+
+  const balance = page.getByRole('region', { name: 'Left this month' })
+  await expect(balance).toContainText(/PLN\s-?[\d,]+\.\d{2}/)
+  await expect(balance.getByRole('progressbar', { name: 'Share of the monthly budgets spent' })).toBeVisible()
+  await expect(balance).toContainText('Income')
+  await expect(balance).toContainText('Expenses')
+  await expect(page.getByTestId('overview-per-day')).toContainText('You can spend per day')
+
+  const budgets = page.getByRole('region', { name: 'Budgets', exact: true })
+  await expect(budgets.getByRole('progressbar')).toHaveCount(3)
+  await expect(budgets).toContainText(/left|Overspent by/)
+  await expect(budgets.getByRole('link', { name: 'All' })).toHaveAttribute('href', '/budgets')
+
+  const today = page.getByRole('region', { name: 'Today', exact: true })
+  await expect(today).toBeVisible()
+  await page.getByRole('link', { name: 'New transaction' }).click()
+  await expect(page).toHaveURL('/transactions/new')
+  const keypad = page.getByRole('group', { name: 'Keypad' })
+  for (const key of ['4', '2', 'Decimal separator', '5']) {
+    await keypad.getByRole('button', { name: key, exact: true }).click()
+  }
+  await page.getByRole('button', { name: 'Kawiarnie' }).click()
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(page).toHaveURL('/')
+  const added = today.getByRole('listitem').filter({ hasText: '-PLN 42.50' }).first()
+  await expect(added).toContainText('Kawiarnie · Konto główne')
+})
+
+test('mobile sections show their own error and one retry recovers them all', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'mobile layout')
+  const mobileSections = ['Left this month', 'Budgets', 'Today']
+  await failEveryRequest(page, isMobile)
+  await page.goto('/')
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Budgets by period' })).toBeVisible()
+  for (const name of mobileSections) {
+    await expect(page.getByRole('region', { name, exact: true }).getByRole('alert')).toContainText(
+      'Something went wrong',
+    )
+  }
+
+  await recover(page)
+  await page.getByRole('region', { name: 'Today', exact: true }).getByRole('button', { name: 'Try again' }).click()
+  for (const name of mobileSections) {
+    await expect(page.getByRole('region', { name, exact: true }).getByRole('alert')).toHaveCount(0)
+  }
+  await expect(page.getByTestId('overview-per-day')).toContainText('You can spend per day')
+  await expect(page.getByRole('region', { name: 'Budgets', exact: true }).getByRole('progressbar')).toHaveCount(3)
+})
+
+test('a brand-new user on mobile sees the balance and what to add', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'mobile layout')
+  await startAsNewUser(page, isMobile)
+  await expect(page.getByRole('link', { name: 'Add an account' })).toHaveAttribute('href', '/accounts')
+  await expect(page.getByRole('region', { name: 'Total balance', exact: true })).toContainText('PLN 0.00')
+  await expect(page.getByTestId('overview-per-day')).toHaveCount(0)
+  const budgets = page.getByRole('region', { name: 'Budgets', exact: true })
+  await expect(budgets).toContainText('No budgets for this month.')
+  await expect(budgets.getByRole('link', { name: 'Create a budget' })).toHaveAttribute('href', '/budgets')
+  const today = page.getByRole('region', { name: 'Today', exact: true })
+  await expect(today).toContainText('No transactions today.')
+  await expect(today.getByRole('link', { name: 'Add a transaction' })).toHaveAttribute('href', '/transactions/new')
+})
