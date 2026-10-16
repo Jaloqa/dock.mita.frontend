@@ -1,6 +1,7 @@
 import { todayIso } from '../../app/shared/period/period'
 import type { MockState } from '../db'
 import { demoAccounts } from './accounts'
+import { demoBudgets } from './budgets'
 import { demoCategories } from './categories'
 import { seedRates } from './rates'
 import { demoTransactions, withTransactionHistory } from './transactions'
@@ -23,6 +24,6 @@ export const seedState = (today: string = todayIso()): MockState => {
     transfers: demoTransfers(today, designed, rates),
     categories: demoCategories(),
     transactions,
-    budgets: [],
+    budgets: demoBudgets(today, settings),
   }
 }
