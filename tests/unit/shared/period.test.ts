@@ -6,6 +6,7 @@ import {
   fromLocalDate,
   isIsoDate,
   isPeriodKey,
+  monthKeyDate,
   periodByKey,
   periodFor,
   shiftPeriod,
@@ -105,5 +106,10 @@ describe('period', () => {
     expect(currentPeriodKey(1, '2026-10-05')).toBe('2026-10')
     expect(currentPeriodKey(10, '2026-10-05')).toBe('2026-09')
     expect(currentPeriodKey(10, '2026-10-16')).toBe('2026-10')
+  })
+
+  it('dates a month key in the middle of its month', () => {
+    expect(monthKeyDate('2027-06').toISOString()).toBe('2027-06-15T00:00:00.000Z')
+    expect(monthKeyDate('2026-12').toISOString()).toBe('2026-12-15T00:00:00.000Z')
   })
 })

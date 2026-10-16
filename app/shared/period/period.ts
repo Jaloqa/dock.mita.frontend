@@ -82,3 +82,8 @@ const PERIOD_KEY = /^(?:19[7-9]\d|20\d\d)-(?:0[1-9]|1[0-2])$/
 export const isPeriodKey = (value: unknown): value is string => typeof value === 'string' && PERIOD_KEY.test(value)
 
 export const currentPeriodKey = (start: MonthStart, today: string = todayIso()): string => periodFor(today, start).key
+
+export const monthKeyDate = (key: string): Date => {
+  const [year, month] = key.split('-').map(Number)
+  return new Date(Date.UTC(year ?? 0, (month ?? 1) - 1, 15))
+}

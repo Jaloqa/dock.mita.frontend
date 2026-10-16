@@ -4,16 +4,12 @@ import { type MonthStart, periodByKey, shiftPeriod } from '~/shared/period/perio
 const props = defineProps<{ monthStart: MonthStart }>()
 const model = defineModel<string>({ required: true })
 const { t, d } = useI18n()
-
-const label = (key: string) => {
-  const [year, month] = key.split('-').map(Number)
-  return d(new Date(Date.UTC(year ?? 0, (month ?? 1) - 1, 15)), { month: 'long', timeZone: 'UTC' })
-}
+const monthLabel = useMonthLabel()
 
 const options = computed(() =>
   [-1, 0, 1].map((offset) => {
     const key = shiftPeriod(model.value, offset, props.monthStart).key
-    return { value: key, label: label(key) }
+    return { value: key, label: monthLabel(key) }
   }),
 )
 

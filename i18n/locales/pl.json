@@ -40,6 +40,7 @@
       "range": "{from} – {to}"
     },
     "dateInputFormat": "dd.mm.yy",
+    "monthInputFormat": "mm.yy",
     "primevue": {
       "firstDayOfWeek": "1",
       "today": "Dziś",
@@ -364,6 +365,81 @@
       "copied": "Skopiowano {count} budżet | Skopiowano {count} budżety | Skopiowano {count} budżetów"
     }
   },
+  "goals": {
+    "eyebrow": "Oszczędności",
+    "savedCaption": "Odłożono {amount}",
+    "actions": {
+      "add": "Nowy cel",
+      "addFirst": "Utwórz cel",
+      "contribute": "Wpłać",
+      "contributeNamed": "Wpłać na cel {name}",
+      "edit": "Edytuj",
+      "editNamed": "Edytuj {name}",
+      "delete": "Usuń"
+    },
+    "summary": {
+      "label": "Podsumowanie celów",
+      "saved": "Odłożono łącznie",
+      "monthly": "Odkładam miesięcznie",
+      "active": "Aktywne cele"
+    },
+    "list": {
+      "label": "Cele"
+    },
+    "card": {
+      "deadline": "Termin: {month}",
+      "noDeadline": "Bez terminu",
+      "saved": "Odłożono",
+      "target": "Cel",
+      "amounts": "{saved} / {target}",
+      "progress": "{name}: odłożona część celu",
+      "reached": "Osiągnięty"
+    },
+    "hint": {
+      "monthly": "Odkładaj {amount} miesięcznie, aby zdążyć",
+      "noDeadline": "Bez terminu — każda kwota się liczy",
+      "overdue": "Termin minął, brakuje {amount}",
+      "reached": "Cel osiągnięty. Brawo!"
+    },
+    "empty": {
+      "title": "Nie masz jeszcze celów",
+      "description": "Wyznacz kwotę, na którą oszczędzasz, i śledź postępy."
+    },
+    "dialog": {
+      "createTitle": "Nowy cel",
+      "editTitle": "Edycja celu",
+      "name": "Nazwa",
+      "target": "Kwota docelowa",
+      "deadline": "Termin",
+      "deadlineHint": "Miesiąc, do którego chcesz osiągnąć cel. Zostaw puste, jeśli nie ma terminu.",
+      "account": "Konto oszczędnościowe",
+      "accountPlaceholder": "Bez powiązanego konta",
+      "accountHint": "Wpłaty na cel staną się przelewami na to konto."
+    },
+    "contribute": {
+      "title": "Wpłata na cel {name}",
+      "amount": "Kwota",
+      "from": "Z konta",
+      "fromPlaceholder": "Nie wskazano",
+      "date": "Data",
+      "rate": "Kurs wymiany ({from} → {to})",
+      "rateHint": "Ile {to} otrzymasz za 1 {from} w wybranym dniu. Możesz go poprawić.",
+      "receives": "Wpłynie {amount}",
+      "transfer": "Zostanie zapisany przelew z konta {from} na konto {to}.",
+      "noTransfer": "Kwota zwiększy cel; salda kont się nie zmienią.",
+      "linkedUnavailable": "Powiązane konto jest zarchiwizowane. Powiąż inne konto w ustawieniach celu."
+    },
+    "confirm": {
+      "deleteTitle": "Usunąć cel?",
+      "deleteMessage": "Cel „{name}” i historia wpłat zostaną usunięte. Wykonane przelewy pozostaną na kontach."
+    },
+    "toast": {
+      "created": "Cel utworzony",
+      "updated": "Cel zaktualizowany",
+      "deleted": "Cel usunięty",
+      "contributed": "Wpłata zapisana"
+    }
+  },
   "validation": {
     "required": "To pole jest wymagane.",
     "invalidValue": "Ta wartość jest nieprawidłowa.",
@@ -385,6 +461,8 @@
     "categoryKindMismatch": "Wybierz kategorię tego samego typu.",
     "expenseCategoryOnly": "Wybierz kategorię wydatków.",
     "budgetExists": "Ta kategoria ma już budżet w tym okresie.",
-    "nothingToCopy": "Poprzedni okres nie ma budżetów do skopiowania."
+    "nothingToCopy": "Poprzedni okres nie ma budżetów do skopiowania.",
+    "deadlinePast": "Wybierz bieżący lub późniejszy miesiąc.",
+    "savingsAccountOnly": "Wybierz konto oszczędnościowe."
   }
 }

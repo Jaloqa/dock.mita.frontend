@@ -40,6 +40,7 @@
       "range": "{from} – {to}"
     },
     "dateInputFormat": "mm/dd/yy",
+    "monthInputFormat": "mm/yy",
     "primevue": {
       "firstDayOfWeek": "0",
       "today": "Today",
@@ -364,6 +365,81 @@
       "copied": "{count} budget copied | {count} budgets copied"
     }
   },
+  "goals": {
+    "eyebrow": "Savings",
+    "savedCaption": "Saved {amount}",
+    "actions": {
+      "add": "New goal",
+      "addFirst": "Create a goal",
+      "contribute": "Contribute",
+      "contributeNamed": "Contribute to {name}",
+      "edit": "Edit",
+      "editNamed": "Edit {name}",
+      "delete": "Delete"
+    },
+    "summary": {
+      "label": "Goals summary",
+      "saved": "Saved in total",
+      "monthly": "Saving per month",
+      "active": "Active goals"
+    },
+    "list": {
+      "label": "Goals"
+    },
+    "card": {
+      "deadline": "Deadline: {month}",
+      "noDeadline": "No deadline",
+      "saved": "Saved",
+      "target": "Target",
+      "amounts": "{saved} / {target}",
+      "progress": "{name}: share of the target saved",
+      "reached": "Reached"
+    },
+    "hint": {
+      "monthly": "Save {amount} a month to make it on time",
+      "noDeadline": "No deadline — any amount helps",
+      "overdue": "The deadline has passed, {amount} to go",
+      "reached": "Goal reached. Well done!"
+    },
+    "empty": {
+      "title": "No goals yet",
+      "description": "Set a target for something you are saving for and follow your progress."
+    },
+    "dialog": {
+      "createTitle": "New goal",
+      "editTitle": "Edit goal",
+      "name": "Name",
+      "target": "Target amount",
+      "deadline": "Deadline",
+      "deadlineHint": "The month you want to reach the goal by. Leave it empty for no deadline.",
+      "account": "Savings account",
+      "accountPlaceholder": "No linked account",
+      "accountHint": "Contributions become transfers into this account."
+    },
+    "contribute": {
+      "title": "Contribute to {name}",
+      "amount": "Amount",
+      "from": "From account",
+      "fromPlaceholder": "Not specified",
+      "date": "Date",
+      "rate": "Exchange rate ({from} → {to})",
+      "rateHint": "How many {to} you get for 1 {from} on the selected date. You can correct it.",
+      "receives": "Receives {amount}",
+      "transfer": "This creates a transfer from {from} to {to}.",
+      "noTransfer": "The amount is added to the goal; account balances do not change.",
+      "linkedUnavailable": "The linked account is archived. Link another account in the goal settings."
+    },
+    "confirm": {
+      "deleteTitle": "Delete goal?",
+      "deleteMessage": "“{name}” and its contribution history will be deleted. Transfers already made stay on your accounts."
+    },
+    "toast": {
+      "created": "Goal created",
+      "updated": "Goal updated",
+      "deleted": "Goal deleted",
+      "contributed": "Contribution saved"
+    }
+  },
   "validation": {
     "required": "This field is required.",
     "invalidValue": "This value is not valid.",
@@ -385,6 +461,8 @@
     "categoryKindMismatch": "Choose a category of the same type.",
     "expenseCategoryOnly": "Choose an expense category.",
     "budgetExists": "This category already has a budget for this period.",
-    "nothingToCopy": "The previous period has no budgets to copy."
+    "nothingToCopy": "The previous period has no budgets to copy.",
+    "deadlinePast": "Choose this month or a later one.",
+    "savingsAccountOnly": "Choose a savings account."
   }
 }
