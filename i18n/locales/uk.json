@@ -92,7 +92,8 @@
       "card": "•••• {last4}",
       "converted": "≈ {amount}",
       "cash": "Гаманець",
-      "savings": "Накопичувальний рахунок"
+      "savings": "Накопичувальний рахунок",
+      "linkedToGoals": "Прив'язаний до цілей"
     },
     "archivedBadge": "В архіві",
     "list": {

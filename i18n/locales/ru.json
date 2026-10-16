@@ -92,7 +92,8 @@
       "card": "•••• {last4}",
       "converted": "≈ {amount}",
       "cash": "Кошелёк",
-      "savings": "Накопительный счёт"
+      "savings": "Накопительный счёт",
+      "linkedToGoals": "Привязан к целям"
     },
     "archivedBadge": "В архиве",
     "list": {

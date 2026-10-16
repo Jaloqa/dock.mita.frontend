@@ -1,7 +1,13 @@
-import { expect, type Page, test } from '@playwright/test'
+import { expect, type Locator, type Page, test } from '@playwright/test'
 
 const card = (page: Page, name: string) =>
   page.getByRole('article').filter({ has: page.getByRole('heading', { name, exact: true }) })
+
+const choose = async (page: Page, combobox: Locator, option: string) => {
+  await expect(page.getByRole('listbox')).toHaveCount(0)
+  await combobox.click()
+  await page.getByRole('listbox').getByRole('option', { name: option }).click()
+}
 
 test('accounts show balances, total, distribution and transfers', async ({ page }) => {
   await page.goto('/accounts')
@@ -10,6 +16,8 @@ test('accounts show balances, total, distribution and transfers', async ({ page 
   await expect(card(page, 'Konto główne')).toContainText('•••• 4821')
   await expect(card(page, 'Gotówka')).toContainText('PLN 940.00')
   await expect(card(page, 'Oszczędności')).toContainText('PLN 14,000.00')
+  await expect(card(page, 'Oszczędności')).toContainText('Linked to goals')
+  await expect(card(page, 'Gotówka')).toContainText('Cash wallet')
   await expect(card(page, 'Konto EUR')).toContainText('€')
   await expect(card(page, 'Konto EUR')).toContainText('≈ PLN')
   await expect(page.getByTestId('accounts-total')).toHaveText(/^Total PLN\s\d{2},\d{3}\.\d{2}$/)
@@ -90,8 +98,7 @@ test('prefills the exchange rate and keeps a corrected one', async ({ page }) =>
   await page.goto('/accounts')
   await page.getByRole('button', { name: 'Transfer', exact: true }).click()
   const dialog = page.getByRole('dialog', { name: 'Transfer' })
-  await dialog.getByRole('combobox', { name: 'To' }).click()
-  await page.getByRole('option', { name: 'Konto EUR · EUR' }).click()
+  await choose(page, dialog.getByRole('combobox', { name: 'To' }), 'Konto EUR · EUR')
   const rate = dialog.getByLabel('Exchange rate (PLN → EUR)')
   await expect(rate).toHaveValue(/^0\.2\d+$/)
   await expect(dialog.getByText('How many EUR you get for 1 PLN on the selected date.')).toBeVisible()
@@ -102,13 +109,11 @@ test('prefills the exchange rate and keeps a corrected one', async ({ page }) =>
   await expect(dialog.getByText('Receives €250.00')).toBeVisible()
 
   const from = dialog.getByRole('combobox', { name: 'From' })
-  await from.click()
-  await page.getByRole('option', { name: 'Gotówka · PLN' }).click()
+  await choose(page, from, 'Gotówka · PLN')
   await expect(from).toContainText('Gotówka · PLN')
   await expect(rate).toHaveValue('0.25')
   await expect(dialog.getByText('Receives €250.00')).toBeVisible()
-  await from.click()
-  await page.getByRole('option', { name: 'Konto główne · PLN' }).click()
+  await choose(page, from, 'Konto główne · PLN')
   await expect(rate).toHaveValue('0.25')
 
   await dialog.getByRole('button', { name: 'Save' }).click()

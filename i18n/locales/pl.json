@@ -92,7 +92,8 @@
       "card": "•••• {last4}",
       "converted": "≈ {amount}",
       "cash": "Portfel",
-      "savings": "Konto oszczędnościowe"
+      "savings": "Konto oszczędnościowe",
+      "linkedToGoals": "Powiązane z celami"
     },
     "archivedBadge": "Zarchiwizowane",
     "list": {

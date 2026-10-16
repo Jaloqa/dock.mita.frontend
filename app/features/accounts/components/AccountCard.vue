@@ -14,6 +14,9 @@ const meta = computed(() => {
   if (props.account.type === 'card' && props.account.cardLast4) {
     parts.push(t('accounts.meta.card', { last4: props.account.cardLast4 }))
   }
+  if (props.account.type === 'savings' && props.account.linkedGoals > 0) {
+    parts.push(t('accounts.meta.linkedToGoals'))
+  }
   if (props.account.currency !== props.baseCurrency && props.baseAmount !== undefined) {
     parts.push(t('accounts.meta.converted', { amount: format(props.baseAmount, props.baseCurrency) }))
   }
