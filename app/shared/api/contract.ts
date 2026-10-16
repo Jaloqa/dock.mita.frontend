@@ -18,6 +18,8 @@ export type NotificationPrefs = {
 
 export type UserDto = { id: string; name: string; email: string; createdAt: string }
 
+export type UpdateMeRequest = { name: string; email: string }
+
 export type SettingsDto = {
   baseCurrency: Currency
   locale: Locale
