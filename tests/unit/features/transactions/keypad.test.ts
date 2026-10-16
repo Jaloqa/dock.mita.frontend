@@ -41,4 +41,9 @@ describe('keypad', () => {
     expect(formatEntry('86.4', 'pl', 'PLN').replace(/\s/g, ' ')).toBe('86,4 zł')
     expect(formatEntry('', 'en', 'EUR')).toBe('€0')
   })
+
+  it('shows the entry without a currency code while the currency is unknown', () => {
+    expect(formatEntry('42.5', 'en', undefined)).toBe('42.5')
+    expect(formatEntry('1234.5', 'pl', undefined)).toBe('1234,5')
+  })
 })
