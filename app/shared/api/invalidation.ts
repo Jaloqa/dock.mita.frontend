@@ -1,6 +1,6 @@
 import type { QueryClient, QueryKey } from '@tanstack/vue-query'
 
-export type DataChange = 'settings' | 'demo' | 'accounts' | 'transfers' | 'categories' | 'transactions'
+export type DataChange = 'settings' | 'demo' | 'accounts' | 'transfers' | 'categories' | 'transactions' | 'budgets'
 
 export const invalidationMap: Record<DataChange, readonly QueryKey[]> = {
   settings: [['overview'], ['budgets'], ['reports'], ['transactions'], ['accounts']],
@@ -9,6 +9,7 @@ export const invalidationMap: Record<DataChange, readonly QueryKey[]> = {
   transfers: [['transfers'], ['accounts'], ['overview']],
   categories: [['categories'], ['transactions'], ['budgets'], ['overview'], ['reports']],
   transactions: [['transactions'], ['accounts'], ['categories'], ['budgets'], ['overview'], ['reports']],
+  budgets: [['budgets'], ['overview']],
 }
 
 export async function invalidateAfter(queryClient: QueryClient, change: DataChange): Promise<void> {

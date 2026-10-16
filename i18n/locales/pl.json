@@ -175,7 +175,7 @@
     },
     "confirm": {
       "deleteTitle": "Usunąć kategorię?",
-      "deleteMessage": "Kategoria „{name}” zostanie usunięta. Jej transakcje zostaną przeniesione do „{other}”.",
+      "deleteMessage": "Kategoria „{name}” zostanie usunięta. Jej operacje i budżety zostaną przeniesione do „{other}”.",
       "deleteUnusedMessage": "Kategoria „{name}” zostanie trwale usunięta."
     },
     "toast": {
@@ -307,6 +307,63 @@
       "note": "Notatka"
     }
   },
+  "budgets": {
+    "actions": {
+      "add": "Nowy budżet",
+      "addFirst": "Utwórz budżet",
+      "addCategory": "Dodaj kategorię",
+      "edit": "Edytuj budżet {name}",
+      "delete": "Usuń",
+      "copy": "Skopiuj budżety z poprzedniego okresu ({month})",
+      "manageCategories": "Zarządzaj kategoriami"
+    },
+    "summary": {
+      "label": "Podsumowanie okresu",
+      "planned": "Zaplanowano",
+      "spent": "Wydano",
+      "left": "Zostało",
+      "daysLeft": "Do końca okresu",
+      "days": "{count} dzień | {count} dni | {count} dni",
+      "progress": "Wydana część planu"
+    },
+    "list": {
+      "label": "Kategorie budżetu"
+    },
+    "status": {
+      "onTrack": "W normie",
+      "almostSpent": "Prawie wyczerpany",
+      "overBudget": "Przekroczony"
+    },
+    "card": {
+      "of": "z {amount}",
+      "left": "Zostało {amount}",
+      "overspent": "Przekroczono o {amount}",
+      "perDay": "≈ {amount} dziennie",
+      "progress": "{name}: wydana część limitu"
+    },
+    "empty": {
+      "title": "Brak budżetów w tym okresie",
+      "description": "Ustaw miesięczny limit dla kategorii, aby kontrolować wydatki."
+    },
+    "dialog": {
+      "createTitle": "Nowy budżet",
+      "editTitle": "Edycja budżetu",
+      "category": "Kategoria",
+      "categoryPlaceholder": "Wybierz kategorię",
+      "limit": "Limit miesięczny",
+      "noCategories": "Każda kategoria wydatków ma już budżet w tym okresie. Dodaj kategorię, aby zaplanować więcej."
+    },
+    "confirm": {
+      "deleteTitle": "Usunąć budżet?",
+      "deleteMessage": "Budżet kategorii {name} zostanie usunięty. Transakcje pozostaną bez zmian."
+    },
+    "toast": {
+      "created": "Budżet utworzony",
+      "updated": "Budżet zaktualizowany",
+      "deleted": "Budżet usunięty",
+      "copied": "Skopiowano {count} budżet | Skopiowano {count} budżety | Skopiowano {count} budżetów"
+    }
+  },
   "validation": {
     "required": "To pole jest wymagane.",
     "invalidValue": "Ta wartość jest nieprawidłowa.",
@@ -325,6 +382,9 @@
     "systemCategory": "Kategorii systemowych nie można usunąć.",
     "titleTooLong": "Użyj najwyżej 100 znaków.",
     "unknownCategory": "Ta kategoria jest niedostępna.",
-    "categoryKindMismatch": "Wybierz kategorię tego samego typu."
+    "categoryKindMismatch": "Wybierz kategorię tego samego typu.",
+    "expenseCategoryOnly": "Wybierz kategorię wydatków.",
+    "budgetExists": "Ta kategoria ma już budżet w tym okresie.",
+    "nothingToCopy": "Poprzedni okres nie ma budżetów do skopiowania."
   }
 }
