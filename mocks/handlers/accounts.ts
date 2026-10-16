@@ -2,6 +2,7 @@ import { type AccountDto, type AccountType, accountTypes } from '../../app/share
 import type { Currency } from '../../app/shared/money/money'
 import type { AccountRow, MockDb } from '../db'
 import { badRequest, notFound } from '../errors'
+import { linkedGoalCounts, unlinkAccount } from '../goals'
 import { newId } from '../ids'
 import { accountBalances, accountsInUse } from '../ledger'
 import { paginate } from '../paginate'
@@ -12,7 +13,7 @@ export const ACCOUNT_NAME_MAX = 40
 const MAX_AMOUNT = 100_000_000_000
 
 type AccountFields = Pick<AccountRow, 'name' | 'type' | 'currency' | 'openingBalance' | 'cardLast4' | 'archived'>
-type Usage = { balances: Map<string, number>; inUse: Set<string> }
+type Usage = { balances: Map<string, number>; inUse: Set<string>; linked: Map<string, number> }
 
 const isAccountType = (value: unknown): value is AccountType => accountTypes.includes(value as AccountType)
 
@@ -50,12 +51,14 @@ function validateAccount(body: unknown, existing?: { row: AccountRow; inUse: boo
 const usageOf = (db: MockDb, userId: string): Usage => ({
   balances: accountBalances(db.state, userId),
   inUse: accountsInUse(db.state, userId),
+  linked: linkedGoalCounts(db.state, userId),
 })
 
 const toDto = ({ userId: _userId, createdAt: _createdAt, ...row }: AccountRow, usage: Usage): AccountDto => ({
   ...row,
   balance: usage.balances.get(row.id) ?? row.openingBalance,
   inUse: usage.inUse.has(row.id),
+  linkedGoals: usage.linked.get(row.id) ?? 0,
 })
 
 const ownAccount = (db: MockDb, userId: string, id: string | undefined): AccountRow =>
@@ -91,6 +94,7 @@ export function registerAccountHandlers(router: MockRouter) {
     const row = ownAccount(db, userId, params.id)
     if (accountsInUse(db.state, userId).has(row.id)) badRequest({ id: ['validation.accountInUse'] })
     db.state.accounts = db.state.accounts.filter((account) => account.id !== row.id)
+    unlinkAccount(db.state, userId, row.id)
     db.save()
   })
 }

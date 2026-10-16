@@ -48,6 +48,7 @@ export type AccountDto = {
   cardLast4: string | null
   archived: boolean
   inUse: boolean
+  linkedGoals: number
 }
 
 export type AccountInput = {
@@ -182,3 +183,29 @@ export type BudgetPage = Page<BudgetDto> & {
 export type BudgetCopyInput = { period: string }
 
 export type BudgetCopyResult = { copied: number }
+
+export type GoalStatus = 'active' | 'reached' | 'overdue'
+
+export const goalStatuses: readonly GoalStatus[] = ['active', 'reached', 'overdue']
+
+export type GoalDto = {
+  id: string
+  name: string
+  target: number
+  saved: number
+  remaining: number
+  percent: number
+  monthly: number | null
+  status: GoalStatus
+  deadline: string | null
+  accountId: string | null
+  currency: Currency
+}
+
+export type GoalInput = { name: string; target: number; deadline: string | null; accountId: string | null }
+
+export type GoalSummary = { saved: number; monthly: number; active: number }
+
+export type GoalPage = Page<GoalDto> & { currency: Currency; summary: GoalSummary }
+
+export type GoalContributionInput = { amount: number; date: string; fromAccountId?: string; rate?: number }

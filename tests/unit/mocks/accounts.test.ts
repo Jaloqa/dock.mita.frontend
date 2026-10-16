@@ -43,6 +43,7 @@ describe('accounts', () => {
       'currency',
       'id',
       'inUse',
+      'linkedGoals',
       'name',
       'openingBalance',
       'type',

@@ -15,7 +15,7 @@ export type SettingsRow = SettingsDto & { userId: string }
 
 export type RateRow = RateDto
 
-export type AccountRow = Omit<AccountDto, 'balance' | 'inUse'> & { userId: string; createdAt: string }
+export type AccountRow = Omit<AccountDto, 'balance' | 'inUse' | 'linkedGoals'> & { userId: string; createdAt: string }
 
 export type TransferRow = TransferDto & { userId: string }
 
@@ -32,6 +32,31 @@ export type BudgetRow = {
   currency: Currency
 }
 
+export type GoalRow = {
+  id: string
+  userId: string
+  name: string
+  target: number
+  saved: number
+  currency: Currency
+  deadline: string | null
+  accountId: string | null
+  createdAt: string
+}
+
+export type GoalContributionRow = {
+  id: string
+  userId: string
+  goalId: string
+  date: string
+  amount: number
+  currency: Currency
+  fromAccountId: string | null
+  transferId: string | null
+  baseAmount: number
+  baseCurrency: Currency
+}
+
 export type MockState = {
   version: 1
   activeUserId: string
@@ -44,6 +69,8 @@ export type MockState = {
   categories: CategoryRow[]
   transactions: TransactionRow[]
   budgets: BudgetRow[]
+  goals: GoalRow[]
+  goalContributions: GoalContributionRow[]
 }
 
 export type KeyValueStorage = Pick<Storage, 'getItem' | 'setItem'>
