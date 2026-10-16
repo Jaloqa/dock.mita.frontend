@@ -1,4 +1,4 @@
-import { expect, type Page, test } from '@playwright/test'
+import { expect, type Locator, type Page, test } from '@playwright/test'
 
 const utcDay = (offset: number) => {
   const now = new Date()
@@ -21,7 +21,7 @@ const monthName = new Date().toLocaleString('en-US', { month: 'long' })
 const pressed = (page: Page, name: string) => page.getByRole('button', { name, exact: true })
 
 const MOCK_DB = 'mita-mock-db-v1'
-const desktopSections = [/^Summary$/, /^Budgets/, /^Recent transactions$/, /^Savings goals$/]
+const desktopSections = [/^Summary$/, /^Spending by category$/, /^Budgets/, /^Recent transactions$/, /^Savings goals$/]
 
 const persistMockDb = async (page: Page, isMobile: boolean) => {
   if (isMobile) {
@@ -172,4 +172,61 @@ test('a brand-new user sees what to set up first', async ({ page, isMobile }) =>
   const goals = page.getByRole('region', { name: 'Savings goals' })
   await expect(goals).toContainText('No goals yet.')
   await expect(goals.getByRole('link', { name: 'Create a goal' })).toHaveAttribute('href', '/goals')
+  const spending = page.getByRole('region', { name: 'Spending by category' })
+  await expect(spending).toContainText('No transactions yet')
+  await expect(spending.locator('dl')).toHaveCount(0)
+  await spending.getByRole('button', { name: 'Add your first transaction' }).click()
+  await expect(page.getByRole('dialog', { name: 'New transaction' })).toBeVisible()
+})
+
+const ringPixel = (canvas: Locator) =>
+  canvas.evaluate((element: HTMLCanvasElement) => {
+    const scale = element.width / element.clientWidth
+    const radius = (element.clientWidth / 2) * 0.85
+    const angle = (20 * Math.PI) / 180
+    const x = Math.round((element.clientWidth / 2 + radius * Math.sin(angle)) * scale)
+    const y = Math.round((element.clientHeight / 2 - radius * Math.cos(angle)) * scale)
+    return Array.from(element.getContext('2d')?.getImageData(x, y, 1, 1).data ?? [])
+  })
+
+const tokenPixel = (page: Page, token: string) =>
+  page.evaluate((name) => {
+    const context = document.createElement('canvas').getContext('2d')
+    if (!context) return []
+    context.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+    context.fillRect(0, 0, 1, 1)
+    return Array.from(context.getImageData(0, 0, 1, 1).data)
+  }, `--mita-${token}`)
+
+test('spending donut shows the top categories, their shares and an accessible description', async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, 'desktop layout')
+  await page.goto('/?range=year')
+  const spending = page.getByRole('region', { name: 'Spending by category' })
+  const donut = spending.getByRole('img', { name: /^Spending by category: .+ \d+\.\d%/ })
+  await expect(donut).toBeVisible()
+  const table = spending.getByRole('table', { name: 'Spending by category' })
+  await expect(table.getByRole('row')).toHaveCount(7)
+  await expect(table.getByRole('row').last()).toContainText('Other')
+  const shares = await table.locator('tbody td:last-child').allTextContents()
+  expect(shares.reduce((sum, text) => sum + Number(text.replace('%', '')), 0)).toBeCloseTo(100, 5)
+  const footer = spending.locator('dl')
+  await expect(footer).toContainText('vs previous 12 months')
+  await expect(footer).toContainText('—')
+  await expect(footer).toContainText('Average expense')
+  await expect(spending.getByRole('link', { name: 'Details' })).toHaveAttribute('href', '/reports')
+
+  const lightFirst = await tokenPixel(page, 'chart-1')
+  await expect.poll(() => ringPixel(donut)).toEqual(lightFirst)
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await expect(page.locator('html')).toHaveClass(/dark/)
+  const darkFirst = await tokenPixel(page, 'chart-1')
+  expect(darkFirst).not.toEqual(lightFirst)
+  await expect.poll(() => ringPixel(donut)).toEqual(darkFirst)
+  await pressed(page, 'Month').click()
+  await expect(spending).toContainText(
+    `vs ${new Date(new Date().getFullYear(), new Date().getMonth() - 1, 15).toLocaleString('en-US', { month: 'long' })}`,
+  )
 })

@@ -47,7 +47,7 @@ export default defineNuxtConfig({
 
   primevue: {
     importTheme: { from: '~/theme/mita-preset.ts' },
-    components: { exclude: ['Form', 'FormField', 'Chart', 'Editor'] },
+    components: { exclude: ['Form', 'FormField', 'Editor'] },
   },
 
   i18n: {
