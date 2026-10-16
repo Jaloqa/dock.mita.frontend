@@ -175,7 +175,7 @@
     },
     "confirm": {
       "deleteTitle": "Delete category?",
-      "deleteMessage": "“{name}” will be deleted. Any transactions in it will move to “{other}”.",
+      "deleteMessage": "“{name}” will be deleted. Its transactions and budgets will move to “{other}”.",
       "deleteUnusedMessage": "“{name}” will be deleted permanently."
     },
     "toast": {
@@ -307,6 +307,63 @@
       "note": "Note"
     }
   },
+  "budgets": {
+    "actions": {
+      "add": "New budget",
+      "addFirst": "Create a budget",
+      "addCategory": "Add category",
+      "edit": "Edit budget {name}",
+      "delete": "Delete",
+      "copy": "Copy budgets from {month}",
+      "manageCategories": "Manage categories"
+    },
+    "summary": {
+      "label": "Period summary",
+      "planned": "Planned",
+      "spent": "Spent",
+      "left": "Left",
+      "daysLeft": "Days left",
+      "days": "{count} day | {count} days",
+      "progress": "Share of the plan spent"
+    },
+    "list": {
+      "label": "Budget categories"
+    },
+    "status": {
+      "onTrack": "On track",
+      "almostSpent": "Almost spent",
+      "overBudget": "Over budget"
+    },
+    "card": {
+      "of": "of {amount}",
+      "left": "Left {amount}",
+      "overspent": "Overspent {amount}",
+      "perDay": "≈ {amount} per day",
+      "progress": "{name}: share of the limit spent"
+    },
+    "empty": {
+      "title": "No budgets for this period",
+      "description": "Set a monthly limit for a category to keep spending in check."
+    },
+    "dialog": {
+      "createTitle": "New budget",
+      "editTitle": "Edit budget",
+      "category": "Category",
+      "categoryPlaceholder": "Choose a category",
+      "limit": "Monthly limit",
+      "noCategories": "Every expense category already has a budget for this period. Add a category to plan more."
+    },
+    "confirm": {
+      "deleteTitle": "Delete budget?",
+      "deleteMessage": "The budget for {name} will be deleted. Its transactions stay as they are."
+    },
+    "toast": {
+      "created": "Budget created",
+      "updated": "Budget updated",
+      "deleted": "Budget deleted",
+      "copied": "{count} budget copied | {count} budgets copied"
+    }
+  },
   "validation": {
     "required": "This field is required.",
     "invalidValue": "This value is not valid.",
@@ -325,6 +382,9 @@
     "systemCategory": "System categories cannot be deleted.",
     "titleTooLong": "Use at most 100 characters.",
     "unknownCategory": "This category is not available.",
-    "categoryKindMismatch": "Choose a category of the same type."
+    "categoryKindMismatch": "Choose a category of the same type.",
+    "expenseCategoryOnly": "Choose an expense category.",
+    "budgetExists": "This category already has a budget for this period.",
+    "nothingToCopy": "The previous period has no budgets to copy."
   }
 }
