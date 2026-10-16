@@ -54,6 +54,15 @@ useHead({ title: () => t('navigation.overview') })
   </EmptyState>
   <div class="hidden flex-col gap-6 lg:flex">
     <OverviewStats :overview="overview" :failed="failed" @retry="refetch()" />
+    <div class="flex flex-wrap items-stretch gap-4">
+      <SpendingCard
+        class="flex-[2_1_520px]"
+        :overview="overview"
+        :failed="failed"
+        @retry="refetch()"
+        @add="dialog.openCreate()"
+      />
+    </div>
     <div class="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] items-stretch gap-4">
       <OverviewBudgets variant="full" :overview="overview" :failed="failed" @retry="refetch()" />
       <RecentTransactions :overview="overview" :failed="failed" @retry="refetch()" />
