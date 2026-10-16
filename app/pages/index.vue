@@ -62,6 +62,7 @@ useHead({ title: () => t('navigation.overview') })
         @retry="refetch()"
         @add="dialog.openCreate()"
       />
+      <QuickAddPanel class="flex-[1_1_300px]" />
     </div>
     <div class="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] items-stretch gap-4">
       <OverviewBudgets variant="full" :overview="overview" :failed="failed" @retry="refetch()" />
