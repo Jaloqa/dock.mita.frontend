@@ -535,6 +535,46 @@
       "add": "Dodaj operację"
     }
   },
+  "reports": {
+    "eyebrow": "Analityka",
+    "range": { "label": "Zakres", "months": "{count} miesiąc | {count} miesiące | {count} miesięcy", "year": "Rok" },
+    "export": "Eksport PDF",
+    "printRange": "Okres raportu: {range}",
+    "stats": {
+      "label": "Wskaźniki",
+      "averageIncome": "Średni przychód",
+      "averageExpense": "Średni wydatek",
+      "savingsRate": "Stopa oszczędności",
+      "savings": "Oszczędności",
+      "none": "—"
+    },
+    "chart": {
+      "title": "Przychody i wydatki według miesięcy",
+      "short": "Według miesięcy",
+      "income": "Przychody",
+      "expense": "Wydatki",
+      "incomeShort": "Przychód",
+      "expenseShort": "Wydatek",
+      "month": "Miesiąc",
+      "label": "Przychody i wydatki, {range}: przychody łącznie {income}, wydatki łącznie {expense}"
+    },
+    "structure": {
+      "plain": "Struktura wydatków",
+      "title": "Struktura wydatków · {month}",
+      "short": "Wydatki · {month}",
+      "empty": "Brak wydatków w okresie: {month}."
+    },
+    "empty": {
+      "title": "Brak raportów",
+      "description": "Raporty pojawią się, gdy zapiszesz przychody lub wydatki.",
+      "action": "Dodaj operację"
+    },
+    "noData": {
+      "title": "Brak danych w tym zakresie",
+      "description": "W okresie {range} nic nie zapisano.",
+      "showYear": "Pokaż rok"
+    }
+  },
   "validation": {
     "required": "To pole jest wymagane.",
     "invalidValue": "Ta wartość jest nieprawidłowa.",

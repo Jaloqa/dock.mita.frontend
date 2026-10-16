@@ -535,6 +535,46 @@
       "add": "Add a transaction"
     }
   },
+  "reports": {
+    "eyebrow": "Analytics",
+    "range": { "label": "Range", "months": "{count} month | {count} months", "year": "Year" },
+    "export": "Export PDF",
+    "printRange": "Period covered: {range}",
+    "stats": {
+      "label": "Key figures",
+      "averageIncome": "Average income",
+      "averageExpense": "Average expense",
+      "savingsRate": "Savings rate",
+      "savings": "Savings",
+      "none": "—"
+    },
+    "chart": {
+      "title": "Income and expenses by month",
+      "short": "By month",
+      "income": "Income",
+      "expense": "Expenses",
+      "incomeShort": "Income",
+      "expenseShort": "Expense",
+      "month": "Month",
+      "label": "Income and expenses, {range}: total income {income}, total expenses {expense}"
+    },
+    "structure": {
+      "plain": "Spending structure",
+      "title": "Spending structure · {month}",
+      "short": "Spending · {month}",
+      "empty": "No expenses in {month}."
+    },
+    "empty": {
+      "title": "No reports yet",
+      "description": "Reports appear once you record income or expenses.",
+      "action": "Add a transaction"
+    },
+    "noData": {
+      "title": "No data for this range",
+      "description": "Nothing was recorded in {range}.",
+      "showYear": "Show the year"
+    }
+  },
   "validation": {
     "required": "This field is required.",
     "invalidValue": "This value is not valid.",
