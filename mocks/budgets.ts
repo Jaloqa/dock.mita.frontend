@@ -4,7 +4,7 @@ import { daysLeft, type MonthStart, type Period, periodByKey } from '../app/shar
 import type { CategoryReference } from './categories'
 import type { BudgetRow, MockState } from './db'
 import { rateOn } from './rates'
-import { baseAmountOf, baseCurrencyOf } from './transactions'
+import { baseAmountOf, baseCurrencyOf, transactionsIn } from './transactions'
 
 export function budgetStatus(spent: number, limit: number): BudgetStatus {
   if (spent > limit) return 'over_budget'
@@ -21,10 +21,15 @@ export const monthStartOf = (state: MockState, userId: string): MonthStart =>
 export const limitIn = (state: MockState, row: BudgetRow, base: Currency, period: Period): number =>
   row.currency === base ? row.limit : convertMinor(row.limit, rateOn(state.rates, period.from, row.currency, base))
 
-export function spentByCategory(state: MockState, userId: string, base: Currency, period: Period): Map<string, number> {
+export function spentByCategory(
+  state: MockState,
+  userId: string,
+  base: Currency,
+  range: Pick<Period, 'from' | 'to'>,
+): Map<string, number> {
   const spent = new Map<string, number>()
-  for (const row of state.transactions) {
-    if (row.userId !== userId || row.kind !== 'expense' || row.date < period.from || row.date > period.to) continue
+  for (const row of transactionsIn(state, userId, range)) {
+    if (row.kind !== 'expense') continue
     spent.set(row.categoryId, (spent.get(row.categoryId) ?? 0) + baseAmountOf(state, row, base))
   }
   return spent
