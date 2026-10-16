@@ -27,10 +27,10 @@ export const decimalSeparator = (locale: string): string =>
 
 const NUMBER_PARTS = new Set(['integer', 'group', 'decimal', 'fraction'])
 
-export function formatEntry(entry: string, locale: string, currency: Currency): string {
+export function formatEntry(entry: string, locale: string, currency: Currency | undefined): string {
   const digits = (entry || '0').replace('.', decimalSeparator(locale))
   let placed = false
-  return new Intl.NumberFormat(locale, { style: 'currency', currency })
+  return new Intl.NumberFormat(locale, currency ? { style: 'currency', currency } : undefined)
     .formatToParts(1)
     .map((part) => {
       if (!NUMBER_PARTS.has(part.type)) return part.value
