@@ -1,7 +1,7 @@
 import { expect, type Locator, type Page, test } from '@playwright/test'
 
-const sectionTitles = ['Profile', 'Currency and region', 'Notifications', 'Data']
-const ukSectionTitles = ['Профіль', 'Валюта і регіон', 'Сповіщення', 'Дані']
+const sectionTitles = ['Profile', 'Currency and region', 'Notifications', 'Data', 'Demo']
+const ukSectionTitles = ['Профіль', 'Валюта і регіон', 'Сповіщення', 'Дані', 'Демо']
 
 const section = (page: Page, name: string) => page.getByRole('region', { name, exact: true })
 const profile = (page: Page) => section(page, 'Profile')
@@ -218,4 +218,126 @@ test('deleting the account needs the email and restores the demo data', async ({
   await openSettingsInApp(page, isMobile)
   await expect(nameField(page)).toHaveValue('Anna Nowak')
   expect(await page.evaluate(() => Reflect.get(window, 'mitaSamePage'))).toBe(true)
+})
+
+type DemoUser = 'anna' | 'oleh'
+
+const accountsScreen = { link: 'Accounts', url: '/accounts', anna: 'Konto główne', oleh: 'Основна картка' }
+const goalsScreen = { link: 'Goals', url: '/goals', anna: 'Wakacje', oleh: 'Ноутбук' }
+
+const visitUserScreens = async (page: Page, isMobile: boolean, user: DemoUser) => {
+  const other: DemoUser = user === 'anna' ? 'oleh' : 'anna'
+  for (const screen of isMobile ? [goalsScreen] : [accountsScreen, goalsScreen]) {
+    await page.evaluate((text) => {
+      const seen = { other: false }
+      const observer = new MutationObserver(() => {
+        if (document.querySelector('main')?.textContent?.includes(text)) seen.other = true
+      })
+      observer.observe(document.body, { childList: true, subtree: true, characterData: true })
+      Reflect.set(window, 'mitaOtherUser', { seen, observer })
+    }, screen[other])
+    await mainNav(page).getByRole('link', { name: screen.link, exact: true }).click()
+    await expect(page).toHaveURL(screen.url)
+    await expect(page.getByRole('heading', { name: screen[user], exact: true })).toBeVisible()
+    await expect(page.getByText(screen[other])).toHaveCount(0)
+    const otherShown = await page.evaluate(() => {
+      const { seen, observer } = Reflect.get(window, 'mitaOtherUser')
+      observer.disconnect()
+      return seen.other
+    })
+    expect(otherShown).toBe(false)
+  }
+}
+
+test('switching the demo user shows only the data of that user', async ({ page, isMobile }) => {
+  await openSettings(page)
+  await page.evaluate(() => Reflect.set(window, 'mitaSamePage', true))
+  await visitUserScreens(page, isMobile, 'anna')
+  await openSettingsInApp(page, isMobile)
+
+  const demoUser = combobox(page, 'Demo user')
+  await expect(demoUser).toHaveText('Anna Nowak')
+  await choose(page, demoUser, 'Oleh Kravets')
+  await expect(page.getByText('Switched to Oleh Kravets')).toBeVisible()
+  await expect(demoUser).toBeFocused()
+  await expect(nameField(page)).toHaveValue('Oleh Kravets')
+  await expect(profile(page).getByLabel('Email', { exact: true })).toHaveValue('oleh@demo.mita.app')
+  await expect(combobox(page, 'Base currency')).toHaveText('UAH — ₴')
+  await expect(combobox(page, 'Start of the financial month')).toHaveText('Day 10')
+
+  await visitUserScreens(page, isMobile, 'oleh')
+  await openSettingsInApp(page, isMobile)
+  await expect(nameField(page)).toHaveValue('Oleh Kravets')
+  await choose(page, combobox(page, 'Demo user'), 'Anna Nowak')
+  await expect(page.getByText('Switched to Anna Nowak')).toBeVisible()
+  await expect(nameField(page)).toHaveValue('Anna Nowak')
+  await expect(combobox(page, 'Base currency')).toHaveText('PLN — zł')
+
+  await visitUserScreens(page, isMobile, 'anna')
+  expect(await page.evaluate(() => Reflect.get(window, 'mitaSamePage'))).toBe(true)
+})
+
+test('resetting the demo data restores the seed', async ({ page }) => {
+  await openSettings(page)
+  await nameField(page).fill('Anna Kowalska')
+  await profile(page).getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByText('Profile saved')).toBeVisible()
+
+  await section(page, 'Demo').getByRole('button', { name: 'Reset demo data' }).click()
+  const confirm = page.getByRole('alertdialog')
+  await expect(confirm).toContainText('All changes will be lost')
+  await confirm.getByRole('button', { name: 'Reset demo data' }).click()
+  await expect(page.getByText('Demo data restored', { exact: true })).toBeVisible()
+  await expect(nameField(page)).toHaveValue('Anna Nowak')
+})
+
+test('the simulated network errors switch persists after a reload', async ({ page }) => {
+  await openSettings(page)
+  const errors = page.getByRole('switch', { name: 'Simulate network errors' })
+  await expect(page.getByText('About 1 in 5 requests fails')).toBeVisible()
+  await expect(errors).not.toBeChecked()
+  await errors.check()
+  await expect(page.getByText('Settings saved')).toBeVisible()
+  await page.reload()
+  await expect(errors).toBeChecked()
+  await errors.uncheck()
+  await expect(errors).not.toBeChecked()
+  await expect(page.getByText('Settings saved')).toBeVisible()
+})
+
+test('a failed save shows an error and keeps the stored values', async ({ page }) => {
+  await page.addInitScript(() => {
+    Math.random = () => (Reflect.get(window, 'mitaFail') === true ? 0 : 0.99)
+  })
+  await openSettings(page)
+  await page.getByRole('switch', { name: 'Simulate network errors' }).check()
+  await expect(page.getByText('Settings saved')).toBeVisible()
+  await page.evaluate(() => Reflect.set(window, 'mitaFail', true))
+
+  const serverError = page
+    .getByRole('alert')
+    .filter({ hasText: 'The server could not complete the request. Please try again.' })
+  const dismissServerError = async () => {
+    await expect(serverError).toHaveCount(1)
+    await serverError.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(serverError).toHaveCount(0)
+  }
+  const currency = combobox(page, 'Base currency')
+  await choose(page, currency, 'EUR — €')
+  await dismissServerError()
+  await expect(currency).toHaveText('PLN — zł')
+
+  const language = combobox(page, 'Language')
+  await language.click()
+  await page.getByRole('option', { name: 'Polski', exact: true }).click()
+  await expect(language).toHaveAttribute('aria-expanded', 'false')
+  await dismissServerError()
+  await expect(language).toHaveText('English')
+  await expect(page).toHaveURL('/settings')
+
+  const weekly = page.getByRole('switch', { name: 'Weekly report' })
+  await weekly.click()
+  await dismissServerError()
+  await expect(weekly).toBeEnabled()
+  await expect(weekly).not.toBeChecked()
 })
