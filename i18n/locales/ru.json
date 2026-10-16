@@ -198,6 +198,10 @@
       "showAllTime": "Показать за всё время",
       "delete": "Удалить"
     },
+    "quickAdd": {
+      "title": "Быстрое добавление",
+      "notePlaceholder": "Необязательно"
+    },
     "filters": {
       "label": "Фильтры",
       "search": "Поиск",
@@ -440,6 +444,95 @@
       "updated": "Цель изменена",
       "deleted": "Цель удалена",
       "contributed": "Пополнение сохранено"
+    }
+  },
+  "overview": {
+    "eyebrow": "Обзор",
+    "range": {
+      "label": "Диапазон",
+      "week": "Неделя",
+      "month": "Месяц",
+      "year": "Год"
+    },
+    "stats": {
+      "label": "Сводка",
+      "balance": "Общий баланс",
+      "accounts": "{count} счёт | {count} счёта | {count} счетов",
+      "income": "Доходы",
+      "incomeCount": "{count} поступление | {count} поступления | {count} поступлений",
+      "expense": "Расходы",
+      "expenseCount": "{count} операция | {count} операции | {count} операций",
+      "withChange": "{text} · {change}",
+      "budgetLeft": "Осталось в бюджете",
+      "budgetMonth": "Бюджеты: {month}",
+      "budgetProgress": "Потраченная доля бюджетов месяца"
+    },
+    "noAccounts": {
+      "title": "Начните со счёта",
+      "description": "Добавьте карту, наличные или сберегательный счёт, чтобы увидеть здесь баланс.",
+      "action": "Добавить счёт"
+    },
+    "spending": {
+      "title": "Расходы по категориям",
+      "details": "Подробнее",
+      "center": "Расходы",
+      "other": "Другое",
+      "chartLabel": "Расходы по категориям: {items}",
+      "category": "Категория",
+      "amount": "Сумма",
+      "share": "Доля",
+      "vsMonth": "По сравнению с прошлым периодом ({month})",
+      "vsWeek": "По сравнению с прошлыми 7 днями",
+      "vsYear": "По сравнению с прошлыми 12 месяцами",
+      "average": "Средний чек",
+      "count": "Операций",
+      "none": "—",
+      "empty": "В этом периоде нет расходов.",
+      "noTransactionsDescription": "Запишите первый расход или доход, чтобы увидеть, куда уходят деньги."
+    },
+    "budgets": {
+      "title": "Бюджеты · {month}",
+      "short": "Бюджеты",
+      "edit": "Изменить",
+      "all": "Все",
+      "amounts": "{spent} / {limit}",
+      "left": "Осталось {amount}",
+      "overspent": "Перерасход {amount}",
+      "progress": "{name}: потраченная доля лимита",
+      "empty": "На этот месяц бюджетов нет.",
+      "create": "Создать бюджет"
+    },
+    "recent": {
+      "title": "Последние операции",
+      "all": "Все",
+      "empty": "В этом периоде нет операций.",
+      "none": "Операций пока нет.",
+      "today": "сегодня",
+      "yesterday": "вчера",
+      "meta": "{category} · {detail}"
+    },
+    "goals": {
+      "title": "Цели накоплений",
+      "add": "Новая цель",
+      "amounts": "{saved} из {target}",
+      "withDetail": "{amounts} · {detail}",
+      "deadline": "Срок: {month}",
+      "reached": "Достигнута",
+      "progress": "{name}: накопленная доля цели",
+      "empty": "Целей пока нет.",
+      "create": "Создать цель"
+    },
+    "mobile": {
+      "eyebrow": "Бюджет на",
+      "periodLink": "Бюджеты по периодам",
+      "leftThisMonth": "Осталось на месяц",
+      "balance": "Общий баланс",
+      "income": "Доходы",
+      "expense": "Расходы",
+      "perDay": "Можно тратить в день",
+      "today": "Сегодня",
+      "todayEmpty": "Сегодня операций нет.",
+      "add": "Добавить операцию"
     }
   },
   "validation": {

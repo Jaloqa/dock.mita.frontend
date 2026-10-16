@@ -198,6 +198,10 @@
       "showAllTime": "Pokaż cały okres",
       "delete": "Usuń"
     },
+    "quickAdd": {
+      "title": "Szybkie dodawanie",
+      "notePlaceholder": "Opcjonalnie"
+    },
     "filters": {
       "label": "Filtry",
       "search": "Szukaj",
@@ -440,6 +444,95 @@
       "updated": "Cel zaktualizowany",
       "deleted": "Cel usunięty",
       "contributed": "Wpłata zapisana"
+    }
+  },
+  "overview": {
+    "eyebrow": "Przegląd",
+    "range": {
+      "label": "Zakres",
+      "week": "Tydzień",
+      "month": "Miesiąc",
+      "year": "Rok"
+    },
+    "stats": {
+      "label": "Podsumowanie",
+      "balance": "Saldo łączne",
+      "accounts": "{count} konto | {count} konta | {count} kont",
+      "income": "Przychody",
+      "incomeCount": "{count} wpływ | {count} wpływy | {count} wpływów",
+      "expense": "Wydatki",
+      "expenseCount": "{count} operacja | {count} operacje | {count} operacji",
+      "withChange": "{text} · {change}",
+      "budgetLeft": "Zostało w budżetach",
+      "budgetMonth": "Budżety: {month}",
+      "budgetProgress": "Wykorzystana część budżetów miesiąca"
+    },
+    "noAccounts": {
+      "title": "Zacznij od konta",
+      "description": "Dodaj kartę, gotówkę lub konto oszczędnościowe, aby zobaczyć tu swoje saldo.",
+      "action": "Dodaj konto"
+    },
+    "spending": {
+      "title": "Wydatki według kategorii",
+      "details": "Szczegóły",
+      "center": "Wydatki",
+      "other": "Inne",
+      "chartLabel": "Wydatki według kategorii: {items}",
+      "category": "Kategoria",
+      "amount": "Kwota",
+      "share": "Udział",
+      "vsMonth": "W porównaniu z poprzednim okresem ({month})",
+      "vsWeek": "W porównaniu z poprzednimi 7 dniami",
+      "vsYear": "W porównaniu z poprzednimi 12 miesiącami",
+      "average": "Średni wydatek",
+      "count": "Operacje",
+      "none": "—",
+      "empty": "Brak wydatków w tym okresie.",
+      "noTransactionsDescription": "Zapisz pierwszy wydatek lub przychód, aby zobaczyć, na co idą pieniądze."
+    },
+    "budgets": {
+      "title": "Budżety · {month}",
+      "short": "Budżety",
+      "edit": "Edytuj",
+      "all": "Wszystkie",
+      "amounts": "{spent} / {limit}",
+      "left": "Zostało {amount}",
+      "overspent": "Przekroczono o {amount}",
+      "progress": "{name}: wykorzystana część limitu",
+      "empty": "Brak budżetów na ten miesiąc.",
+      "create": "Utwórz budżet"
+    },
+    "recent": {
+      "title": "Ostatnie operacje",
+      "all": "Wszystkie",
+      "empty": "Brak operacji w tym okresie.",
+      "none": "Brak operacji.",
+      "today": "dziś",
+      "yesterday": "wczoraj",
+      "meta": "{category} · {detail}"
+    },
+    "goals": {
+      "title": "Cele oszczędnościowe",
+      "add": "Nowy cel",
+      "amounts": "{saved} z {target}",
+      "withDetail": "{amounts} · {detail}",
+      "deadline": "Termin: {month}",
+      "reached": "Osiągnięty",
+      "progress": "{name}: zaoszczędzona część celu",
+      "empty": "Brak celów.",
+      "create": "Utwórz cel"
+    },
+    "mobile": {
+      "eyebrow": "Budżet na",
+      "periodLink": "Budżety według okresu",
+      "leftThisMonth": "Zostało w tym miesiącu",
+      "balance": "Saldo łączne",
+      "income": "Przychody",
+      "expense": "Wydatki",
+      "perDay": "Możesz wydać dziennie",
+      "today": "Dziś",
+      "todayEmpty": "Dziś brak operacji.",
+      "add": "Dodaj operację"
     }
   },
   "validation": {

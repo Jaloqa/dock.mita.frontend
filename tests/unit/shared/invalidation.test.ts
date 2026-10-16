@@ -16,4 +16,19 @@ describe('invalidation map', () => {
       expect(invalidationMap[change]).toContainEqual(['goals'])
     }
   })
+
+  it('refreshes the overview after every change that feeds it', () => {
+    for (const change of [
+      'transactions',
+      'transfers',
+      'accounts',
+      'budgets',
+      'goals',
+      'goalContributions',
+      'categories',
+      'settings',
+    ] as const) {
+      expect(invalidationMap[change]).toContainEqual(['overview'])
+    }
+  })
 })

@@ -198,6 +198,10 @@
       "showAllTime": "Show all time",
       "delete": "Delete"
     },
+    "quickAdd": {
+      "title": "Quick add",
+      "notePlaceholder": "Optional"
+    },
     "filters": {
       "label": "Filters",
       "search": "Search",
@@ -440,6 +444,95 @@
       "updated": "Goal updated",
       "deleted": "Goal deleted",
       "contributed": "Contribution saved"
+    }
+  },
+  "overview": {
+    "eyebrow": "Overview",
+    "range": {
+      "label": "Range",
+      "week": "Week",
+      "month": "Month",
+      "year": "Year"
+    },
+    "stats": {
+      "label": "Summary",
+      "balance": "Total balance",
+      "accounts": "{count} account | {count} accounts",
+      "income": "Income",
+      "incomeCount": "{count} payment in | {count} payments in",
+      "expense": "Expenses",
+      "expenseCount": "{count} transaction | {count} transactions",
+      "withChange": "{text} · {change}",
+      "budgetLeft": "Left in budgets",
+      "budgetMonth": "Budgets for {month}",
+      "budgetProgress": "Share of the monthly budgets spent"
+    },
+    "noAccounts": {
+      "title": "Start with an account",
+      "description": "Add a card, cash or savings account to see your balance here.",
+      "action": "Add an account"
+    },
+    "spending": {
+      "title": "Spending by category",
+      "details": "Details",
+      "center": "Expenses",
+      "other": "Other",
+      "chartLabel": "Spending by category: {items}",
+      "category": "Category",
+      "amount": "Amount",
+      "share": "Share",
+      "vsMonth": "vs {month}",
+      "vsWeek": "vs previous 7 days",
+      "vsYear": "vs previous 12 months",
+      "average": "Average expense",
+      "count": "Transactions",
+      "none": "—",
+      "empty": "No expenses in this period.",
+      "noTransactionsDescription": "Record your first expense or income to see where the money goes."
+    },
+    "budgets": {
+      "title": "Budgets · {month}",
+      "short": "Budgets",
+      "edit": "Edit",
+      "all": "All",
+      "amounts": "{spent} / {limit}",
+      "left": "{amount} left",
+      "overspent": "Overspent by {amount}",
+      "progress": "{name}: share of the limit spent",
+      "empty": "No budgets for this month.",
+      "create": "Create a budget"
+    },
+    "recent": {
+      "title": "Recent transactions",
+      "all": "All",
+      "empty": "No transactions in this period.",
+      "none": "No transactions yet.",
+      "today": "today",
+      "yesterday": "yesterday",
+      "meta": "{category} · {detail}"
+    },
+    "goals": {
+      "title": "Savings goals",
+      "add": "New goal",
+      "amounts": "{saved} of {target}",
+      "withDetail": "{amounts} · {detail}",
+      "deadline": "Deadline: {month}",
+      "reached": "Reached",
+      "progress": "{name}: share of the target saved",
+      "empty": "No goals yet.",
+      "create": "Create a goal"
+    },
+    "mobile": {
+      "eyebrow": "Budget for",
+      "periodLink": "Budgets by period",
+      "leftThisMonth": "Left this month",
+      "balance": "Total balance",
+      "income": "Income",
+      "expense": "Expenses",
+      "perDay": "You can spend per day",
+      "today": "Today",
+      "todayEmpty": "No transactions today.",
+      "add": "Add a transaction"
     }
   },
   "validation": {

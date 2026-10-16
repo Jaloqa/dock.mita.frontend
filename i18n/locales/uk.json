@@ -198,6 +198,10 @@
       "showAllTime": "Показати за весь час",
       "delete": "Видалити"
     },
+    "quickAdd": {
+      "title": "Швидке додавання",
+      "notePlaceholder": "Необов'язково"
+    },
     "filters": {
       "label": "Фільтри",
       "search": "Пошук",
@@ -440,6 +444,95 @@
       "updated": "Ціль змінено",
       "deleted": "Ціль видалено",
       "contributed": "Поповнення збережено"
+    }
+  },
+  "overview": {
+    "eyebrow": "Огляд",
+    "range": {
+      "label": "Діапазон",
+      "week": "Тиждень",
+      "month": "Місяць",
+      "year": "Рік"
+    },
+    "stats": {
+      "label": "Підсумок",
+      "balance": "Загальний баланс",
+      "accounts": "{count} рахунок | {count} рахунки | {count} рахунків",
+      "income": "Доходи",
+      "incomeCount": "{count} надходження | {count} надходження | {count} надходжень",
+      "expense": "Витрати",
+      "expenseCount": "{count} операція | {count} операції | {count} операцій",
+      "withChange": "{text} · {change}",
+      "budgetLeft": "Залишилось у бюджеті",
+      "budgetMonth": "Бюджети: {month}",
+      "budgetProgress": "Витрачена частка бюджетів місяця"
+    },
+    "noAccounts": {
+      "title": "Почніть із рахунку",
+      "description": "Додайте картку, готівку або ощадний рахунок, щоб бачити тут баланс.",
+      "action": "Додати рахунок"
+    },
+    "spending": {
+      "title": "Витрати за категоріями",
+      "details": "Докладніше",
+      "center": "Витрати",
+      "other": "Інше",
+      "chartLabel": "Витрати за категоріями: {items}",
+      "category": "Категорія",
+      "amount": "Сума",
+      "share": "Частка",
+      "vsMonth": "Порівняно з попереднім періодом ({month})",
+      "vsWeek": "Порівняно з попередніми 7 днями",
+      "vsYear": "Порівняно з попередніми 12 місяцями",
+      "average": "Середній чек",
+      "count": "Операцій",
+      "none": "—",
+      "empty": "У цьому періоді немає витрат.",
+      "noTransactionsDescription": "Запишіть першу витрату чи дохід, щоб побачити, куди йдуть гроші."
+    },
+    "budgets": {
+      "title": "Бюджети · {month}",
+      "short": "Бюджети",
+      "edit": "Змінити",
+      "all": "Усі",
+      "amounts": "{spent} / {limit}",
+      "left": "Залишилось {amount}",
+      "overspent": "Перевитрата {amount}",
+      "progress": "{name}: витрачена частка ліміту",
+      "empty": "На цей місяць бюджетів немає.",
+      "create": "Створити бюджет"
+    },
+    "recent": {
+      "title": "Останні операції",
+      "all": "Усі",
+      "empty": "У цьому періоді немає операцій.",
+      "none": "Операцій поки немає.",
+      "today": "сьогодні",
+      "yesterday": "учора",
+      "meta": "{category} · {detail}"
+    },
+    "goals": {
+      "title": "Цілі заощаджень",
+      "add": "Нова ціль",
+      "amounts": "{saved} з {target}",
+      "withDetail": "{amounts} · {detail}",
+      "deadline": "Термін: {month}",
+      "reached": "Досягнуто",
+      "progress": "{name}: заощаджена частка цілі",
+      "empty": "Цілей поки немає.",
+      "create": "Створити ціль"
+    },
+    "mobile": {
+      "eyebrow": "Бюджет на",
+      "periodLink": "Бюджети за періодами",
+      "leftThisMonth": "Залишилось на місяць",
+      "balance": "Загальний баланс",
+      "income": "Доходи",
+      "expense": "Витрати",
+      "perDay": "Можна витрачати на день",
+      "today": "Сьогодні",
+      "todayEmpty": "Сьогодні операцій немає.",
+      "add": "Додати операцію"
     }
   },
   "validation": {
