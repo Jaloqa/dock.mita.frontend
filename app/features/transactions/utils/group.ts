@@ -1,4 +1,4 @@
-import type { TransactionDto } from '../../../shared/api/contract'
+import type { TransactionDto, TransactionSort } from '../../../shared/api/contract'
 
 type Signed = Pick<TransactionDto, 'kind'>
 
@@ -25,4 +25,9 @@ export function groupByDay<T>(items: readonly T[], transactionOf: (item: T) => T
     groups.set(transaction.date, group)
   }
   return [...groups.values()]
+}
+
+export function orderDayGroups<T>(groups: readonly DayGroup<T>[], sort: TransactionSort): DayGroup<T>[] {
+  const direction = sort === 'date' ? 1 : -1
+  return [...groups].sort((a, b) => direction * a.date.localeCompare(b.date))
 }
