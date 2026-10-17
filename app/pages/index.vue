@@ -42,6 +42,13 @@ useHead({ title: () => t('navigation.overview') })
       >
         <AppIcon name="calendar" :size="20" />
       </NuxtLinkLocale>
+      <NuxtLinkLocale
+        to="/settings"
+        :aria-label="t('navigation.settings')"
+        class="flex size-11 items-center justify-center rounded-xl border border-border bg-surface text-ink"
+      >
+        <AppIcon name="settings" :size="20" />
+      </NuxtLinkLocale>
     </template>
   </PageHeader>
   <EmptyState
