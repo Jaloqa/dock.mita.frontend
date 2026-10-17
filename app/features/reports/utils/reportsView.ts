@@ -4,6 +4,8 @@ type ReportFacts = Pick<ReportDto, 'hasTransactions' | 'totals'>
 
 export type ReportState = 'noTransactions' | 'noData' | 'ready'
 
+export const wholePercentOptions = { maximumFractionDigits: 0, signDisplay: 'negative' } as const
+
 export const resolveReportRange = (value: unknown): ReportRange => (isReportRange(value) ? value : '6m')
 
 export const sameYear = (fromKey: string, toKey: string): boolean => fromKey.slice(0, 4) === toKey.slice(0, 4)

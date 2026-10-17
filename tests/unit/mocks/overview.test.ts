@@ -92,6 +92,7 @@ describe('overview rules', () => {
     expect(percentChange(5_240, 5_000)).toBe(4.8)
     expect(percentChange(4_500, 5_000)).toBe(-10)
     expect(percentChange(5_000, 5_000)).toBe(0)
+    expect(percentChange(4_999, 5_000)).toBe(0)
     expect(percentChange(100, 0)).toBeNull()
     expect(percentChange(0, 0)).toBeNull()
   })

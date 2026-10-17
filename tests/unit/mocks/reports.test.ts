@@ -77,6 +77,7 @@ describe('report rules', () => {
     expect(savingsRateOf(1_000, 0)).toBe(100)
     expect(savingsRateOf(100_000, 150_000)).toBe(-50)
     expect(savingsRateOf(2_000, 1_999)).toBe(0.1)
+    expect(savingsRateOf(100_000, 100_040)).toBe(0)
     expect(savingsRateOf(2_000, 2_001)).toBe(-0.1)
     expect(savingsRateOf(2_000, 2_000)).toBe(0)
     expect(savingsRateOf(100_000, 100_004)).toBe(0)
