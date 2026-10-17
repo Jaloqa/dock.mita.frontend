@@ -30,4 +30,28 @@ describe('locales', () => {
       ]),
     )
   })
+
+  it.each([
+    ['en', en],
+    ['pl', pl],
+    ['ru', ru],
+    ['uk', uk],
+  ])('%s explains the exchange rate of a goal contribution like the one of a transfer', (_name, locale) => {
+    expect(locale.goals.contribute.rateHint).toBe(locale.accounts.transferDialog.rateHint)
+    expect(locale.goals.contribute.rate).toBe(locale.accounts.transferDialog.rate)
+  })
+
+  it.each([
+    ['ru', ru, 'Изменение'],
+    ['uk', uk, 'Зміна'],
+  ])('%s names every edit dialog the same way', (_name, locale, prefix) => {
+    const titles = [
+      locale.accounts.dialog.editTitle,
+      locale.categories.form.editTitle,
+      locale.transactions.dialog.editTitle,
+      locale.budgets.dialog.editTitle,
+      locale.goals.dialog.editTitle,
+    ]
+    for (const title of titles) expect(title.startsWith(prefix)).toBe(true)
+  })
 })
