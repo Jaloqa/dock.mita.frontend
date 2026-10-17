@@ -228,6 +228,43 @@ test('the chart follows the theme', async ({ page, isMobile }) => {
   await expect.poll(() => colorPixels(chart, lightIncome)).toBe(0)
 })
 
+test('long amounts in the spending structure keep their columns apart and aligned', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'desktop layout')
+  await page.goto('/accounts')
+  await page.getByRole('button', { name: 'New transaction' }).click()
+  const dialog = page.getByRole('dialog', { name: 'New transaction' })
+  await expect(dialog.getByRole('button', { name: 'Close', exact: true })).toBeFocused()
+  await dialog.getByLabel('Amount').pressSequentially('98765432.10')
+  await dialog.getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByText('Transaction saved')).toBeVisible()
+
+  await page.getByRole('link', { name: 'Reports' }).first().click()
+  const rows = page.getByTestId('report-structure-rows').getByRole('listitem')
+  await expect(rows.first()).toContainText(/zł\s98,7\d\d,\d{3}\.\d{2}/)
+  const cells = await rows.evaluateAll((items) =>
+    items.map((item) => {
+      const [, bar, amount, share] = [...item.children]
+      const text = document.createRange()
+      if (amount) text.selectNodeContents(amount)
+      const amountBox = amount?.getBoundingClientRect()
+      const textBox = text.getBoundingClientRect()
+      return {
+        amountLeft: amountBox?.left ?? 0,
+        textLeft: textBox.left,
+        textRight: textBox.right,
+        barRight: bar?.getBoundingClientRect().right ?? 0,
+        shareLeft: share?.getBoundingClientRect().left ?? 0,
+      }
+    }),
+  )
+  expect(cells.length).toBeGreaterThan(1)
+  for (const cell of cells) {
+    expect(cell.textLeft).toBeGreaterThan(cell.barRight)
+    expect(cell.textRight).toBeLessThan(cell.shareLeft)
+    expect(cell.amountLeft).toBe(cells[0]?.amountLeft ?? 0)
+  }
+})
+
 test('the mobile report shows the range, two cards, the chart and the structure', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'mobile layout')
   await page.goto('/reports')
