@@ -13,7 +13,7 @@ const emit = defineEmits<{ done: []; cancel: [] }>()
 const { t } = useI18n()
 const notify = useNotify()
 const server = useServerErrors()
-const { create, update } = useCategoryMutations()
+const { create, update, isMissing, refresh } = useCategoryMutations()
 
 const fields = ['name', 'color'] as const
 type Field = (typeof fields)[number]
@@ -44,7 +44,13 @@ async function showServerErrors(error: unknown) {
   if (server.apply(error, fields)) {
     await nextTick()
     focusFirstInvalid(formEl.value)
-  } else notify.error(error)
+    return
+  }
+  notify.error(error)
+  if (isMissing(error)) {
+    emit('cancel')
+    await refresh()
+  }
 }
 
 const finish = (message: string) => {

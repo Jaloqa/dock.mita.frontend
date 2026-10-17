@@ -7,10 +7,15 @@ export async function loadMockTransport(): Promise<Transport> {
       throw new ApiError({ status: 503, title: 'Mock backend runs in the browser only' })
     }
   }
-  const [{ createMockApi }, { createMockTransport }, { defaultHandlers }] = await Promise.all([
+  const [{ createMockApi }, { createMockTransport }, { defaultHandlers }, { STORAGE_KEY }] = await Promise.all([
     import('~~/mocks/api'),
     import('~~/mocks/transport'),
     import('~~/mocks/handlers'),
+    import('~~/mocks/db'),
   ])
-  return createMockTransport(createMockApi({ storage: window.localStorage, register: defaultHandlers }))
+  const api = createMockApi({ storage: window.localStorage, register: defaultHandlers })
+  window.addEventListener('storage', (event) => {
+    if (event.key === STORAGE_KEY) api.db.reload()
+  })
+  return createMockTransport(api)
 }

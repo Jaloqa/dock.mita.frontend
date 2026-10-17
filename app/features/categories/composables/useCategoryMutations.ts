@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import type { CategoryInput } from '~/shared/api/contract'
 import { invalidateAfter } from '~/shared/api/invalidation'
+import { isApiError } from '~/shared/api/problem'
 import { categoriesApi } from '~/shared/categories/categoriesApi'
 
 export function useCategoryMutations() {
@@ -15,5 +16,7 @@ export function useCategoryMutations() {
       onSuccess,
     }),
     remove: useMutation({ mutationFn: api.remove, onSuccess }),
+    isMissing: (error: unknown) => isApiError(error) && error.status === 404,
+    refresh: () => invalidateAfter(queryClient, 'categories'),
   }
 }

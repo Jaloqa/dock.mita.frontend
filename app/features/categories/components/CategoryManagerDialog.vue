@@ -11,7 +11,7 @@ const { t } = useI18n()
 const notify = useNotify()
 const confirm = useConfirm()
 const { categories, isPending, isError, refetch } = useCategories()
-const { remove } = useCategoryMutations()
+const { remove, isMissing, refresh } = useCategoryMutations()
 
 const tab = ref<string | number>('expense')
 const editing = ref<Editing>()
@@ -83,7 +83,10 @@ function confirmDelete(category: CategoryDto) {
           focusAfterDelete(category, neighbour)
           notify.success(t('categories.toast.deleted'))
         },
-        onError: (error) => notify.error(error),
+        onError: (error) => {
+          notify.error(error)
+          if (isMissing(error)) refresh()
+        },
       }),
   })
 }
