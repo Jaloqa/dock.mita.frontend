@@ -321,7 +321,7 @@
       "amount": "Kwota",
       "currency": "Waluta",
       "rate": "Kurs wymiany ({from} → {to})",
-      "rateHint": "Ile {to} to 1 {from} w wybranym dniu. Możesz go poprawić.",
+      "rateHint": "Ile {to} to 1 {from} w wybranym dniu. Kurs możesz poprawić.",
       "accountAmount": "Na koncie: {amount}",
       "category": "Kategoria",
       "account": "Konto",
@@ -417,7 +417,7 @@
     },
     "confirm": {
       "deleteTitle": "Usunąć budżet?",
-      "deleteMessage": "Budżet kategorii {name} zostanie usunięty. Transakcje pozostaną bez zmian."
+      "deleteMessage": "Budżet kategorii „{name}” zostanie usunięty. Operacje pozostaną bez zmian."
     },
     "toast": {
       "created": "Budżet utworzony",
@@ -485,7 +485,7 @@
       "fromPlaceholder": "Nie wskazano",
       "date": "Data",
       "rate": "Kurs wymiany ({from} → {to})",
-      "rateHint": "Ile {to} otrzymasz za 1 {from} w wybranym dniu. Możesz go poprawić.",
+      "rateHint": "Ile {to} otrzymasz za 1 {from} w wybranym dniu. Kurs możesz poprawić.",
       "receives": "Wpłynie {amount}",
       "transfer": "Zostanie zapisany przelew z konta {from} na konto {to}.",
       "noTransfer": "Kwota zwiększy cel; salda kont się nie zmienią.",
