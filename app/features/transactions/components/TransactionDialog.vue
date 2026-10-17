@@ -71,6 +71,7 @@ const kindOptions = computed(() =>
   categoryKinds.map((kind) => ({ value: kind, label: t(`transactions.kindSingle.${kind}`) })),
 )
 const categoryOptions = computed(() => pickable(form.kind))
+const selectedCategory = computed(() => categoryOptions.value.find((row) => row.id === form.categoryId))
 const accountOptions = computed(() => {
   const own = props.transaction ? accounts.value.find((row) => row.id === props.transaction?.accountId) : undefined
   const list = own?.archived ? [...activeAccounts.value, own] : activeAccounts.value
@@ -381,6 +382,17 @@ function confirmDelete() {
             fluid
             @change="touch('categoryId')"
           >
+            <template #value="{ placeholder }">
+              <span v-if="selectedCategory" class="flex items-center gap-2">
+                <span
+                  class="size-2.5 shrink-0 rounded-full"
+                  :class="categorySwatchClass(selectedCategory.color)"
+                  aria-hidden="true"
+                />
+                {{ selectedCategory.name }}
+              </span>
+              <template v-else>{{ placeholder ?? ' ' }}</template>
+            </template>
             <template #option="{ option }">
               <span class="flex items-center gap-2">
                 <span class="size-2.5 rounded-full" :class="categorySwatchClass(option.color)" aria-hidden="true" />
