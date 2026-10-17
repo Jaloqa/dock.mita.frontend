@@ -118,6 +118,33 @@ test('adds an income category in the income tab', async ({ page }) => {
   await expect(dialog.getByRole('list', { name: 'Expenses' }).getByRole('listitem')).toHaveCount(11)
 })
 
+test('switching tabs keeps an unsaved edit', async ({ page }) => {
+  const dialog = await openManager(page)
+  await dialog.getByRole('list', { name: 'Expenses' }).getByRole('button', { name: 'Edit Sport' }).click()
+  const edit = dialog.getByRole('form', { name: 'Edit category' })
+  await edit.getByLabel('Name', { exact: true }).fill('Fitness')
+
+  await dialog.getByRole('tab', { name: 'Income' }).click()
+  await expect(edit).toBeHidden()
+  await dialog.getByRole('button', { name: 'Add category' }).click()
+  const create = dialog.getByRole('form', { name: 'New category' })
+  await create.getByLabel('Name', { exact: true }).fill('Dywidendy')
+
+  await dialog.getByRole('tab', { name: 'Expenses' }).click()
+  await expect(edit.getByLabel('Name', { exact: true })).toHaveValue('Fitness')
+  await dialog.getByRole('tab', { name: 'Income' }).click()
+  await expect(create.getByLabel('Name', { exact: true })).toHaveValue('Dywidendy')
+  await create.getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByText('Category added')).toBeVisible()
+
+  await dialog.getByRole('tab', { name: 'Expenses' }).click()
+  await edit.getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByText('Category updated')).toBeVisible()
+  await expect(
+    dialog.getByRole('list', { name: 'Expenses' }).getByRole('button', { name: 'Edit Fitness' }),
+  ).toBeVisible()
+})
+
 test('saving a category deleted in another tab refreshes the list', async ({ page, context }) => {
   const dialog = await openManager(page)
   const expense = dialog.getByRole('list', { name: 'Expenses' })
