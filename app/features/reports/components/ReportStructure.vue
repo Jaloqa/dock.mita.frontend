@@ -50,11 +50,15 @@ const width = (amount: number) => `${barShare(amount, largest.value) * 100}%`
         </div>
       </li>
     </ul>
-    <ul v-else class="m-0 flex list-none flex-col gap-3.5 p-0">
+    <ul
+      v-else
+      class="m-0 grid list-none grid-cols-[140px_minmax(0,1fr)_max-content_max-content] gap-3.5 p-0"
+      data-testid="report-structure-rows"
+    >
       <li
         v-for="item in report.structure.items"
         :key="item.categoryId"
-        class="grid grid-cols-[140px_minmax(0,1fr)_110px_52px] items-center gap-3.5 text-sm"
+        class="col-span-full grid grid-cols-subgrid items-center text-sm"
       >
         <span class="truncate font-medium">{{ item.name }}</span>
         <div class="h-2.5 overflow-hidden rounded-full bg-bg" aria-hidden="true">
@@ -63,7 +67,9 @@ const width = (amount: number) => `${barShare(amount, largest.value) * 100}%`
         <span class="text-right font-mono text-[13px] whitespace-nowrap">{{
           format(item.amount, report.currency)
         }}</span>
-        <span class="text-right font-mono text-[13px] text-muted">{{ percent.share(item.percent) }}</span>
+        <span class="text-right font-mono text-[13px] whitespace-nowrap text-muted">{{
+          percent.share(item.percent)
+        }}</span>
       </li>
     </ul>
   </section>
