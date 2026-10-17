@@ -170,4 +170,7 @@ test('transactions screen is localized', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1, name: 'Operacje' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Dodaj operację' })).toBeVisible()
   await expect(page.getByRole('region', { name: 'Podsumowanie filtra' })).toContainText('Znaleziono')
+  const month = new Date().toLocaleString('pl', { month: 'long' })
+  const capitalized = month.charAt(0).toUpperCase() + month.slice(1)
+  await expect(page.getByText(new RegExp(`^${capitalized} \\d{4}$`))).toBeVisible()
 })

@@ -9,7 +9,7 @@ const monthLabel = useMonthLabel()
 const options = computed(() =>
   [-1, 0, 1].map((offset) => {
     const key = shiftPeriod(model.value, offset, props.monthStart).key
-    return { value: key, label: monthLabel(key) }
+    return { value: key, label: monthLabel(key, { capitalize: true }) }
   }),
 )
 

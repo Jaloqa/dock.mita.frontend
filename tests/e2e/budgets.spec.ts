@@ -56,6 +56,10 @@ test('budgets are localized', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1, name: 'Budżety' })).toBeVisible()
   await expect(page.getByRole('region', { name: 'Podsumowanie okresu' })).toContainText(/7\s?000,00\s?zł/)
   await expect(page.getByRole('region', { name: 'Kategorie budżetu' }).getByRole('article')).toHaveCount(8)
+  const month = monthName(shift(0), 'pl')
+  const capitalized = month.charAt(0).toUpperCase() + month.slice(1)
+  await expect(page.getByRole('button', { name: capitalized, exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByText(new RegExp(`^${capitalized} \\d{4}$`))).toBeVisible()
 })
 
 const openNewBudget = async (page: Page, trigger: string) => {

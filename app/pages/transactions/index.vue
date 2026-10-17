@@ -10,7 +10,7 @@ const filtersOpen = ref(false)
 
 const eyebrow = computed(() => {
   const key = screen.periodKey.value
-  return key ? monthLabel(key, { withYear: true }) : t(`transactions.period.${filters.value.period}`)
+  return key ? monthLabel(key, { withYear: true, capitalize: true }) : t(`transactions.period.${filters.value.period}`)
 })
 
 const exportCsv = () => exporter.exportCsv(screen.query.value)
