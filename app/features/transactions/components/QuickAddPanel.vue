@@ -47,6 +47,7 @@ const formEl = ref<HTMLFormElement | null>(null)
 const maxDate = computed(() => toLocalDate(addDaysIso(todayIso(), 365)))
 const account = computed(() => activeAccounts.value.find((row) => row.id === form.accountId))
 const categoryOptions = computed(() => pickable(form.kind))
+const selectedCategory = computed(() => categoryOptions.value.find((row) => row.id === form.categoryId))
 const accountOptions = computed(() =>
   activeAccounts.value.map((row) => ({ value: row.id, label: `${row.name} · ${row.currency}` })),
 )
@@ -213,6 +214,17 @@ async function submit() {
             fluid
             @change="touch('categoryId')"
           >
+            <template #value="{ placeholder }">
+              <span v-if="selectedCategory" class="flex items-center gap-2">
+                <span
+                  class="size-2.5 shrink-0 rounded-full"
+                  :class="categorySwatchClass(selectedCategory.color)"
+                  aria-hidden="true"
+                />
+                {{ selectedCategory.name }}
+              </span>
+              <template v-else>{{ placeholder ?? ' ' }}</template>
+            </template>
             <template #option="{ option }">
               <span class="flex items-center gap-2">
                 <span class="size-2.5 rounded-full" :class="categorySwatchClass(option.color)" aria-hidden="true" />

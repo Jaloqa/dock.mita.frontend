@@ -28,6 +28,7 @@ const v$ = useVuelidate(budgetRules(t), form)
 const formEl = ref<HTMLFormElement | null>(null)
 
 const isEdit = computed(() => props.budget !== undefined)
+const selectedCategory = computed(() => props.categories.find((row) => row.id === form.categoryId))
 const noChoices = computed(() => !isEdit.value && props.categories.length === 0)
 const saving = computed(() => create.isPending.value || update.isPending.value || remove.isPending.value)
 
@@ -149,6 +150,17 @@ function manageCategories() {
             fluid
             @hide="touch('categoryId')"
           >
+            <template #value="{ placeholder }">
+              <span v-if="selectedCategory" class="flex items-center gap-2">
+                <span
+                  class="size-2.5 shrink-0 rounded-full"
+                  :class="categorySwatchClass(selectedCategory.color)"
+                  aria-hidden="true"
+                />
+                {{ selectedCategory.name }}
+              </span>
+              <template v-else>{{ placeholder ?? ' ' }}</template>
+            </template>
             <template #option="{ option }">
               <span class="flex items-center gap-2">
                 <span

@@ -79,6 +79,19 @@ test('validates the amount before saving and focuses it', async ({ page }) => {
   await expect(dialog.getByLabel('Amount')).toBeFocused()
 })
 
+test('the closed category select shows the colour of the chosen category', async ({ page }) => {
+  await page.goto('/accounts')
+  const dialog = await openDialog(page)
+  const category = dialog.getByRole('combobox', { name: 'Category' })
+  await expect(category).toContainText('Spożywcze')
+  await expect(category.locator('.bg-chart-2')).toBeVisible()
+  await category.click()
+  await page.getByRole('listbox').getByRole('option', { name: 'Mieszkanie' }).click()
+  await expect(category).toHaveAttribute('aria-expanded', 'false')
+  await expect(category).toContainText('Mieszkanie')
+  await expect(category.locator('.bg-chart-1')).toBeVisible()
+})
+
 test('income offers income categories only', async ({ page }) => {
   await page.goto('/accounts')
   const dialog = await openDialog(page)
