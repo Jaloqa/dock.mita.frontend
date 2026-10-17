@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import {
+  axisLabels,
   barShare,
   canExport,
   largestOf,
@@ -56,6 +57,18 @@ describe('report view helpers', () => {
     expect(barShare(50, 200)).toBe(0.25)
     expect(barShare(200, 200)).toBe(1)
     expect(barShare(10, 0)).toBe(0)
+  })
+
+  it('puts the year under the first month and under every month that starts a new year', () => {
+    const month = (key: string) => `m${key.slice(5)}`
+    expect(axisLabels(['2025-11', '2025-12', '2026-01', '2026-02'], month)).toEqual([
+      ['m11', '2025'],
+      ['m12'],
+      ['m01', '2026'],
+      ['m02'],
+    ])
+    expect(axisLabels(['2026-05', '2026-06'], month)).toEqual([['m05', '2026'], ['m06']])
+    expect(axisLabels([], month)).toEqual([])
   })
 
   it('shows a savings rate that rounds to zero without a minus sign', () => {

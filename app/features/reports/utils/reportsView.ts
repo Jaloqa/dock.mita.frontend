@@ -16,6 +16,14 @@ export function rangeEnds(periods: readonly { period: string }[]): { first: stri
   return first !== undefined && last !== undefined ? { first, last } : null
 }
 
+export function axisLabels(keys: readonly string[], monthOf: (key: string) => string): string[][] {
+  return keys.map((key, index) => {
+    const year = key.slice(0, 4)
+    const yearChanged = index === 0 || keys[index - 1]?.slice(0, 4) !== year
+    return yearChanged ? [monthOf(key), year] : [monthOf(key)]
+  })
+}
+
 export function reportStateOf(report: ReportFacts): ReportState {
   if (!report.hasTransactions) return 'noTransactions'
   return report.totals.income > 0 || report.totals.expense > 0 ? 'ready' : 'noData'

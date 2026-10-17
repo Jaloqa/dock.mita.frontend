@@ -3,9 +3,10 @@ import type { ChartData, Chart as ChartJs, ChartOptions, TooltipItem } from 'cha
 import type { ReportPeriodDto } from '~/shared/api/contract'
 import { type Currency, fromMinor } from '~/shared/money/money'
 import { monthKeyDate } from '~/shared/period/period'
+import { axisLabels } from '../utils/reportsView'
 
 type Palette = { income: string; expense: string; grid: string; tick: string }
-type BarChart = ChartJs<'bar', number[], string>
+type BarChart = ChartJs<'bar', number[], string[]>
 type ChartHandle = { getChart(): BarChart | undefined }
 
 const props = defineProps<{
@@ -33,10 +34,13 @@ const shortMonth = (key: string) => d(monthKeyDate(key), { month: 'short', timeZ
 const compactMoney = (minor: number) =>
   n(fromMinor(minor), { key: 'currency', currency: props.currency, notation: 'compact', maximumFractionDigits: 1 })
 
-function dataFor(colors: Palette): ChartData<'bar', number[], string> {
+function dataFor(colors: Palette): ChartData<'bar', number[], string[]> {
   const bar = { borderRadius: props.compact ? 4 : 5, maxBarThickness: props.compact ? 14 : 22 }
   return {
-    labels: props.periods.map((row) => shortMonth(row.period)),
+    labels: axisLabels(
+      props.periods.map((row) => row.period),
+      shortMonth,
+    ),
     datasets: [
       {
         label: t('reports.chart.income'),
@@ -63,6 +67,10 @@ function optionsFor(colors: Palette): ChartOptions<'bar'> {
       legend: { display: false },
       tooltip: {
         callbacks: {
+          title: (items: TooltipItem<'bar'>[]) => {
+            const period = props.periods[items[0]?.dataIndex ?? -1]?.period
+            return period ? monthLabel(period, { withYear: true, capitalize: true }) : ''
+          },
           label: (item: TooltipItem<'bar'>) =>
             `${item.dataset.label ?? ''}: ${format(item.parsed.y ?? 0, props.currency)}`,
         },
