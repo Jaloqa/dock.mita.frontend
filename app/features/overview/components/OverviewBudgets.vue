@@ -44,7 +44,7 @@ const title = computed(() =>
         {{ t('overview.budgets.create') }}
       </NuxtLinkLocale>
     </div>
-    <ul v-else class="m-0 flex list-none flex-col gap-4.5 p-0">
+    <ul v-else class="m-0 flex flex-1 list-none flex-col justify-around gap-4.5 p-0">
       <li v-for="budget in items" :key="budget.id" class="flex flex-col gap-2">
         <div class="flex justify-between gap-2 text-sm">
           <span class="min-w-0 truncate font-medium">{{ budget.name }}</span>
