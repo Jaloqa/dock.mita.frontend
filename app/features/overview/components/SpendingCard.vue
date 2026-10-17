@@ -101,15 +101,17 @@ const changeLabel = computed(() => {
         :currency="overview.currency"
         :compact="compact"
       />
-      <ul v-if="compact" class="m-0 flex min-w-0 flex-1 list-none flex-col gap-2.5 p-0" aria-hidden="true">
+      <ul v-if="compact" class="m-0 flex min-w-0 flex-1 list-none flex-col gap-2 p-0" aria-hidden="true">
         <li
           v-for="slice in shownSlices"
           :key="slice.key"
-          class="grid grid-cols-[10px_minmax(0,1fr)_auto] items-center gap-1.5 text-[13px]"
+          class="grid grid-cols-[10px_minmax(0,1fr)] items-center gap-x-2 text-[13px] leading-[18px]"
         >
           <span class="size-2.5 rounded-sm" :class="categorySwatchClass(slice.color)" />
           <span class="truncate font-medium">{{ slice.name }}</span>
-          <span class="font-mono text-[11px] whitespace-nowrap">{{ format(slice.amount, overview.currency) }}</span>
+          <span class="col-start-2 font-mono text-[11px] leading-[15px] whitespace-nowrap text-muted">
+            {{ format(slice.amount, overview.currency) }}
+          </span>
         </li>
       </ul>
       <ul v-else class="m-0 min-w-0 flex-[1_1_260px] list-none p-0" aria-hidden="true">
