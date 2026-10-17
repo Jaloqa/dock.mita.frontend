@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import type { ChartData, Chart as ChartJs, ChartOptions, TooltipItem } from 'chart.js'
 import type { ReportPeriodDto } from '~/shared/api/contract'
-import { type Currency, fromMinor } from '~/shared/money/money'
+import type { Currency } from '~/shared/money/money'
 import { monthKeyDate } from '~/shared/period/period'
+import { capitalizeFirst } from '~/shared/utils/text'
 import { axisLabels } from '../utils/reportsView'
 
 type Palette = { income: string; expense: string; grid: string; tick: string }
@@ -15,7 +16,7 @@ const props = defineProps<{
   description: string
   compact?: boolean
 }>()
-const { t, d, n } = useI18n()
+const { t, d, locale } = useI18n()
 const { format } = useMoney()
 const monthLabel = useMonthLabel()
 const chart = useTemplateRef<ChartHandle>('chart')
@@ -30,12 +31,24 @@ function readPalette(prefix: '' | 'light-'): Palette {
   return { income: token('chart-income'), expense: token('chart-expense'), grid: token('border'), tick: token('muted') }
 }
 
-const shortMonth = (key: string) => d(monthKeyDate(key), { month: 'short', timeZone: 'UTC' })
-const compactMoney = (minor: number) =>
-  n(fromMinor(minor), { key: 'currency', currency: props.currency, notation: 'compact', maximumFractionDigits: 1 })
+const shortMonth = (key: string) =>
+  capitalizeFirst(d(monthKeyDate(key), { month: 'short', timeZone: 'UTC' }), locale.value)
+function barStyle() {
+  const narrow = props.compact && props.periods.length > 6
+  const gap = narrow ? 2 : 4
+  const width = narrow ? 8 : props.compact ? 16 : 22
+  const radius = props.compact ? 4 : 6
+  // A fixed thickness keeps each income/expense pair side by side; the transparent side borders draw the gap between them.
+  return {
+    barThickness: width + gap,
+    borderWidth: { left: gap / 2, right: gap / 2, top: 0, bottom: 0 },
+    borderColor: 'transparent',
+    borderRadius: { topLeft: radius, topRight: radius, bottomLeft: 0, bottomRight: 0 },
+  }
+}
 
 function dataFor(colors: Palette): ChartData<'bar', number[], string[]> {
-  const bar = { borderRadius: props.compact ? 4 : 5, maxBarThickness: props.compact ? 14 : 22 }
+  const bar = barStyle()
   return {
     labels: axisLabels(
       props.periods.map((row) => row.period),
@@ -82,16 +95,7 @@ function optionsFor(colors: Palette): ChartOptions<'bar'> {
         border: { color: colors.grid },
         ticks: { color: colors.tick, font: { size: props.compact ? 11 : 12 } },
       },
-      y: {
-        beginAtZero: true,
-        border: { display: false },
-        grid: { color: colors.grid },
-        ticks: {
-          color: colors.tick,
-          maxTicksLimit: props.compact ? 4 : 5,
-          callback: (value) => compactMoney(Number(value)),
-        },
-      },
+      y: { beginAtZero: true, display: false },
     },
   }
 }
@@ -138,7 +142,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="flex flex-col">
-    <div class="relative w-full" :class="compact ? 'h-32.5' : 'h-55 print:w-160'">
+    <div class="relative w-full" :class="compact ? 'h-37.5' : 'h-60 print:w-160'">
       <ClientOnly>
         <Chart
           v-if="data && options"

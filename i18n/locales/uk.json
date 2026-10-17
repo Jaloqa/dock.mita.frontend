@@ -582,7 +582,12 @@
   },
   "reports": {
     "eyebrow": "Аналітика",
-    "range": { "label": "Діапазон", "months": "{count} місяць | {count} місяці | {count} місяців", "year": "Рік" },
+    "range": {
+      "label": "Діапазон",
+      "months": "{count} місяць | {count} місяці | {count} місяців",
+      "monthsShort": "{count} міс",
+      "year": "Рік"
+    },
     "export": "Експорт PDF",
     "printRange": "Період звіту: {range}",
     "stats": {
