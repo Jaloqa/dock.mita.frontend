@@ -117,3 +117,24 @@ test('adds an income category in the income tab', async ({ page }) => {
   await dialog.getByRole('tab', { name: 'Expenses' }).click()
   await expect(dialog.getByRole('list', { name: 'Expenses' }).getByRole('listitem')).toHaveCount(11)
 })
+
+test('saving a category deleted in another tab refreshes the list', async ({ page, context }) => {
+  const dialog = await openManager(page)
+  const expense = dialog.getByRole('list', { name: 'Expenses' })
+  await expense.getByRole('button', { name: 'Edit Sport' }).click()
+  const edit = dialog.getByRole('form', { name: 'Edit category' })
+  await edit.getByLabel('Name', { exact: true }).fill('Fitness')
+
+  const otherTab = await context.newPage()
+  const otherDialog = await openManager(otherTab)
+  await otherDialog.getByRole('list', { name: 'Expenses' }).getByRole('button', { name: 'Delete Sport' }).click()
+  await otherTab.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click()
+  await expect(otherTab.getByText('Category deleted')).toBeVisible()
+  await otherTab.close()
+
+  await edit.getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByText('This item no longer exists.')).toBeVisible()
+  await expect(edit).toBeHidden()
+  await expect(expense.getByRole('listitem')).toHaveCount(10)
+  await expect(expense.getByRole('button', { name: 'Edit Sport' })).toHaveCount(0)
+})

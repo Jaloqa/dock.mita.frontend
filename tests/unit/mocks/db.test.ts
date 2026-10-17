@@ -35,6 +35,18 @@ describe('mock db', () => {
     expect(createDb(storage, seedState).state.simulateErrors).toBe(true)
   })
 
+  it('reloads changes another tab wrote to storage', () => {
+    const storage = memoryStorage()
+    const db = createDb(storage, seedState)
+    db.save()
+    const otherTab = createDb(storage, seedState)
+    otherTab.state.simulateErrors = true
+    otherTab.save()
+    expect(db.state.simulateErrors).toBe(false)
+    db.reload()
+    expect(db.state.simulateErrors).toBe(true)
+  })
+
   it('falls back to the seed when stored JSON is corrupted', () => {
     expect(createDb(memoryStorage('{not json'), seedState).state.users).toHaveLength(2)
   })

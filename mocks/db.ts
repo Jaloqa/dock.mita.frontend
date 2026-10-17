@@ -77,7 +77,7 @@ export type KeyValueStorage = Pick<Storage, 'getItem' | 'setItem'>
 
 export const STORAGE_KEY = 'mita-mock-db-v1'
 
-export type MockDb = { state: MockState; save(): void; reset(): void }
+export type MockDb = { state: MockState; save(): void; reset(): void; reload(): void }
 
 const isState = (value: unknown, seed: MockState): value is MockState => {
   if (typeof value !== 'object' || value === null) return false
@@ -116,6 +116,9 @@ export function createDb(storage: KeyValueStorage | undefined, seed: () => MockS
     reset: () => {
       db.state = seed()
       write(storage, db.state)
+    },
+    reload: () => {
+      db.state = read(storage, seed)
     },
   }
   return db
