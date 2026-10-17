@@ -60,13 +60,13 @@ test('adds an expense on the full-screen keypad', async ({ page }) => {
   for (const key of ['4', '2', 'Decimal separator', '5']) {
     await keypad.getByRole('button', { name: key, exact: true }).click()
   }
-  await expect(page.getByLabel('Amount')).toHaveText(/^−PLN\s42\.5$/)
+  await expect(page.getByLabel('Amount')).toHaveText(/^−zł\s42\.5$/)
   await page.getByRole('button', { name: 'Kawiarnie' }).click()
   await expect(page.getByRole('button', { name: 'Kawiarnie' })).toHaveAttribute('aria-pressed', 'true')
   await page.getByRole('button', { name: 'Save' }).click()
   await expect(page).toHaveURL('/transactions')
   await expect(page.getByText('Transaction saved')).toBeVisible()
-  const added = list(page).getByRole('listitem').filter({ hasText: '-PLN 42.50' }).first()
+  const added = list(page).getByRole('listitem').filter({ hasText: '-zł 42.50' }).first()
   await expect(added).toContainText('Kawiarnie')
 })
 
@@ -86,7 +86,7 @@ test('switches to income and picks the account and the date in drawers', async (
   await page.keyboard.press('Escape')
   await expect(page.getByRole('dialog', { name: 'Choose a date' })).toBeHidden()
   await page.keyboard.type('7')
-  await expect(page.getByLabel('Amount')).toHaveText(/^\+PLN\s7$/)
+  await expect(page.getByLabel('Amount')).toHaveText(/^\+zł\s7$/)
   await page.getByRole('button', { name: 'Close' }).click()
   await expect(page).not.toHaveURL(/\/transactions\/new$/)
 })
@@ -94,14 +94,14 @@ test('switches to income and picks the account and the date in drawers', async (
 test('edits the amount with physical digits, comma, dot and Backspace', async ({ page }) => {
   await page.goto('/transactions/new')
   const amount = page.getByLabel('Amount')
-  await expect(amount).toHaveText(/^−PLN\s0$/)
+  await expect(amount).toHaveText(/^−zł\s0$/)
   await page.keyboard.type('42,5')
-  await expect(amount).toHaveText(/^−PLN\s42\.5$/)
+  await expect(amount).toHaveText(/^−zł\s42\.5$/)
   await page.keyboard.press('Backspace')
   await page.keyboard.press('Backspace')
-  await expect(amount).toHaveText(/^−PLN\s42$/)
+  await expect(amount).toHaveText(/^−zł\s42$/)
   await page.keyboard.type('.75.')
-  await expect(amount).toHaveText(/^−PLN\s42\.75$/)
+  await expect(amount).toHaveText(/^−zł\s42\.75$/)
 })
 
 test('shows a server error under the date when the date is too far ahead', async ({ page }) => {
@@ -109,7 +109,7 @@ test('shows a server error under the date when the date is too far ahead', async
   await page.goto('/transactions/new')
   await page.getByRole('button', { name: 'Kawiarnie' }).click()
   await page.keyboard.type('5')
-  await expect(page.getByLabel('Amount')).toHaveText(/^−PLN\s5$/)
+  await expect(page.getByLabel('Amount')).toHaveText(/^−zł\s5$/)
   await page.clock.setSystemTime(new Date('2029-06-01T10:00:00'))
   await page.getByRole('button', { name: 'Save' }).click()
   const dateButton = page.getByRole('button', { name: 'Date: Today' })

@@ -30,7 +30,10 @@ const NUMBER_PARTS = new Set(['integer', 'group', 'decimal', 'fraction'])
 export function formatEntry(entry: string, locale: string, currency: Currency | undefined): string {
   const digits = (entry || '0').replace('.', decimalSeparator(locale))
   let placed = false
-  return new Intl.NumberFormat(locale, currency ? { style: 'currency', currency } : undefined)
+  return new Intl.NumberFormat(
+    locale,
+    currency ? { style: 'currency', currency, currencyDisplay: 'narrowSymbol' } : undefined,
+  )
     .formatToParts(1)
     .map((part) => {
       if (!NUMBER_PARTS.has(part.type)) return part.value
