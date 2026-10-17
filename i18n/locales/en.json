@@ -582,7 +582,12 @@
   },
   "reports": {
     "eyebrow": "Analytics",
-    "range": { "label": "Range", "months": "{count} month | {count} months", "year": "Year" },
+    "range": {
+      "label": "Range",
+      "months": "{count} month | {count} months",
+      "monthsShort": "{count} mo",
+      "year": "Year"
+    },
     "export": "Export PDF",
     "printRange": "Period covered: {range}",
     "stats": {

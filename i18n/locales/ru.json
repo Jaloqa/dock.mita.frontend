@@ -582,7 +582,12 @@
   },
   "reports": {
     "eyebrow": "Аналитика",
-    "range": { "label": "Диапазон", "months": "{count} месяц | {count} месяца | {count} месяцев", "year": "Год" },
+    "range": {
+      "label": "Диапазон",
+      "months": "{count} месяц | {count} месяца | {count} месяцев",
+      "monthsShort": "{count} мес",
+      "year": "Год"
+    },
     "export": "Экспорт PDF",
     "printRange": "Период отчёта: {range}",
     "stats": {

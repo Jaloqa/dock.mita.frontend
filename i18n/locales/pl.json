@@ -582,7 +582,12 @@
   },
   "reports": {
     "eyebrow": "Analityka",
-    "range": { "label": "Zakres", "months": "{count} miesiąc | {count} miesiące | {count} miesięcy", "year": "Rok" },
+    "range": {
+      "label": "Zakres",
+      "months": "{count} miesiąc | {count} miesiące | {count} miesięcy",
+      "monthsShort": "{count} mies.",
+      "year": "Rok"
+    },
     "export": "Eksport PDF",
     "printRange": "Okres raportu: {range}",
     "stats": {
