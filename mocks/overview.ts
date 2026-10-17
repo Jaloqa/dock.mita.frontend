@@ -50,7 +50,8 @@ export function rangesOf(range: OverviewRange, today: string, monthStart: MonthS
 
 export function percentChange(current: number, previous: number): number | null {
   if (previous === 0) return null
-  return Math.round(((current - previous) * 1000) / previous) / 10
+  const change = Math.round(((current - previous) * 1000) / previous) / 10
+  return change === 0 ? 0 : change
 }
 
 export function shareTenths(amounts: readonly number[]): number[] {

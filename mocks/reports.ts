@@ -18,7 +18,8 @@ type Categories = ReadonlyMap<string, Pick<CategoryRow, 'name' | 'color' | 'syst
 
 export function savingsRateOf(income: number, expense: number): number | null {
   if (income <= 0) return null
-  return roundHalfAwayFromZero(((income - expense) * 1000) / income) / 10
+  const rate = roundHalfAwayFromZero(((income - expense) * 1000) / income) / 10
+  return rate === 0 ? 0 : rate
 }
 
 function periodTotals(

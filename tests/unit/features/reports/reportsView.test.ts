@@ -7,6 +7,7 @@ import {
   reportStateOf,
   resolveReportRange,
   sameYear,
+  wholePercentOptions,
 } from '../../../../app/features/reports/utils/reportsView'
 import { isReportRange, reportRangePeriods } from '../../../../app/shared/api/contract'
 
@@ -55,5 +56,13 @@ describe('report view helpers', () => {
     expect(barShare(50, 200)).toBe(0.25)
     expect(barShare(200, 200)).toBe(1)
     expect(barShare(10, 0)).toBe(0)
+  })
+
+  it('shows a savings rate that rounds to zero without a minus sign', () => {
+    const format = (value: number) =>
+      new Intl.NumberFormat('en', { style: 'percent', ...wholePercentOptions }).format(value / 100)
+    expect(format(-0.3)).toBe('0%')
+    expect(format(-12.6)).toBe('-13%')
+    expect(format(33.3)).toBe('33%')
   })
 })
