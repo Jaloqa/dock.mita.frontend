@@ -271,27 +271,36 @@ test('quick add has its own error and retry, independent of the overview section
   await expect(page.getByRole('region', { name: 'Recent transactions' }).getByRole('alert')).toBeVisible()
 })
 
-test('mobile overview shows the month left, the daily allowance, budgets and today', async ({ page, isMobile }) => {
+test('mobile overview shows the spending donut, its categories and the recent transactions', async ({
+  page,
+  isMobile,
+}) => {
   test.skip(!isMobile, 'mobile layout')
   await page.goto('/')
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(monthName)
   await expect(page.getByText('Budget for', { exact: true })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Budgets by period' })).toHaveAttribute('href', '/budgets')
+  await expect(page.getByRole('link', { name: 'Settings' })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Left this month' })).toHaveCount(0)
+  await expect(page.getByRole('region', { name: 'Today', exact: true })).toHaveCount(0)
+  await expect(page.getByTestId('overview-per-day')).toHaveCount(0)
 
-  const balance = page.getByRole('region', { name: 'Left this month' })
-  await expect(balance).toContainText(/-?zł\s[\d,]+\.\d{2}/)
-  await expect(balance.getByRole('progressbar', { name: 'Share of the monthly budgets spent' })).toBeVisible()
-  await expect(balance).toContainText('Income')
-  await expect(balance).toContainText('Expenses')
-  await expect(page.getByTestId('overview-per-day')).toContainText('You can spend per day')
+  const spending = page.getByRole('region', { name: 'Spending by category' })
+  await expect(spending.getByRole('img', { name: /^Spending by category/ })).toBeVisible()
+  await expect(spending).toContainText('Expenses')
+  await expect(spending).toContainText(/-?zł\s[\d,]+\.\d{2}/)
+  const categories = spending.locator('li')
+  expect(await categories.count()).toBeGreaterThan(1)
+  await expect(categories.first()).toContainText(/zł\s[\d,]+\.\d{2}/)
+  await expect(categories.first()).toContainText(/\d+(\.\d+)?%/)
+  await expect(spending.getByText(/^vs /)).toBeVisible()
+  await expect(spending.getByRole('link', { name: 'Details' })).toHaveAttribute('href', '/reports')
+  await expect(spending.getByRole('table')).toHaveCount(1)
 
-  const budgets = page.getByRole('region', { name: 'Budgets', exact: true })
-  await expect(budgets.getByRole('progressbar')).toHaveCount(3)
-  await expect(budgets).toContainText(/left|Overspent by/)
-  await expect(budgets.getByRole('link', { name: 'All' })).toHaveAttribute('href', '/budgets')
+  const recent = page.getByRole('region', { name: 'Recent transactions' })
+  await expect(recent.getByRole('listitem')).toHaveCount(6)
+  await expect(recent.getByRole('link', { name: 'All' })).toHaveAttribute('href', '/transactions')
 
-  const today = page.getByRole('region', { name: 'Today', exact: true })
-  await expect(today).toBeVisible()
   await page.getByRole('link', { name: 'New transaction' }).click()
   await expect(page).toHaveURL('/transactions/new')
   const keypad = page.getByRole('group', { name: 'Keypad' })
@@ -301,13 +310,13 @@ test('mobile overview shows the month left, the daily allowance, budgets and tod
   await page.getByRole('button', { name: 'Kawiarnie' }).click()
   await page.getByRole('button', { name: 'Save' }).click()
   await expect(page).toHaveURL('/')
-  const added = today.getByRole('listitem').filter({ hasText: '-zł 42.50' }).first()
-  await expect(added).toContainText('Kawiarnie · Konto główne')
+  await expect(recent.getByRole('listitem').first()).toContainText('-zł 42.50')
+  await expect(recent.getByRole('listitem').first()).toContainText('Kawiarnie · today')
 })
 
 test('mobile sections show their own error and one retry recovers them all', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'mobile layout')
-  const mobileSections = ['Left this month', 'Budgets', 'Today']
+  const mobileSections = ['Spending by category', 'Recent transactions']
   await failEveryRequest(page, isMobile)
   await page.goto('/')
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
@@ -319,26 +328,28 @@ test('mobile sections show their own error and one retry recovers them all', asy
   }
 
   await recover(page)
-  await page.getByRole('region', { name: 'Today', exact: true }).getByRole('button', { name: 'Try again' }).click()
+  await page
+    .getByRole('region', { name: 'Recent transactions', exact: true })
+    .getByRole('button', { name: 'Try again' })
+    .click()
   for (const name of mobileSections) {
     await expect(page.getByRole('region', { name, exact: true }).getByRole('alert')).toHaveCount(0)
   }
-  await expect(page.getByTestId('overview-per-day')).toContainText('You can spend per day')
-  await expect(page.getByRole('region', { name: 'Budgets', exact: true }).getByRole('progressbar')).toHaveCount(3)
+  await expect(page.getByRole('region', { name: 'Spending by category' }).locator('li')).not.toHaveCount(0)
+  await expect(page.getByRole('region', { name: 'Recent transactions' }).getByRole('listitem')).toHaveCount(6)
 })
 
-test('a brand-new user on mobile sees the balance and what to add', async ({ page, isMobile }) => {
+test('a brand-new user on mobile sees what to add', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'mobile layout')
   await startAsNewUser(page, isMobile)
   await expect(page.getByRole('link', { name: 'Add an account' })).toHaveAttribute('href', '/accounts')
-  await expect(page.getByRole('region', { name: 'Total balance', exact: true })).toContainText('zł 0.00')
-  await expect(page.getByTestId('overview-per-day')).toHaveCount(0)
-  const budgets = page.getByRole('region', { name: 'Budgets', exact: true })
-  await expect(budgets).toContainText('No budgets for this month.')
-  await expect(budgets.getByRole('link', { name: 'Create a budget' })).toHaveAttribute('href', '/budgets')
-  const today = page.getByRole('region', { name: 'Today', exact: true })
-  await expect(today).toContainText('No transactions today.')
-  await expect(today.getByRole('link', { name: 'Add a transaction' })).toHaveAttribute('href', '/transactions/new')
+  const spending = page.getByRole('region', { name: 'Spending by category' })
+  await expect(spending).toContainText('No transactions yet')
+  await expect(spending.getByRole('link', { name: 'Add your first transaction' })).toHaveAttribute(
+    'href',
+    '/transactions/new',
+  )
+  await expect(page.getByRole('region', { name: 'Recent transactions' })).toContainText('No transactions yet.')
 })
 
 const amountOf = (text: string | null) => Number((text ?? '').replace(/[^\d.-]/g, ''))

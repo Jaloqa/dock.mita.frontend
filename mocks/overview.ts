@@ -9,7 +9,7 @@ import type {
 } from '../app/shared/api/contract'
 import type { Currency } from '../app/shared/money/money'
 import { addDaysIso, daysLeft, type MonthStart, type Period, periodFor, shiftPeriod } from '../app/shared/period/period'
-import { budgetsOf, monthStartOf, perDayHint, spentByCategory, summarize } from './budgets'
+import { budgetsOf, monthStartOf, spentByCategory, summarize } from './budgets'
 import { ownCategories } from './categories'
 import type { CategoryRow, MockDb, MockState, TransactionRow } from './db'
 import { amountIn, goalsOf } from './goals'
@@ -19,7 +19,6 @@ import { baseAmountOf, baseCurrencyOf, transactionsIn } from './transactions'
 export const SPENDING_SLICES = 5
 export const TOP_BUDGETS = 5
 export const RECENT_TRANSACTIONS = 6
-export const TODAY_TRANSACTIONS = 10
 export const GOALS_PREVIEW = 3
 
 export type DateRange = Pick<Period, 'from' | 'to'>
@@ -201,15 +200,10 @@ export function overviewOf(db: MockDb, userId: string, range: OverviewRange, tod
       planned: summary.planned,
       spent: summary.spent,
       left: summary.left,
-      daysLeft: days,
-      perDay: perDayHint(summary.left, days),
       budgets: budgets.length,
     },
     topBudgets,
     recent: newestFirst(rows).slice(0, RECENT_TRANSACTIONS).map(transactionView),
-    today: newestFirst(counted({ from: today, to: today }))
-      .slice(0, TODAY_TRANSACTIONS)
-      .map(transactionView),
     goals: preview,
     goalCount: goals.length,
     hasTransactions: state.transactions.some((row) => row.userId === userId),
