@@ -5,7 +5,7 @@ import type { Currency } from '~/shared/money/money'
 
 type Slice = { name: string; amount: number; percent: number; color: CategoryColor }
 
-const props = defineProps<{ slices: Slice[]; total: number; currency: Currency; large?: boolean }>()
+const props = defineProps<{ slices: Slice[]; total: number; currency: Currency; compact?: boolean }>()
 const { t } = useI18n()
 const { format } = useMoney()
 const percent = useOverviewPercent()
@@ -66,7 +66,7 @@ const description = computed(() =>
 </script>
 
 <template>
-  <div class="relative shrink-0" :class="large ? 'size-60' : 'size-55'">
+  <div class="relative shrink-0" :class="compact ? 'size-36' : 'size-55'">
     <ClientOnly>
       <Chart
         v-if="palette.surface"
@@ -81,8 +81,8 @@ const description = computed(() =>
       class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-0.5"
       aria-hidden="true"
     >
-      <span class="text-xs text-muted">{{ t('overview.spending.center') }}</span>
-      <MoneyText :class="large ? 'text-2xl' : 'text-lg'" :amount="total" :currency="currency" />
+      <span class="text-muted" :class="compact ? 'text-[11px]' : 'text-xs'">{{ t('overview.spending.center') }}</span>
+      <MoneyText :class="compact ? 'text-sm' : 'text-lg'" :amount="total" :currency="currency" />
     </div>
   </div>
 </template>
