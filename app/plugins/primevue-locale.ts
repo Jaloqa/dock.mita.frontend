@@ -1,8 +1,8 @@
-const capitalize = (value: string, locale: string) => value.charAt(0).toLocaleUpperCase(locale) + value.slice(1)
+import { capitalizeFirst } from '~/shared/utils/text'
 
 const names = (locale: string, count: number, at: (index: number) => Date, options: Intl.DateTimeFormatOptions) => {
   const format = new Intl.DateTimeFormat(locale, { ...options, timeZone: 'UTC' })
-  return Array.from({ length: count }, (_, index) => capitalize(format.format(at(index)), locale))
+  return Array.from({ length: count }, (_, index) => capitalizeFirst(format.format(at(index)), locale))
 }
 
 const weekday = (index: number) => new Date(Date.UTC(2023, 0, 1 + index))

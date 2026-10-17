@@ -156,7 +156,7 @@ onBeforeUnmount(() => {
       </thead>
       <tbody>
         <tr v-for="row in periods" :key="row.period">
-          <th scope="row">{{ monthLabel(row.period, { withYear: true }) }}</th>
+          <th scope="row">{{ monthLabel(row.period, { withYear: true, capitalize: true }) }}</th>
           <td>{{ format(row.income, currency) }}</td>
           <td>{{ format(row.expense, currency) }}</td>
         </tr>

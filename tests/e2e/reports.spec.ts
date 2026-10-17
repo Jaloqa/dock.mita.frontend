@@ -114,6 +114,9 @@ test('reports are localized', async ({ page, isMobile }) => {
   await expect(page.getByRole('heading', { level: 1, name: 'Raporty' })).toBeVisible()
   await expect(page.getByRole('region', { name: 'Wskaźniki' })).toContainText('Średni przychód')
   await expect(pressed(page, '6 miesięcy')).toHaveAttribute('aria-pressed', 'true')
+  const month = monthAt(0).toLocaleString('pl', { month: 'long', timeZone: 'UTC' })
+  const capitalized = month.charAt(0).toUpperCase() + month.slice(1)
+  await expect(page.getByRole('rowheader', { name: new RegExp(`^${capitalized} \\d{4}$`) })).toHaveCount(1)
 })
 
 test('a brand-new user is pointed to transactions', async ({ page, isMobile }) => {

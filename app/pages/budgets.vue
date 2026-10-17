@@ -13,7 +13,9 @@ const editing = ref<BudgetDto>()
 
 const monthLabel = useMonthLabel()
 
-const eyebrow = computed(() => (ready.value ? monthLabel(period.value, { withYear: true }) : undefined))
+const eyebrow = computed(() =>
+  ready.value ? monthLabel(period.value, { withYear: true, capitalize: true }) : undefined,
+)
 const editingName = computed(() => cards.value.find((card) => card.budget.id === editing.value?.id)?.name)
 
 function openCreate() {

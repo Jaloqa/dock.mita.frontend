@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const monthLabel = useMonthLabel()
 const rangeLabel = useOverviewRangeLabel()
 const range = useOverviewRange()
@@ -7,12 +7,10 @@ const { overview, isError, refetch } = useOverview(range)
 const dialog = useTransactionDialog()
 
 const failed = computed(() => isError.value && !overview.value)
-const capitalized = (label: string) => {
-  const first = Array.from(label)[0] ?? ''
-  return first.toLocaleUpperCase(locale.value) + label.slice(first.length)
-}
 const monthTitle = computed(() =>
-  overview.value ? capitalized(monthLabel(overview.value.month.period, { withYear: true })) : t('navigation.overview'),
+  overview.value
+    ? monthLabel(overview.value.month.period, { withYear: true, capitalize: true })
+    : t('navigation.overview'),
 )
 const title = computed(() =>
   overview.value && range.value !== 'month' ? rangeLabel(overview.value.from, overview.value.to) : monthTitle.value,

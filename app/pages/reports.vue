@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { canExport, reportStateOf } from '~/features/reports/utils/reportsView'
+import { capitalizeFirst } from '~/shared/utils/text'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const range = useReportRange()
 const { report, isError, isPlaceholderData, refetch } = useReport(range)
 const rangeLabel = useReportRangeLabel()
@@ -28,7 +29,7 @@ useHead({ title: () => t('navigation.reports') })
   </PageHeader>
   <PageHeader
     class="lg:hidden! print:hidden!"
-    :eyebrow="covered || t('reports.eyebrow')"
+    :eyebrow="covered ? capitalizeFirst(covered, locale) : t('reports.eyebrow')"
     :title="t('navigation.reports')"
   >
     <template #actions>
