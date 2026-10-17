@@ -15,6 +15,7 @@ const notify = useNotify()
 const server = useServerErrors()
 const { create, update, isMissing, refresh } = useCategoryMutations()
 
+const nameId = `category-name-${props.kind}`
 const fields = ['name', 'color'] as const
 type Field = (typeof fields)[number]
 
@@ -77,7 +78,7 @@ async function submit() {
   }
 }
 
-onMounted(() => formEl.value?.querySelector<HTMLInputElement>('#category-name')?.focus())
+onMounted(() => formEl.value?.querySelector<HTMLInputElement>(`#${nameId}`)?.focus())
 </script>
 
 <template>
@@ -89,10 +90,10 @@ onMounted(() => formEl.value?.querySelector<HTMLInputElement>('#category-name')?
     @submit.prevent="submit"
     @keydown.esc.stop.prevent="emit('cancel')"
   >
-    <FormRow id="category-name" :label="t('categories.form.name')" :errors="errorsOf('name')">
+    <FormRow :id="nameId" :label="t('categories.form.name')" :errors="errorsOf('name')">
       <template #default="{ invalid, describedBy }">
         <InputText
-          id="category-name"
+          :id="nameId"
           v-model="form.name"
           autocomplete="off"
           :invalid="invalid"
@@ -103,7 +104,7 @@ onMounted(() => formEl.value?.querySelector<HTMLInputElement>('#category-name')?
         />
       </template>
     </FormRow>
-    <FormRow id="category-color" :label="t('categories.form.color')" :errors="errorsOf('color')">
+    <FormRow :id="`category-color-${kind}`" :label="t('categories.form.color')" :errors="errorsOf('color')">
       <template #default="{ labelId }">
         <CategoryColorPicker v-model="form.color" :labelled-by="labelId" />
       </template>

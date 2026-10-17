@@ -4,7 +4,7 @@ import { categoriesOfKind } from '~/shared/categories/select'
 import { useCategories } from '~/shared/categories/useCategories'
 import { suggestColor } from '../schemas/categorySchema'
 
-type Editing = { kind: CategoryKind; category?: CategoryDto }
+type Editing = { category?: CategoryDto }
 
 const visible = defineModel<boolean>('visible', { required: true })
 const { t } = useI18n()
@@ -14,30 +14,22 @@ const { categories, isPending, isError, refetch } = useCategories()
 const { remove, isMissing, refresh } = useCategoryMutations()
 
 const tab = ref<string | number>('expense')
-const editing = ref<Editing>()
+const editing = ref<Partial<Record<CategoryKind, Editing>>>({})
 
-const activeKind = computed<CategoryKind>(() => (tab.value === 'income' ? 'income' : 'expense'))
 const listOf = (kind: CategoryKind) => categoriesOfKind(categories.value, kind)
-const takenNames = computed(() => {
-  const current = editing.value
-  if (!current) return []
-  return listOf(current.kind)
-    .filter((category) => category.id !== current.category?.id)
+const takenNames = (kind: CategoryKind) =>
+  listOf(kind)
+    .filter((category) => category.id !== editing.value[kind]?.category?.id)
     .map((category) => category.name)
-})
-const defaultColor = computed(() => suggestColor(listOf(activeKind.value)))
-const creating = (kind: CategoryKind) =>
-  editing.value !== undefined && !editing.value.category && editing.value.kind === kind
+const defaultColor = (kind: CategoryKind) => suggestColor(listOf(kind))
+const creating = (kind: CategoryKind) => editing.value[kind] !== undefined && !editing.value[kind]?.category
+const editedCategory = (kind: CategoryKind) => editing.value[kind]?.category
 
 watch(visible, (open) => {
   if (open) {
     tab.value = 'expense'
-    editing.value = undefined
+    editing.value = {}
   }
-})
-
-watch(tab, () => {
-  editing.value = undefined
 })
 
 const root = ref<HTMLElement | null>(null)
@@ -50,11 +42,15 @@ async function focusIn(selector: string) {
 const focusAdd = (kind: CategoryKind) => focusIn(`[data-category-add="${kind}"]`)
 const focusEdit = (id: string) => focusIn(`[data-category-edit="${id}"]`)
 
-function stopEditing() {
-  const current = editing.value
-  editing.value = undefined
+function startEditing(kind: CategoryKind, category?: CategoryDto) {
+  editing.value = { ...editing.value, [kind]: { category } }
+}
+
+function stopEditing(kind: CategoryKind) {
+  const current = editing.value[kind]
+  editing.value = { ...editing.value, [kind]: undefined }
   if (current?.category) focusEdit(current.category.id)
-  else if (current) focusAdd(current.kind)
+  else if (current) focusAdd(kind)
 }
 
 function focusAfterDelete(category: CategoryDto, neighbour: CategoryDto | undefined) {
@@ -79,7 +75,9 @@ function confirmDelete(category: CategoryDto) {
     accept: () =>
       remove.mutate(category.id, {
         onSuccess: () => {
-          if (editing.value?.category?.id === category.id) editing.value = undefined
+          if (editedCategory(category.kind)?.id === category.id) {
+            editing.value = { ...editing.value, [category.kind]: undefined }
+          }
           focusAfterDelete(category, neighbour)
           notify.success(t('categories.toast.deleted'))
         },
@@ -112,10 +110,10 @@ function confirmDelete(category: CategoryDto) {
             <CategoryEditor
               v-if="creating(kind)"
               :kind="kind"
-              :taken-names="takenNames"
-              :default-color="defaultColor"
-              @done="stopEditing"
-              @cancel="stopEditing"
+              :taken-names="takenNames(kind)"
+              :default-color="defaultColor(kind)"
+              @done="stopEditing(kind)"
+              @cancel="stopEditing(kind)"
             />
             <Button
               v-else
@@ -123,7 +121,7 @@ function confirmDelete(category: CategoryDto) {
               class="min-h-11 self-start"
               :data-category-add="kind"
               :disabled="isPending || isError"
-              @click="editing = { kind }"
+              @click="startEditing(kind)"
             >
               <AppIcon name="plus" :size="16" :stroke-width="2.2" />
               {{ t('categories.actions.add') }}
@@ -134,21 +132,21 @@ function confirmDelete(category: CategoryDto) {
                 :label="t(`categories.kind.${kind}`)"
                 :is-pending="isPending"
                 :is-error="isError"
-                :editing-id="editing?.category?.id"
+                :editing-id="editedCategory(kind)?.id"
                 @retry="refetch"
-                @edit="(category) => (editing = { kind: category.kind, category })"
+                @edit="(category) => startEditing(kind, category)"
                 @remove="confirmDelete"
               >
                 <template #editor>
                   <CategoryEditor
-                    v-if="editing?.category"
-                    :key="editing.category.id"
+                    v-if="editedCategory(kind)"
+                    :key="editedCategory(kind)?.id"
                     :kind="kind"
-                    :category="editing.category"
-                    :taken-names="takenNames"
-                    :default-color="defaultColor"
-                    @done="stopEditing"
-                    @cancel="stopEditing"
+                    :category="editedCategory(kind)"
+                    :taken-names="takenNames(kind)"
+                    :default-color="defaultColor(kind)"
+                    @done="stopEditing(kind)"
+                    @cancel="stopEditing(kind)"
                   />
                 </template>
               </CategoryList>
