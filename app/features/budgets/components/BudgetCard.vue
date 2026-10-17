@@ -19,7 +19,7 @@ const remainder = computed(() =>
   <article :aria-labelledby="headingId" class="flex flex-col gap-3.5 rounded-(--radius-card) bg-surface p-5.5">
     <div class="flex items-center justify-between gap-2">
       <h2 :id="headingId" class="m-0 min-w-0 truncate text-base font-semibold">{{ name }}</h2>
-      <div class="flex shrink-0 items-center gap-1">
+      <div class="-my-2.5 flex shrink-0 items-center gap-1">
         <span
           class="rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap"
           :class="statusBadgeClass[budget.status]"
@@ -33,16 +33,18 @@ const remainder = computed(() =>
       <span class="font-mono text-[22px] font-medium whitespace-nowrap">{{ format(budget.spent, currency) }}</span>
       <span class="text-[13px] text-muted">{{ t('budgets.card.of', { amount: format(budget.limit, currency) }) }}</span>
     </div>
-    <ProgressBar
-      :value="spentShare(budget.spent, budget.limit)"
-      :label="t('budgets.card.progress', { name })"
-      :tone="statusBarTone(budget.status)"
-    />
-    <div class="flex flex-wrap justify-between gap-2 text-xs text-muted">
-      <span>{{ remainder }}</span>
-      <span v-if="budget.perDay !== null">
-        {{ t('budgets.card.perDay', { amount: format(budget.perDay, currency) }) }}
-      </span>
+    <div class="mt-auto flex flex-col gap-3.5">
+      <ProgressBar
+        :value="spentShare(budget.spent, budget.limit)"
+        :label="t('budgets.card.progress', { name })"
+        :tone="statusBarTone(budget.status)"
+      />
+      <div class="flex flex-wrap justify-between gap-2 text-xs text-muted">
+        <span>{{ remainder }}</span>
+        <span v-if="budget.perDay !== null">
+          {{ t('budgets.card.perDay', { amount: format(budget.perDay, currency) }) }}
+        </span>
+      </div>
     </div>
   </article>
 </template>
