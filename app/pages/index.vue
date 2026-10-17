@@ -7,13 +7,15 @@ const { overview, isError, refetch } = useOverview(range)
 const dialog = useTransactionDialog()
 
 const failed = computed(() => isError.value && !overview.value)
-const title = computed(() =>
-  overview.value ? rangeLabel(overview.value.from, overview.value.to) : t('navigation.overview'),
-)
 const capitalized = (label: string) => {
   const first = Array.from(label)[0] ?? ''
   return first.toLocaleUpperCase(locale.value) + label.slice(first.length)
 }
+const title = computed(() => {
+  if (!overview.value) return t('navigation.overview')
+  if (range.value === 'month') return capitalized(monthLabel(overview.value.month.period, { withYear: true }))
+  return rangeLabel(overview.value.from, overview.value.to)
+})
 const mobileTitle = computed(() =>
   overview.value ? capitalized(monthLabel(overview.value.month.period)) : t('navigation.overview'),
 )

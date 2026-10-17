@@ -4,10 +4,6 @@ const utcDay = (offset: number) => {
   const now = new Date()
   return new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate() + offset))
 }
-const monthEdge = (last: boolean) => {
-  const now = new Date()
-  return new Date(Date.UTC(now.getFullYear(), now.getMonth() + (last ? 1 : 0), last ? 0 : 1))
-}
 const shortDate = (date: Date, withYear: boolean) =>
   date.toLocaleDateString('en-US', {
     day: 'numeric',
@@ -18,6 +14,7 @@ const shortDate = (date: Date, withYear: boolean) =>
 const rangeLabel = (from: Date, to: Date) =>
   `${shortDate(from, from.getUTCFullYear() !== to.getUTCFullYear())} – ${shortDate(to, true)}`
 const monthName = new Date().toLocaleString('en-US', { month: 'long' })
+const monthTitle = new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })
 const pressed = (page: Page, name: string) => page.getByRole('button', { name, exact: true })
 
 const MOCK_DB = 'mita-mock-db-v1'
@@ -73,7 +70,7 @@ test('overview shows the financial month at a glance and keeps the range in the 
   test.skip(isMobile, 'desktop layout')
   await page.goto('/')
   const title = page.getByRole('heading', { level: 1 })
-  await expect(title).toHaveText(rangeLabel(monthEdge(false), monthEdge(true)))
+  await expect(title).toHaveText(monthTitle)
   await expect(pressed(page, 'Month')).toHaveAttribute('aria-pressed', 'true')
 
   const summary = page.getByRole('region', { name: 'Summary', exact: true })
@@ -115,7 +112,7 @@ test('falls back to the month for an unknown range', async ({ page, isMobile }) 
   test.skip(isMobile, 'desktop layout')
   await page.goto('/?range=decade')
   await expect(pressed(page, 'Month')).toHaveAttribute('aria-pressed', 'true')
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(rangeLabel(monthEdge(false), monthEdge(true)))
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(monthTitle)
 })
 
 test('the header button opens the transaction dialog', async ({ page, isMobile }) => {
