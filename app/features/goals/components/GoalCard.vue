@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { GoalDto } from '~/shared/api/contract'
-import type { Currency } from '~/shared/money/money'
+import { type Currency, fromMinor } from '~/shared/money/money'
 import { goalHint, savedShare } from '../utils/goalView'
 
 const props = defineProps<{ goal: GoalDto; currency: Currency }>()
@@ -18,6 +18,20 @@ const deadline = computed(() =>
 )
 const saved = computed(() => format(props.goal.saved, props.currency))
 const target = computed(() => format(props.goal.target, props.currency))
+const wholeDigits = (minor: number) => {
+  const digits = minor % 100 === 0 ? 0 : 2
+  return { minimumFractionDigits: digits, maximumFractionDigits: digits }
+}
+const compactAmounts = computed(() =>
+  t('goals.card.amounts', {
+    saved: n(fromMinor(props.goal.saved), wholeDigits(props.goal.saved)),
+    target: n(fromMinor(props.goal.target), {
+      key: 'currency',
+      currency: props.currency,
+      ...wholeDigits(props.goal.target),
+    }),
+  }),
+)
 const hint = computed(() => {
   const { key, amount } = goalHint(props.goal)
   return amount === null ? t(key) : t(key, { amount: format(amount, props.currency) })
@@ -85,7 +99,7 @@ const contributeLabel = computed(() => t('goals.actions.contributeNamed', { name
       />
     </div>
     <div class="flex items-center justify-between gap-2 lg:hidden">
-      <span class="min-w-0 font-mono text-[13px] text-muted">{{ t('goals.card.amounts', { saved, target }) }}</span>
+      <span class="min-w-0 font-mono text-[13px] whitespace-nowrap text-muted">{{ compactAmounts }}</span>
       <div class="flex shrink-0 items-center gap-1">
         <Button text rounded severity="secondary" class="size-11" :aria-label="editLabel" @click="emit('edit')">
           <AppIcon name="edit" :size="18" />
