@@ -21,3 +21,11 @@ test('localized routes keep the locale prefix', async ({ page }) => {
   await page.goto('/uk/budgets')
   await expect(page.getByRole('heading', { level: 1, name: 'Бюджети' })).toBeVisible()
 })
+
+test('mobile overview links to settings', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'mobile layout')
+  await page.goto('/')
+  await page.getByRole('link', { name: 'Settings' }).filter({ visible: true }).click()
+  await expect(page).toHaveURL('/settings')
+  await expect(page.getByRole('heading', { level: 1, name: 'Settings' })).toBeVisible()
+})
