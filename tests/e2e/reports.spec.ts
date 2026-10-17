@@ -36,7 +36,7 @@ const persistMockDb = async (page: Page, isMobile: boolean) => {
   }
   await page.goto('/reports')
   await expect(page.getByRole('region', { name: 'Key figures' }).getByTestId('report-average-expense')).toContainText(
-    /PLN\s[\d,]+\.\d{2}/,
+    /zł\s[\d,]+\.\d{2}/,
   )
   await page.getByRole('button', { name: 'New transaction' }).click()
   const dialog = page.getByRole('dialog', { name: 'New transaction' })
@@ -86,12 +86,12 @@ test('the desktop report shows the averages, the savings rate and the spending s
   const stats = page.getByRole('region', { name: 'Key figures' })
   const income = stats.getByTestId('report-average-income')
   await expect(income).toContainText('Average income')
-  await expect(income).toContainText(/PLN\s[\d,]+\.\d{2}/)
-  await expect(stats.getByTestId('report-average-expense')).toContainText(/PLN\s[\d,]+\.\d{2}/)
+  await expect(income).toContainText(/zł\s[\d,]+\.\d{2}/)
+  await expect(stats.getByTestId('report-average-expense')).toContainText(/zł\s[\d,]+\.\d{2}/)
   await expect(stats.getByTestId('report-savings-rate')).toContainText(/Savings rate\s*(-?\d+%|—)/)
 
   const structure = page.getByRole('region', { name: `Spending structure · ${monthName}` })
-  await expect(structure).toContainText(/PLN\s[\d,]+\.\d{2}/)
+  await expect(structure).toContainText(/zł\s[\d,]+\.\d{2}/)
   await expect(structure.getByRole('listitem').first()).toContainText(/\d+\.\d%/)
 })
 
@@ -195,7 +195,7 @@ test('the chart lists every period of the selected range', async ({ page }) => {
   await expect(table(page).getByRole('row')).toHaveCount(7)
   await expect(table(page).getByRole('row').last()).toContainText(longMonth(monthAt(0), true))
   await expect(
-    page.getByRole('img', { name: new RegExp(`^Income and expenses, ${coveredLabel(6)}: total income PLN`) }),
+    page.getByRole('img', { name: new RegExp(`^Income and expenses, ${coveredLabel(6)}: total income zł`) }),
   ).toBeVisible()
   await pressed(page, '3 months').click()
   await expect(table(page).getByRole('row')).toHaveCount(4)
@@ -232,7 +232,7 @@ test('the mobile report shows the range, two cards, the chart and the structure'
   await expect(page.getByText(coveredLabel(6), { exact: true })).toBeVisible()
 
   const stats = page.getByRole('region', { name: 'Key figures' })
-  await expect(stats.getByTestId('report-average-expense')).toContainText(/PLN\s[\d,]+\.\d{2}/)
+  await expect(stats.getByTestId('report-average-expense')).toContainText(/zł\s[\d,]+\.\d{2}/)
   await expect(stats.getByTestId('report-savings-rate')).toContainText('Savings')
   await expect(stats.getByTestId('report-average-income')).toHaveCount(0)
 

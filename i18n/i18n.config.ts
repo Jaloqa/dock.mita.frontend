@@ -1,7 +1,7 @@
 import { createPluralRule } from './plural-rules'
 
 const currency = {
-  currency: { style: 'currency', currency: 'PLN', currencyDisplay: 'symbol' },
+  currency: { style: 'currency', currency: 'PLN', currencyDisplay: 'narrowSymbol' },
   percent: { style: 'percent', maximumFractionDigits: 1 },
 } as const
 

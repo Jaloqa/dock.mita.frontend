@@ -14,7 +14,7 @@ const openDialog = async (page: Page) => {
 
 test('a EUR expense from a PLN card lowers the card balance by the converted amount', async ({ page }) => {
   await page.goto('/accounts')
-  await expect(card(page, 'Konto główne')).toContainText('PLN 8,820.40')
+  await expect(card(page, 'Konto główne')).toContainText('zł 8,820.40')
   const dialog = await openDialog(page)
   await expect(dialog.getByRole('combobox', { name: 'Account' })).toContainText('Konto główne · PLN')
   await dialog.getByLabel('Amount').pressSequentially('50')
@@ -25,12 +25,12 @@ test('a EUR expense from a PLN card lowers the card balance by the converted amo
   await expect(dialog.getByText('How many PLN equal 1 EUR on the selected date.')).toBeVisible()
   await rate.fill('')
   await rate.pressSequentially('4')
-  await expect(dialog.getByText('On the account: PLN 200.00')).toBeVisible()
+  await expect(dialog.getByText('On the account: zł 200.00')).toBeVisible()
   await dialog.getByLabel('Description').fill('Książki')
   await dialog.getByRole('button', { name: 'Save' }).click()
   await expect(dialog).toBeHidden()
   await expect(page.getByText('Transaction saved')).toBeVisible()
-  await expect(card(page, 'Konto główne')).toContainText('PLN 8,620.40')
+  await expect(card(page, 'Konto główne')).toContainText('zł 8,620.40')
 })
 
 test('editing a EUR expense keeps its custom exchange rate', async ({ page }) => {
@@ -45,7 +45,7 @@ test('editing a EUR expense keeps its custom exchange rate', async ({ page }) =>
   await expect(rate).toHaveValue(/^4\.\d+$/)
   await rate.fill('')
   await rate.pressSequentially('4')
-  await expect(dialog.getByText('On the account: PLN 200.00')).toBeVisible()
+  await expect(dialog.getByText('On the account: zł 200.00')).toBeVisible()
   await dialog.getByLabel('Description').fill('Antykwariat')
   await dialog.getByRole('button', { name: 'Save' }).click()
   await expect(dialog).toBeHidden()
@@ -59,7 +59,7 @@ test('editing a EUR expense keeps its custom exchange rate', async ({ page }) =>
   await expect(edit.getByRole('combobox', { name: 'Currency' })).toContainText('EUR')
   const editRate = edit.getByLabel('Exchange rate (EUR → PLN)')
   await expect(editRate).toHaveValue('4.00')
-  await expect(edit.getByText('On the account: PLN 200.00')).toBeVisible()
+  await expect(edit.getByText('On the account: zł 200.00')).toBeVisible()
   await expect(edit.getByRole('button', { name: 'Close', exact: true })).toBeFocused()
   await edit.getByLabel('Note').fill('Stare wydanie')
   await edit.getByRole('button', { name: 'Save' }).click()

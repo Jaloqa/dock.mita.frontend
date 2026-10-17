@@ -39,6 +39,8 @@ describe('keypad', () => {
     expect(decimalSeparator('pl')).toBe(',')
     expect(decimalSeparator('en')).toBe('.')
     expect(formatEntry('86.4', 'pl', 'PLN').replace(/\s/g, ' ')).toBe('86,4 zł')
+    expect(formatEntry('86.4', 'en', 'EUR')).toBe('€86.4')
+    expect(formatEntry('86.4', 'en', 'UAH')).toBe('₴86.4')
     expect(formatEntry('', 'en', 'EUR')).toBe('€0')
   })
 
