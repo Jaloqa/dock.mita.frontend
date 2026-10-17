@@ -10,6 +10,7 @@ import { addDaysIso, fromLocalDate, todayIso, toLocalDate } from '~/shared/perio
 import { type TransactionForm, transactionRules } from '../schemas/transactionSchema'
 
 const { t, locale } = useI18n()
+const { format } = useMoney()
 const notify = useNotify()
 const server = useServerErrors()
 const {
@@ -181,7 +182,8 @@ async function submit() {
           <InputNumber
             v-model="form.amount"
             input-id="quick-add-panel-amount"
-            input-class="min-h-12 font-mono text-xl"
+            input-class="min-h-12 font-mono! text-xl!"
+            :placeholder="format(0, form.currency)"
             mode="currency"
             :currency="form.currency"
             :locale="locale"
