@@ -271,19 +271,27 @@ test('quick add has its own error and retry, independent of the overview section
   await expect(page.getByRole('region', { name: 'Recent transactions' }).getByRole('alert')).toBeVisible()
 })
 
-test('mobile overview shows the spending donut, its categories and the recent transactions', async ({
+test('mobile overview shows the balance, the spending donut with its legend and the recent transactions', async ({
   page,
   isMobile,
 }) => {
   test.skip(!isMobile, 'mobile layout')
   await page.goto('/')
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(monthName)
-  await expect(page.getByText('Budget for', { exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(monthTitle)
+  await expect(page.locator('header:visible').getByText('Overview', { exact: true })).toBeVisible()
+  await expect(page.getByText('Budget for')).toHaveCount(0)
   await expect(page.getByRole('link', { name: 'Budgets by period' })).toHaveAttribute('href', '/budgets')
   await expect(page.getByRole('link', { name: 'Settings' })).toBeVisible()
   await expect(page.getByRole('region', { name: 'Left this month' })).toHaveCount(0)
   await expect(page.getByRole('region', { name: 'Today', exact: true })).toHaveCount(0)
   await expect(page.getByTestId('overview-per-day')).toHaveCount(0)
+
+  const balance = page.getByRole('region', { name: 'Summary', exact: true })
+  await expect(balance).toContainText('Balance')
+  await expect(balance.getByTestId('mobile-balance')).toContainText(/zł\s[\d,]+\.\d{2}/)
+  await expect(balance.getByTestId('mobile-income')).toContainText(/^\+zł\s[\d,]+\.\d{2}$/)
+  await expect(balance.getByTestId('mobile-expense')).toContainText(/^-zł\s[\d,]+\.\d{2}$/)
+  await expect(balance.getByRole('progressbar')).toHaveCount(0)
 
   const spending = page.getByRole('region', { name: 'Spending by category' })
   await expect(spending.getByRole('img', { name: /^Spending by category/ })).toBeVisible()
@@ -291,9 +299,11 @@ test('mobile overview shows the spending donut, its categories and the recent tr
   await expect(spending).toContainText(/-?zł\s[\d,]+\.\d{2}/)
   const categories = spending.locator('li')
   expect(await categories.count()).toBeGreaterThan(1)
+  expect(await categories.count()).toBeLessThanOrEqual(5)
   await expect(categories.first()).toContainText(/zł\s[\d,]+\.\d{2}/)
-  await expect(categories.first()).toContainText(/\d+(\.\d+)?%/)
-  await expect(spending.getByText(/^vs /)).toBeVisible()
+  await expect(categories.last()).toContainText('Other')
+  await expect(categories.filter({ hasText: '%' })).toHaveCount(0)
+  await expect(spending.getByText(/^vs /)).toHaveCount(0)
   await expect(spending.getByRole('link', { name: 'Details' })).toHaveAttribute('href', '/reports')
   await expect(spending.getByRole('table')).toHaveCount(1)
 
@@ -316,7 +326,7 @@ test('mobile overview shows the spending donut, its categories and the recent tr
 
 test('mobile sections show their own error and one retry recovers them all', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'mobile layout')
-  const mobileSections = ['Spending by category', 'Recent transactions']
+  const mobileSections = ['Summary', 'Spending by category', 'Recent transactions']
   await failEveryRequest(page, isMobile)
   await page.goto('/')
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
@@ -343,6 +353,7 @@ test('a brand-new user on mobile sees what to add', async ({ page, isMobile }) =
   test.skip(!isMobile, 'mobile layout')
   await startAsNewUser(page, isMobile)
   await expect(page.getByRole('link', { name: 'Add an account' })).toHaveAttribute('href', '/accounts')
+  await expect(page.getByTestId('mobile-balance')).toContainText('0.00')
   const spending = page.getByRole('region', { name: 'Spending by category' })
   await expect(spending).toContainText('No transactions yet')
   await expect(spending.getByRole('link', { name: 'Add your first transaction' })).toHaveAttribute(

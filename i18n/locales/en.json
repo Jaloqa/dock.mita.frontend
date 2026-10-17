@@ -576,7 +576,7 @@
       "create": "Create a goal"
     },
     "mobile": {
-      "eyebrow": "Budget for",
+      "balance": "Balance",
       "periodLink": "Budgets by period"
     }
   },

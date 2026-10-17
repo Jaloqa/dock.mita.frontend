@@ -11,13 +11,11 @@ const capitalized = (label: string) => {
   const first = Array.from(label)[0] ?? ''
   return first.toLocaleUpperCase(locale.value) + label.slice(first.length)
 }
-const title = computed(() => {
-  if (!overview.value) return t('navigation.overview')
-  if (range.value === 'month') return capitalized(monthLabel(overview.value.month.period, { withYear: true }))
-  return rangeLabel(overview.value.from, overview.value.to)
-})
-const mobileTitle = computed(() =>
-  overview.value ? capitalized(monthLabel(overview.value.month.period)) : t('navigation.overview'),
+const monthTitle = computed(() =>
+  overview.value ? capitalized(monthLabel(overview.value.month.period, { withYear: true })) : t('navigation.overview'),
+)
+const title = computed(() =>
+  overview.value && range.value !== 'month' ? rangeLabel(overview.value.from, overview.value.to) : monthTitle.value,
 )
 
 useHead({ title: () => t('navigation.overview') })
@@ -33,7 +31,7 @@ useHead({ title: () => t('navigation.overview') })
       </Button>
     </template>
   </PageHeader>
-  <PageHeader class="lg:hidden!" :eyebrow="t('overview.mobile.eyebrow')" :title="mobileTitle">
+  <PageHeader class="lg:hidden!" :eyebrow="t('overview.eyebrow')" :title="monthTitle">
     <template #actions>
       <NuxtLinkLocale
         to="/budgets"
@@ -84,6 +82,7 @@ useHead({ title: () => t('navigation.overview') })
     </div>
   </div>
   <div class="flex flex-col gap-4.5 lg:hidden">
+    <OverviewBalanceCompact :overview="overview" :failed="failed" @retry="refetch()" />
     <SpendingCard compact :overview="overview" :failed="failed" @retry="refetch()" />
     <RecentTransactions :overview="overview" :failed="failed" @retry="refetch()" />
   </div>

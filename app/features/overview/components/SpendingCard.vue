@@ -17,9 +17,30 @@ const slices = computed(() =>
     name: slice.name ?? t('overview.spending.other'),
     amount: slice.amount,
     percent: slice.percent,
+    bucket: slice.categoryId === null,
     color: sliceColor(index, slice.categoryId === null),
   })),
 )
+
+const MOBILE_CATEGORIES = 4
+const mobileSlices = computed(() => {
+  const named = slices.value.filter((slice) => !slice.bucket)
+  const rest = [...named.slice(MOBILE_CATEGORIES), ...slices.value.filter((slice) => slice.bucket)]
+  const top = named.slice(0, MOBILE_CATEGORIES)
+  if (rest.length <= 1) return [...top, ...rest]
+  return [
+    ...top,
+    {
+      key: 'other',
+      name: t('overview.spending.other'),
+      amount: rest.reduce((sum, slice) => sum + slice.amount, 0),
+      percent: rest.reduce((sum, slice) => sum + slice.percent, 0),
+      bucket: true,
+      color: sliceColor(0, true),
+    },
+  ]
+})
+const shownSlices = computed(() => (props.compact ? mobileSlices.value : slices.value))
 
 const changeLabel = computed(() => {
   const value = props.overview
@@ -50,13 +71,13 @@ const changeLabel = computed(() => {
     <ErrorState v-if="failed" compact @retry="emit('retry')" />
     <div
       v-else-if="!overview"
-      class="flex items-center gap-8"
-      :class="compact ? 'flex-col' : 'flex-wrap'"
+      class="flex items-center"
+      :class="compact ? 'gap-3' : 'flex-wrap gap-8'"
       aria-hidden="true"
     >
-      <Skeleton shape="circle" :size="compact ? '15rem' : '13.75rem'" class="mx-auto" />
-      <div class="flex flex-col gap-3" :class="compact ? 'w-full' : 'flex-[1_1_260px]'">
-        <Skeleton v-for="index in compact ? 5 : 6" :key="index" height="1.75rem" />
+      <Skeleton shape="circle" :size="compact ? '9rem' : '13.75rem'" :class="compact ? 'shrink-0' : 'mx-auto'" />
+      <div class="flex flex-col gap-3" :class="compact ? 'min-w-0 flex-1' : 'flex-[1_1_260px]'">
+        <Skeleton v-for="index in compact ? 5 : 6" :key="index" :height="compact ? '1.25rem' : '1.75rem'" />
       </div>
     </div>
     <div v-else-if="!overview.hasTransactions" class="flex flex-col items-start gap-3">
@@ -72,17 +93,28 @@ const changeLabel = computed(() => {
       <Button v-else :label="t('transactions.actions.addFirst')" class="min-h-11" @click="emit('add')" />
     </div>
     <p v-else-if="slices.length === 0" class="m-0 text-sm text-muted">{{ t('overview.spending.empty') }}</p>
-    <div v-else class="flex flex-auto items-center" :class="compact ? 'flex-col gap-5' : 'flex-wrap gap-8'">
+    <div v-else class="flex flex-auto items-center" :class="compact ? 'gap-3' : 'flex-wrap gap-8'">
       <SpendingDonut
-        class="mx-auto"
-        :slices="slices"
+        :class="compact ? undefined : 'mx-auto'"
+        :slices="shownSlices"
         :total="overview.expense.amount"
         :currency="overview.currency"
-        :large="compact"
+        :compact="compact"
       />
-      <ul class="m-0 min-w-0 list-none p-0" :class="compact ? 'w-full' : 'flex-[1_1_260px]'" aria-hidden="true">
+      <ul v-if="compact" class="m-0 flex min-w-0 flex-1 list-none flex-col gap-2.5 p-0" aria-hidden="true">
         <li
-          v-for="slice in slices"
+          v-for="slice in shownSlices"
+          :key="slice.key"
+          class="grid grid-cols-[10px_minmax(0,1fr)_auto] items-center gap-1.5 text-[13px]"
+        >
+          <span class="size-2.5 rounded-sm" :class="categorySwatchClass(slice.color)" />
+          <span class="truncate font-medium">{{ slice.name }}</span>
+          <span class="font-mono text-[11px] whitespace-nowrap">{{ format(slice.amount, overview.currency) }}</span>
+        </li>
+      </ul>
+      <ul v-else class="m-0 min-w-0 flex-[1_1_260px] list-none p-0" aria-hidden="true">
+        <li
+          v-for="slice in shownSlices"
           :key="slice.key"
           class="grid grid-cols-[12px_minmax(0,1fr)_auto_52px] items-center gap-3 border-t border-bg py-2.5 text-sm"
         >
@@ -104,7 +136,7 @@ const changeLabel = computed(() => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="slice in slices" :key="slice.key">
+          <tr v-for="slice in shownSlices" :key="slice.key">
             <th scope="row">{{ slice.name }}</th>
             <td>{{ format(slice.amount, overview.currency) }}</td>
             <td>{{ percent.share(slice.percent) }}</td>
@@ -113,7 +145,7 @@ const changeLabel = computed(() => {
       </table>
     </div>
     <dl
-      v-if="overview?.hasTransactions"
+      v-if="overview?.hasTransactions && !compact"
       class="m-0 grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 border-t border-track pt-4.5"
     >
       <div class="flex flex-col gap-1">
@@ -122,7 +154,7 @@ const changeLabel = computed(() => {
           {{ overview.expense.change === null ? t('overview.spending.none') : percent.change(overview.expense.change) }}
         </dd>
       </div>
-      <div v-if="!compact" class="flex flex-col gap-1">
+      <div class="flex flex-col gap-1">
         <dt class="text-xs text-muted">{{ t('overview.spending.average') }}</dt>
         <dd class="m-0 font-mono text-base font-medium">
           {{
@@ -132,7 +164,7 @@ const changeLabel = computed(() => {
           }}
         </dd>
       </div>
-      <div v-if="!compact" class="flex flex-col gap-1">
+      <div class="flex flex-col gap-1">
         <dt class="text-xs text-muted">{{ t('overview.spending.count') }}</dt>
         <dd class="m-0 font-mono text-base font-medium">{{ n(overview.transactionCount) }}</dd>
       </div>
