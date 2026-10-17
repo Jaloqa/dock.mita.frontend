@@ -127,6 +127,25 @@ test('copies budgets from the previous period into an empty one', async ({ page 
   await expect(card(page, 'Mieszkanie')).toContainText('of zł 2,160.00')
 })
 
+test('copying after another tab already copied explains why and shows the copied budgets', async ({
+  page,
+  context,
+}) => {
+  await page.goto(`/budgets?period=${shift(1)}`)
+  const copyButton = page.getByRole('button', { name: `Copy budgets from ${monthName(shift(0))}` })
+  await expect(copyButton).toBeVisible()
+
+  const otherTab = await context.newPage()
+  await otherTab.goto(`/budgets?period=${shift(1)}`)
+  await otherTab.getByRole('button', { name: `Copy budgets from ${monthName(shift(0))}` }).click()
+  await expect(otherTab.getByText('8 budgets copied')).toBeVisible()
+  await otherTab.close()
+
+  await copyButton.click()
+  await expect(page.getByText('There is nothing left to copy from the previous period.')).toBeVisible()
+  await expect(cards(page)).toHaveCount(8)
+})
+
 test('does not offer copying when the previous period is empty', async ({ page }) => {
   await page.goto(`/budgets?period=${shift(2)}`)
   await expect(page.getByRole('button', { name: 'Create a budget' })).toBeVisible()
