@@ -27,12 +27,12 @@ const meta = computed(() => {
 <template>
   <article
     :aria-labelledby="headingId"
-    class="flex min-w-0 flex-col gap-4.5 rounded-(--radius-card) p-5.5"
+    class="flex min-w-0 flex-col gap-3.5 rounded-(--radius-card) p-5.5"
     :class="[isDeep ? 'bg-deep text-on-deep' : 'bg-surface text-ink', { 'opacity-75': account.archived }]"
   >
     <div class="flex items-center justify-between gap-2">
       <h2 :id="headingId" class="m-0 truncate text-base font-semibold">{{ account.name }}</h2>
-      <div class="flex shrink-0 items-center gap-1">
+      <div class="-my-2.5 flex shrink-0 items-center gap-1">
         <span
           class="rounded-full px-2.5 py-1 text-xs font-semibold"
           :class="isDeep ? 'bg-on-deep/15 text-on-deep' : 'bg-track text-ink'"
