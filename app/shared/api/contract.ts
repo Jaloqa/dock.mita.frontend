@@ -230,8 +230,6 @@ export type OverviewMonth = {
   planned: number
   spent: number
   left: number
-  daysLeft: number
-  perDay: number | null
   budgets: number
 }
 
@@ -273,7 +271,6 @@ export type OverviewDto = {
   month: OverviewMonth
   topBudgets: OverviewBudgetDto[]
   recent: OverviewTransactionDto[]
-  today: OverviewTransactionDto[]
   goals: OverviewGoalDto[]
   goalCount: number
   hasTransactions: boolean

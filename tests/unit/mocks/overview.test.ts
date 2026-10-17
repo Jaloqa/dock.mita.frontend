@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test'
 import type { BudgetDto, GoalDto, OverviewDto } from '../../../app/shared/api/contract'
 import { convertMinor } from '../../../app/shared/money/money'
-import { addDaysIso, daysLeft, periodFor, shiftPeriod, todayIso } from '../../../app/shared/period/period'
+import { addDaysIso, periodFor, shiftPeriod, todayIso } from '../../../app/shared/period/period'
 import { createMockApi, type MockApi } from '../../../mocks/api'
 import { defaultHandlers } from '../../../mocks/handlers'
 import { percentChange, rangesOf, shareTenths } from '../../../mocks/overview'
@@ -214,7 +214,6 @@ describe('overview', () => {
     await record(mock, 'expense', expenseCategory('groceries'), 50_000)
     await record(mock, 'expense', expenseCategory('cafes'), 9_000)
     await record(mock, 'expense', expenseCategory('housing'), 25_000)
-    const days = daysLeft(current, today)
     const result = await overview(mock, 'week')
     expect(result.month).toEqual({
       period: current.key,
@@ -223,8 +222,6 @@ describe('overview', () => {
       planned: 250_000,
       spent: 84_000,
       left: 166_000,
-      daysLeft: days,
-      perDay: Math.floor(166_000 / days),
       budgets: 6,
     })
     expect(result.topBudgets.map((row) => [row.name, row.status, row.remaining])).toEqual([
@@ -262,7 +259,6 @@ describe('overview', () => {
     }
     const result = await overview(mock)
     expect(result.recent.map((row) => row.title)).toEqual(['t8', 't7', 't6', 't5', 't4', 't3'])
-    expect(result.today.map((row) => row.title)).toEqual(['t8', 't7', 't6', 't5', 't4', 't3', 't2', 't1'])
     expect(result.recent[0]).toEqual({
       id: expect.stringMatching(/^txn_/),
       kind: 'expense',
@@ -309,10 +305,9 @@ describe('overview', () => {
       averageExpense: null,
       transactionCount: 0,
       spending: [],
-      month: { planned: 0, spent: 0, left: 0, perDay: null, budgets: 0 },
+      month: { planned: 0, spent: 0, left: 0, budgets: 0 },
       topBudgets: [],
       recent: [],
-      today: [],
       goals: [],
       goalCount: 0,
       hasTransactions: false,

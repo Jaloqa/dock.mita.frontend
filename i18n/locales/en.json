@@ -550,10 +550,7 @@
       "title": "Budgets · {month}",
       "short": "Budgets",
       "edit": "Edit",
-      "all": "All",
       "amounts": "{spent} / {limit}",
-      "left": "{amount} left",
-      "overspent": "Overspent by {amount}",
       "progress": "{name}: share of the limit spent",
       "empty": "No budgets for this month.",
       "create": "Create a budget"
@@ -580,15 +577,7 @@
     },
     "mobile": {
       "eyebrow": "Budget for",
-      "periodLink": "Budgets by period",
-      "leftThisMonth": "Left this month",
-      "balance": "Total balance",
-      "income": "Income",
-      "expense": "Expenses",
-      "perDay": "You can spend per day",
-      "today": "Today",
-      "todayEmpty": "No transactions today.",
-      "add": "Add a transaction"
+      "periodLink": "Budgets by period"
     }
   },
   "reports": {

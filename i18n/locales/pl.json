@@ -550,10 +550,7 @@
       "title": "Budżety · {month}",
       "short": "Budżety",
       "edit": "Edytuj",
-      "all": "Wszystkie",
       "amounts": "{spent} / {limit}",
-      "left": "Zostało {amount}",
-      "overspent": "Przekroczono o {amount}",
       "progress": "{name}: wykorzystana część limitu",
       "empty": "Brak budżetów na ten miesiąc.",
       "create": "Utwórz budżet"
@@ -580,15 +577,7 @@
     },
     "mobile": {
       "eyebrow": "Budżet na",
-      "periodLink": "Budżety według okresu",
-      "leftThisMonth": "Zostało w tym miesiącu",
-      "balance": "Saldo łączne",
-      "income": "Przychody",
-      "expense": "Wydatki",
-      "perDay": "Możesz wydać dziennie",
-      "today": "Dziś",
-      "todayEmpty": "Dziś brak operacji.",
-      "add": "Dodaj operację"
+      "periodLink": "Budżety według okresu"
     }
   },
   "reports": {
