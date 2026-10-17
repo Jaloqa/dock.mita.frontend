@@ -112,13 +112,13 @@ const newestFirst = (rows: readonly TransactionRow[]): TransactionRow[] =>
 
 function balanceOf(state: MockState, userId: string, base: Currency, today: string): OverviewDto['balance'] {
   const balances = accountBalances(state, userId)
-  const active = state.accounts.filter((row) => row.userId === userId && !row.archived)
+  const holding = state.accounts
+    .filter((row) => row.userId === userId)
+    .map((row) => ({ row, balance: balances.get(row.id) ?? row.openingBalance }))
+    .filter(({ row, balance }) => !row.archived || balance !== 0)
   return {
-    amount: active.reduce(
-      (sum, row) => sum + amountIn(state, balances.get(row.id) ?? row.openingBalance, row.currency, base, today),
-      0,
-    ),
-    accounts: active.length,
+    amount: holding.reduce((sum, { row, balance }) => sum + amountIn(state, balance, row.currency, base, today), 0),
+    accounts: holding.length,
   }
 }
 

@@ -4,6 +4,9 @@ import { toBaseAmount } from '../../../shared/rates/convert'
 
 export type AccountShare = { id: string; name: string; percent: number }
 
+export const holdingAccounts = (accounts: readonly AccountDto[]): AccountDto[] =>
+  accounts.filter((account) => !account.archived || account.balance !== 0)
+
 export function totalInBase(
   accounts: readonly AccountDto[],
   rates: readonly RateDto[],

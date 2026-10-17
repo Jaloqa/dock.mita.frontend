@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { accountShares, totalInBase } from '../../../../app/features/accounts/utils/summary'
+import { accountShares, holdingAccounts, totalInBase } from '../../../../app/features/accounts/utils/summary'
 import type { AccountDto, RateDto } from '../../../../app/shared/api/contract'
 import type { Currency } from '../../../../app/shared/money/money'
 
@@ -26,6 +26,14 @@ describe('accounts summary', () => {
 
   it('includes negative balances in the total', () => {
     expect(totalInBase([account('a', 'PLN', 10_000), account('b', 'PLN', -2_500)], rates, 'PLN')).toBe(7_500)
+  })
+
+  it('keeps archived accounts that still hold money in the total', () => {
+    const archivedWithMoney = { ...account('b', 'PLN', 2_500), archived: true }
+    const archivedEmpty = { ...account('c', 'PLN', 0), archived: true }
+    const holding = holdingAccounts([account('a', 'PLN', 10_000), archivedWithMoney, archivedEmpty])
+    expect(holding.map((entry) => entry.id)).toEqual(['a', 'b'])
+    expect(totalInBase(holding, rates, 'PLN')).toBe(12_500)
   })
 
   it('cannot total without a rate for every currency', () => {
