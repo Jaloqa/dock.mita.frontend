@@ -104,6 +104,14 @@ test('edits the amount with physical digits, comma, dot and Backspace', async ({
   await expect(amount).toHaveText(/^−zł\s42\.75$/)
 })
 
+test('the date label follows the calendar past midnight', async ({ page }) => {
+  await page.clock.install({ time: new Date('2030-06-15T23:59:00') })
+  await page.goto('/transactions/new')
+  await expect(page.getByRole('button', { name: 'Date: Today' })).toBeVisible()
+  await page.clock.runFor('02:00')
+  await expect(page.getByRole('button', { name: 'Date: Yesterday' })).toBeVisible()
+})
+
 test('shows a server error under the date when the date is too far ahead', async ({ page }) => {
   await page.clock.install({ time: new Date('2030-06-15T10:00:00') })
   await page.goto('/transactions/new')

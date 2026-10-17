@@ -1,7 +1,6 @@
 import { useAccounts } from '~/shared/accounts/useAccounts'
 import type { TransactionSort } from '~/shared/api/contract'
 import { useCategories } from '~/shared/categories/useCategories'
-import { todayIso } from '~/shared/period/period'
 import { useUserSettings } from '~/shared/user/useUserSettings'
 import type { TransactionView } from '../types'
 import {
@@ -20,11 +19,11 @@ export function useTransactionsScreen() {
   const settings = useUserSettings()
   const categories = useCategories()
   const accounts = useAccounts()
-  const today = todayIso()
+  const today = useToday()
   const filters = ref<TransactionFilters>(defaultFilters())
   const sort = ref<TransactionSort>('-date')
   const ready = computed(() => !settings.isPending.value && !settings.isError.value)
-  const query = computed(() => toQuery(filters.value, sort.value, today, settings.monthStart.value))
+  const query = computed(() => toQuery(filters.value, sort.value, today.value, settings.monthStart.value))
   const list = useTransactions(query, { enabled: ready })
 
   const unfiltered = computed(() => isUnfilteredQuery(query.value))
@@ -109,6 +108,6 @@ export function useTransactionsScreen() {
     },
     categories: categories.categories,
     accounts: accounts.accounts,
-    periodKey: computed(() => periodKeyOf(filters.value.period, today, settings.monthStart.value)),
+    periodKey: computed(() => periodKeyOf(filters.value.period, today.value, settings.monthStart.value)),
   }
 }

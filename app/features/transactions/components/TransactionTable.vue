@@ -9,7 +9,6 @@ import {
 } from '@tanstack/vue-table'
 import type { TransactionDto, TransactionSort } from '~/shared/api/contract'
 import { categorySwatchClass } from '~/shared/categories/colors'
-import { todayIso } from '~/shared/period/period'
 import type { TransactionView } from '../types'
 import { signedAccountAmount, signedAmount } from '../utils/group'
 
@@ -71,12 +70,12 @@ const table = useTable({
 const ariaSort = (direction: false | 'asc' | 'desc') =>
   direction === 'asc' ? 'ascending' : direction === 'desc' ? 'descending' : undefined
 
-const currentYear = todayIso().slice(0, 4)
+const today = useToday()
 const day = (iso: string) =>
   d(new Date(`${iso}T00:00:00Z`), {
     day: '2-digit',
     month: '2-digit',
-    ...(iso.startsWith(currentYear) ? {} : { year: 'numeric' }),
+    ...(iso.startsWith(today.value.slice(0, 4)) ? {} : { year: 'numeric' }),
     timeZone: 'UTC',
   })
 
