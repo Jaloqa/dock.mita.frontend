@@ -57,7 +57,7 @@ test('shows compact goal cards on mobile', async ({ page, isMobile }) => {
   await expect(page.getByRole('region', { name: 'Goals summary' })).toBeHidden()
   await expect(cards(page)).toHaveCount(3)
   const vacation = card(page, 'Wakacje')
-  await expect(vacation.getByText('zł 4,200.00 / zł 8,000.00')).toBeVisible()
+  await expect(vacation.getByText('4,200 / zł 8,000')).toBeVisible()
   await expect(vacation).toContainText('52%')
   const bar = await vacation.getByRole('progressbar').boundingBox()
   expect(bar?.height).toBe(8)
