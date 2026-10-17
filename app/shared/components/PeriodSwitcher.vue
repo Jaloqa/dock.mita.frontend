@@ -22,6 +22,7 @@ const rangeTitle = computed(() => t('shared.period.range', { from: day(range.val
 
 <template>
   <SelectButton
+    class="mita-segmented"
     v-model="model"
     :options="options"
     option-label="label"

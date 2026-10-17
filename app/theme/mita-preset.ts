@@ -59,7 +59,30 @@ const MitaPreset = definePreset(Aura, {
     },
   },
   components: {
-    button: { root: { iconOnlyWidth: '2.75rem' } },
+    button: {
+      root: { iconOnlyWidth: '2.75rem' },
+      colorScheme: {
+        light: {
+          root: {
+            secondary: {
+              background: '{surface.200}',
+              hoverBackground: '{surface.300}',
+              activeBackground: '{surface.300}',
+              borderColor: '{surface.200}',
+              hoverBorderColor: '{surface.300}',
+              activeBorderColor: '{surface.300}',
+              color: '{surface.800}',
+              hoverColor: '{surface.800}',
+              activeColor: '{surface.800}',
+            },
+          },
+          outlined: { secondary: { borderColor: 'var(--mita-border)', color: 'var(--mita-ink)' } },
+        },
+        dark: {
+          outlined: { secondary: { borderColor: 'var(--mita-border)', color: 'var(--mita-ink)' } },
+        },
+      },
+    },
     togglebutton: { content: { padding: '0.375rem 0.75rem' } },
   },
 })

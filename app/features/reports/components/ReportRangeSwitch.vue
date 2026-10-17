@@ -14,6 +14,7 @@ const options = computed(() => reportRanges.map((range) => ({ value: range, labe
 
 <template>
   <SelectButton
+    class="mita-segmented"
     v-model="model"
     :options="options"
     option-label="label"
