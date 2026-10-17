@@ -641,7 +641,7 @@
     "categoryKindMismatch": "Wybierz kategorię tego samego typu.",
     "expenseCategoryOnly": "Wybierz kategorię wydatków.",
     "budgetExists": "Ta kategoria ma już budżet w tym okresie.",
-    "nothingToCopy": "Poprzedni okres nie ma budżetów do skopiowania.",
+    "nothingToCopy": "Z poprzedniego okresu nie ma już czego kopiować.",
     "deadlinePast": "Wybierz bieżący lub późniejszy miesiąc.",
     "savingsAccountOnly": "Wybierz konto oszczędnościowe.",
     "invalidEmail": "Wpisz poprawny adres e-mail.",

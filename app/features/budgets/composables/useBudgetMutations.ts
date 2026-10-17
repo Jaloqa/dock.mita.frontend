@@ -15,6 +15,6 @@ export function useBudgetMutations() {
       onSuccess,
     }),
     remove: useMutation({ mutationFn: api.remove, onSuccess }),
-    copy: useMutation({ mutationFn: api.copy, onSuccess }),
+    copy: useMutation({ mutationFn: api.copy, onSettled: onSuccess }),
   }
 }
