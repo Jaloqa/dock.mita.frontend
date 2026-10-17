@@ -12,7 +12,7 @@ const headingId = useId()
   <section
     :aria-labelledby="headingId"
     :aria-busy="!overview && !failed"
-    class="flex flex-col gap-1.5 rounded-(--radius-card) bg-surface p-5.5"
+    class="flex flex-col gap-1.5 rounded-(--radius-card) bg-surface p-4 lg:p-5.5"
   >
     <div class="flex items-baseline justify-between gap-2">
       <h2 :id="headingId" class="m-0 text-base font-semibold">{{ t('overview.recent.title') }}</h2>
