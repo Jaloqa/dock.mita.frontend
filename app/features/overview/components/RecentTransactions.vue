@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import type { OverviewDto } from '~/shared/api/contract'
-import { todayIso } from '~/shared/period/period'
 
 defineProps<{ overview?: OverviewDto; failed?: boolean }>()
 const emit = defineEmits<{ retry: [] }>()
 const { t } = useI18n()
-const today = todayIso()
+const today = useToday()
 const headingId = useId()
 </script>
 

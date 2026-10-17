@@ -3,7 +3,7 @@ import { useVuelidate } from '@vuelidate/core'
 import { useAccounts } from '~/shared/accounts/useAccounts'
 import { type CategoryKind, categoryKinds } from '~/shared/api/contract'
 import { useCategories } from '~/shared/categories/useCategories'
-import { addDaysIso, fromLocalDate, todayIso, toLocalDate } from '~/shared/period/period'
+import { addDaysIso, fromLocalDate, toLocalDate } from '~/shared/period/period'
 import { quickAddRules } from '../schemas/transactionSchema'
 import { decimalSeparator, entryToMinor, formatEntry, isDigit, type KeypadKey, pressKey } from '../utils/keypad'
 
@@ -19,13 +19,13 @@ const fields = ['amount', 'categoryId', 'accountId', 'date'] as const
 type Field = (typeof fields)[number]
 type ValidatedField = Exclude<Field, 'date'>
 
-const today = todayIso()
-const maxDate = toLocalDate(addDaysIso(today, 365))
+const today = useToday()
+const maxDate = computed(() => toLocalDate(addDaysIso(today.value, 365)))
 const kind = ref<CategoryKind>('expense')
 const entry = ref('')
 const categoryId = ref<string | null>(null)
 const accountId = ref<string | null>(null)
-const date = ref(today)
+const date = ref(today.value)
 const dateOpen = ref(false)
 const accountOpen = ref(false)
 const rootEl = ref<HTMLElement | null>(null)
@@ -41,8 +41,8 @@ const amountText = computed(
 const loadError = computed(() => categories.isError.value || accounts.isError.value)
 const noAccounts = computed(() => !accounts.isPending.value && accounts.activeAccounts.value.length === 0)
 const dateLabel = computed(() => {
-  if (date.value === today) return t('transactions.day.today')
-  if (date.value === addDaysIso(today, -1)) return t('transactions.day.yesterday')
+  if (date.value === today.value) return t('transactions.day.today')
+  if (date.value === addDaysIso(today.value, -1)) return t('transactions.day.yesterday')
   return d(new Date(`${date.value}T00:00:00Z`), 'dayMonth')
 })
 

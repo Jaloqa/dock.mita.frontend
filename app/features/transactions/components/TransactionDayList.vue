@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { TransactionDto, TransactionSort } from '~/shared/api/contract'
 import type { Currency } from '~/shared/money/money'
-import { addDaysIso, todayIso } from '~/shared/period/period'
+import { addDaysIso } from '~/shared/period/period'
 import type { TransactionView } from '../types'
 import { groupByDay, orderDayGroups, signedAmount } from '../utils/group'
 
@@ -9,8 +9,7 @@ const props = defineProps<{ rows: TransactionView[]; currency: Currency; sort: T
 const emit = defineEmits<{ open: [transaction: TransactionDto] }>()
 const { t, d } = useI18n()
 const { format } = useMoney()
-const today = todayIso()
-const currentYear = today.slice(0, 4)
+const today = useToday()
 
 const groups = computed(() =>
   orderDayGroups(
@@ -20,10 +19,10 @@ const groups = computed(() =>
 )
 
 const label = (date: string) => {
-  if (date === today) return t('transactions.day.today')
-  if (date === addDaysIso(today, -1)) return t('transactions.day.yesterday')
+  if (date === today.value) return t('transactions.day.today')
+  if (date === addDaysIso(today.value, -1)) return t('transactions.day.yesterday')
   const value = new Date(`${date}T00:00:00Z`)
-  if (date.startsWith(currentYear)) return d(value, 'dayMonth')
+  if (date.startsWith(today.value.slice(0, 4))) return d(value, 'dayMonth')
   return d(value, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
 }
 </script>
