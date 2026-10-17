@@ -234,7 +234,7 @@ describe('overview', () => {
     expect(result.topBudgets[0]).toMatchObject({ categoryId: expenseCategory('housing'), limit: 20_000, spent: 25_000 })
   })
 
-  it('totals the balances of active accounts at today’s rate', async () => {
+  it('totals the balances of every account holding money at today’s rate', async () => {
     const mock = api()
     const own = mock.db.state.accounts.filter((row) => row.userId === 'usr_anna')
     const inPln = (row: (typeof own)[number]) =>
@@ -247,8 +247,11 @@ describe('overview', () => {
     expect((await overview(mock)).balance).toEqual({ amount: expected - 12_345, accounts: 4 })
     const cash = own.find((row) => row.id === 'acc_anna_cash')
     if (!cash) throw new Error('no cash account')
+    const cashOpening = cash.openingBalance
     cash.archived = true
-    expect((await overview(mock)).balance).toEqual({ amount: expected - 12_345 - cash.openingBalance, accounts: 3 })
+    expect((await overview(mock)).balance).toEqual({ amount: expected - 12_345, accounts: 4 })
+    cash.openingBalance = 0
+    expect((await overview(mock)).balance).toEqual({ amount: expected - 12_345 - cashOpening, accounts: 3 })
   })
 
   it('lists the newest transactions of the range and all of today', async () => {

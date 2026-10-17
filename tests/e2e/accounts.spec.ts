@@ -60,6 +60,8 @@ test('adds an account after fixing validation errors, then deletes it', async ({
 
 test('archives an account with history and restores it', async ({ page }) => {
   await page.goto('/accounts')
+  await expect(page.getByTestId('accounts-total')).toBeVisible()
+  const total = await page.getByTestId('accounts-total').textContent()
   await card(page, 'Gotówka').getByRole('button', { name: 'Edit Gotówka' }).click()
   const edit = page.getByRole('dialog', { name: 'Edit account' })
   await expect(edit.getByRole('button', { name: 'Delete' })).toHaveCount(0)
@@ -68,6 +70,7 @@ test('archives an account with history and restores it', async ({ page }) => {
   await page.getByRole('alertdialog').getByRole('button', { name: 'Archive' }).click()
   await expect(page.getByText('Account archived')).toBeVisible()
   await expect(card(page, 'Gotówka')).toHaveCount(0)
+  await expect(page.getByTestId('accounts-total')).toHaveText(total ?? '')
 
   await page.getByRole('button', { name: 'Show archived (1)' }).click()
   await card(page, 'Gotówka').getByRole('button', { name: 'Edit Gotówka' }).click()

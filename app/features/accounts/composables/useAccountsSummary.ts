@@ -2,7 +2,7 @@ import { useAccounts } from '~/shared/accounts/useAccounts'
 import type { AccountDto } from '~/shared/api/contract'
 import { useRates } from '~/shared/rates/useRates'
 import { useUserSettings } from '~/shared/user/useUserSettings'
-import { accountShares, totalInBase } from '../utils/summary'
+import { accountShares, holdingAccounts, totalInBase } from '../utils/summary'
 
 export function useAccountsSummary() {
   const accounts = useAccounts()
@@ -19,16 +19,17 @@ export function useAccountsSummary() {
   )
   const active = computed(() => accounts.accounts.value.filter((account) => !account.archived))
   const archived = computed(() => accounts.accounts.value.filter((account) => account.archived))
+  const holding = computed(() => holdingAccounts(accounts.accounts.value))
 
   return {
     active,
     archived,
     baseCurrency: settings.baseCurrency,
     total: computed(() =>
-      ready.value ? totalInBase(active.value, rates.rates.value, settings.baseCurrency.value) : undefined,
+      ready.value ? totalInBase(holding.value, rates.rates.value, settings.baseCurrency.value) : undefined,
     ),
     shares: computed(() =>
-      ready.value ? accountShares(active.value, rates.rates.value, settings.baseCurrency.value) : [],
+      ready.value ? accountShares(holding.value, rates.rates.value, settings.baseCurrency.value) : [],
     ),
     baseAmountOf: (account: AccountDto) => (ready.value ? rates.toBase(account.balance, account.currency) : undefined),
     settingsReady,
