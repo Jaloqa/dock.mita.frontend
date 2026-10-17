@@ -9,6 +9,7 @@ const options = computed(() => overviewRanges.map((range) => ({ value: range, la
 
 <template>
   <SelectButton
+    class="mita-segmented"
     v-model="model"
     :options="options"
     option-label="label"

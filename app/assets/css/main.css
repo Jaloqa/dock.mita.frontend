@@ -112,6 +112,63 @@
   }
 }
 
+/* PrimeVue injects the styles of mounted components outside its cascade layer, so these overrides stay unlayered and win by specificity. */
+html .p-button,
+html .p-inputtext,
+html .p-textarea,
+html .p-select-label,
+html .p-select-option {
+  font-size: 0.875rem;
+}
+
+html .p-button {
+  font-weight: 600;
+}
+
+html .p-button-outlined.p-button-secondary:not(:disabled):not(:hover) {
+  background: var(--mita-surface);
+}
+
+html .mita-segmented {
+  gap: 0;
+  padding: 3px;
+  border: 1px solid var(--mita-border);
+  border-radius: var(--radius-control);
+  background: var(--mita-surface);
+}
+
+html .mita-segmented .p-togglebutton {
+  min-height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--mita-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+html .mita-segmented .p-togglebutton:not(:disabled):hover {
+  background: transparent;
+  color: var(--mita-ink);
+}
+
+html .mita-segmented .p-togglebutton .p-togglebutton-content {
+  height: 100%;
+  padding: 0 14px;
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+html .mita-segmented .p-togglebutton-checked {
+  color: var(--mita-ink);
+  font-weight: 600;
+}
+
+html .mita-segmented .p-togglebutton-checked .p-togglebutton-content {
+  background: var(--mita-track);
+}
+
 @page {
   size: A4;
   margin: 12mm;
