@@ -75,6 +75,8 @@ Until the backend is ready the app runs on mocks. `runtimeConfig.public.apiMocks
 - Feature API modules (`features/<x>/api`) call `apiClient` only. They never know which transport is active.
 - The mock transport routes requests to handlers in `mocks/handlers`, which work on a `localStorage` database. Business rules (balances, currency conversion, budget statuses, aggregates) live in those handlers, as they will in the backend.
 - Mock handlers behave like the real API: `/v1` paths, `userId` from the session, paginated lists, latency, RFC 9457 ProblemDetails for validation errors.
+- Hybrid mode: with `NUXT_PUBLIC_API_MOCKS=true`, `NUXT_PUBLIC_API_REAL_PATHS` (comma-separated, whole path segments, e.g. `/v1/auth,/v1/me,/v1/settings`) routes those paths to the real backend and the rest to mocks. An empty list is pure mock mode; `NUXT_PUBLIC_API_MOCKS=false` sends everything over HTTP.
+- The HTTP transport is same-origin: a Nitro middleware (`server/middleware/apiProxy.ts`) forwards `/v1/**` to `NUXT_API_PROXY_TARGET` (`http://localhost:8080` locally, `http://host.docker.internal:8080` in Docker dev). The target is read at runtime from `runtimeConfig.apiProxyTarget`, so a built image honours the variable; when it is empty the middleware does nothing.
 - `mocks/` is loaded only when the flag is on. Removing mocks later means deleting `mocks/` and the mock transport; nothing else changes.
 
 ## Internationalization
