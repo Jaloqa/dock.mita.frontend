@@ -24,11 +24,12 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     // The refresh cookie is scoped to /v1/auth, so page requests never carry it, and a rotation done on the server would never reach the browser.
     refresh: import.meta.client,
   })
-  const realPaths = parseRealPaths(config.public.apiRealPaths)
+  const mode = useApiMode()
   let transport: Transport = http
-  if (config.public.apiMocks && realPaths.length === 0) {
+  if (mode === 'mock') {
     transport = await loadMockTransport()
-  } else if (config.public.apiMocks) {
+  } else if (mode === 'hybrid') {
+    const realPaths = parseRealPaths(config.public.apiRealPaths)
     const mock = await loadMockTransport({
       currentUserId: () => nuxtApp.$queryClient.getQueryData<UserDto>(userKeys.me)?.id,
     })

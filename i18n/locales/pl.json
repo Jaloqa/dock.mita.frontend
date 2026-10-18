@@ -115,7 +115,9 @@
       "description": "Wszystkie Twoje konta, operacje, budżety, cele, kategorie i ustawienia zostaną usunięte, a dane demonstracyjne przywrócone. Tego nie można cofnąć.",
       "confirmLabel": "Wpisz {email}, aby potwierdzić",
       "confirm": "Usuń konto",
-      "done": "Konto usunięte. Przywrócono dane demonstracyjne."
+      "done": "Konto usunięte. Przywrócono dane demonstracyjne.",
+      "passwordLabel": "Hasło",
+      "realDescription": "Twoje konto i wszystkie jego dane zostaną trwale usunięte. Tej operacji nie można cofnąć. Podaj hasło, aby potwierdzić."
     },
     "demo": {
       "title": "Demo",
@@ -658,7 +660,8 @@
       "tooManyAttempts": "Zbyt wiele prób. Odczekaj chwilę i spróbuj ponownie.",
       "sessionExpired": "Sesja wygasła. Zaloguj się ponownie."
     },
-    "preferences": "Ustawienia wyświetlania"
+    "preferences": "Ustawienia wyświetlania",
+    "logout": "Wyloguj się"
   },
   "validation": {
     "required": "To pole jest wymagane.",

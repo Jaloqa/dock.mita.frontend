@@ -1,8 +1,21 @@
 <script setup lang="ts">
+import { useSession } from '~/shared/auth/useSession'
+
 const emit = defineEmits<{ addTransaction: [] }>()
 const { t } = useI18n()
 const localePath = useLocalePath()
 const route = useRoute()
+const { user, logout } = useSession()
+const signingOut = ref(false)
+
+async function signOut() {
+  signingOut.value = true
+  try {
+    await logout()
+  } finally {
+    signingOut.value = false
+  }
+}
 
 const isActive = (to: string) => route.path === localePath(to)
 
@@ -44,5 +57,20 @@ const linkClass = (to: string) => [
       <AppIcon :name="settingsNavigation.icon" />
       {{ t('navigation.settings') }}
     </NuxtLinkLocale>
+    <div class="mt-auto flex items-center gap-1 border-t border-border pt-4">
+      <p class="m-0 min-w-0 flex-1 truncate px-2 text-sm font-semibold" data-testid="sidebar-user">
+        {{ user?.name }}
+      </p>
+      <button
+        type="button"
+        :aria-label="t('auth.logout')"
+        :title="t('auth.logout')"
+        :disabled="signingOut"
+        class="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-(--radius-control) border-0 bg-transparent text-muted hover:bg-surface/60 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-wait disabled:opacity-60"
+        @click="signOut"
+      >
+        <AppIcon name="logout" />
+      </button>
+    </div>
   </nav>
 </template>

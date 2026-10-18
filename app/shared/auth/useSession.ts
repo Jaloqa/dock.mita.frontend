@@ -19,6 +19,12 @@ export function useSession() {
     return signedIn
   }
 
+  const end = async () => {
+    status.value = 'anonymous'
+    queryClient.clear()
+    await navigateTo(localePath('login'))
+  }
+
   return {
     user,
     status: computed(() => status.value),
@@ -28,10 +34,12 @@ export function useSession() {
       try {
         await api.logout()
       } finally {
-        status.value = 'anonymous'
-        queryClient.clear()
-        await navigateTo(localePath('login'))
+        await end()
       }
+    },
+    deleteAccount: async (password: string) => {
+      await api.deleteAccount(password)
+      await end()
     },
   }
 }

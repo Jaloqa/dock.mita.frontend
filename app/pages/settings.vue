@@ -4,7 +4,7 @@ const notify = useNotify()
 const { exporting, exportCsv } = useTransactionExport()
 const categoriesOpen = ref(false)
 const deleteOpen = ref(false)
-const mocks = useRuntimeConfig().public.apiMocks
+const apiMode = useApiMode()
 
 useHead({ title: () => t('navigation.settings') })
 </script>
@@ -17,14 +17,14 @@ useHead({ title: () => t('navigation.settings') })
     <NotificationsSection />
     <DataSection
       :exporting="exporting"
-      :can-delete-account="mocks"
       @export="exportCsv({})"
       @import="notify.info(t('settings.data.importSoon'))"
       @manage-categories="categoriesOpen = true"
       @delete-account="deleteOpen = true"
     />
-    <DemoSection v-if="mocks" />
+    <DemoSection v-if="apiMode === 'mock'" />
   </div>
   <CategoryManagerDialog v-model:visible="categoriesOpen" />
-  <DeleteAccountDialog v-if="mocks" v-model:visible="deleteOpen" />
+  <DeleteAccountDialog v-if="apiMode === 'mock'" v-model:visible="deleteOpen" />
+  <DeleteAccountPasswordDialog v-else v-model:visible="deleteOpen" />
 </template>

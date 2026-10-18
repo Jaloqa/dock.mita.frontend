@@ -20,3 +20,4 @@ export type IconName =
   | 'backspace'
   | 'eye'
   | 'eyeOff'
+  | 'logout'
