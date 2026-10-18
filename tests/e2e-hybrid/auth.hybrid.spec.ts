@@ -35,7 +35,7 @@ test('a real account registers, keeps its settings, signs out and in, and is del
   await expect(mainNav(page).getByText(name, { exact: true })).toBeVisible()
 
   await page.goto('/accounts')
-  await expect(page.getByRole('heading', { name: 'Konto główne', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Accounts', exact: true })).toBeVisible()
 
   await openSettings(page)
   await expect(section(page, 'Demo')).toHaveCount(0)
