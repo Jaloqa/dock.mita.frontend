@@ -20,4 +20,6 @@ export default defineNuxtPlugin((nuxtApp) => {
   if (import.meta.client && state.value) {
     hydrate(queryClient, state.value)
   }
+
+  return { provide: { queryClient } }
 })

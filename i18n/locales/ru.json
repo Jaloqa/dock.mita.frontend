@@ -62,6 +62,9 @@
       "searchMessage": "Найдено результатов: {0}",
       "selectionMessage": "Выбрано элементов: {0}",
       "close": "Закрыть"
+    },
+    "session": {
+      "loading": "Проверяем сессию"
     }
   },
   "settings": {

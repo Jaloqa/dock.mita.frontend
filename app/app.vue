@@ -14,9 +14,11 @@ useHead({
 </script>
 
 <template>
-  <NuxtLayout>
-    <NuxtPage />
-  </NuxtLayout>
+  <SessionGate>
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
+  </SessionGate>
   <Toast />
   <ConfirmDialog />
 </template>

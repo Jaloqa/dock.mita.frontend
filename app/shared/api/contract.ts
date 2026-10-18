@@ -20,6 +20,12 @@ export type UserDto = { id: string; name: string; email: string; createdAt: stri
 
 export type UpdateMeRequest = { name: string; email: string }
 
+export type RegisterRequest = { name: string; email: string; password: string }
+
+export type LoginRequest = { email: string; password: string }
+
+export type DeleteAccountRequest = { password: string }
+
 export type SettingsDto = {
   baseCurrency: Currency
   locale: Locale

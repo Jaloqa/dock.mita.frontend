@@ -41,11 +41,13 @@ describe('createApiClient', () => {
     await client.post('/v1/items', { name: 'a' })
     await client.put('/v1/items/1', { name: 'b' })
     await client.delete('/v1/items/1')
+    await client.delete('/v1/me', { password: 'secret' })
     expect(seen).toEqual([
       { method: 'GET', path: '/v1/items', query: { page: 2 } },
       { method: 'POST', path: '/v1/items', body: { name: 'a' } },
       { method: 'PUT', path: '/v1/items/1', body: { name: 'b' } },
       { method: 'DELETE', path: '/v1/items/1' },
+      { method: 'DELETE', path: '/v1/me', body: { password: 'secret' } },
     ])
   })
 })

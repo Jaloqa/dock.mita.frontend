@@ -62,6 +62,9 @@
       "searchMessage": "Dostępne wyniki: {0}",
       "selectionMessage": "Wybrane elementy: {0}",
       "close": "Zamknij"
+    },
+    "session": {
+      "loading": "Sprawdzamy sesję"
     }
   },
   "settings": {

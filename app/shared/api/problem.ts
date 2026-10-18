@@ -14,13 +14,15 @@ export class ApiError extends Error {
   readonly title: string
   readonly code: string | undefined
   readonly fieldErrors: Record<string, string[]>
+  readonly retryAfter: number | undefined
 
-  constructor(problem: ProblemDetails) {
+  constructor(problem: ProblemDetails, retryAfter?: number) {
     super(problem.detail ?? problem.title)
     this.name = 'ApiError'
     this.status = problem.status
     this.title = problem.title
     this.code = problem.code
+    this.retryAfter = retryAfter
     this.fieldErrors = Object.fromEntries(
       Object.entries(problem.errors ?? {}).map(([field, messages]) => [camelCase(field), messages]),
     )
@@ -35,9 +37,9 @@ const isProblemDetails = (value: unknown): value is ProblemDetails =>
   typeof (value as { status?: unknown }).status === 'number' &&
   typeof (value as { title?: unknown }).title === 'string'
 
-export function toApiError(status: number, body: unknown): ApiError {
-  if (isProblemDetails(body)) return new ApiError(body)
-  return new ApiError({ status, title: status >= 500 ? 'Server error' : 'Request failed' })
+export function toApiError(status: number, body: unknown, retryAfter?: number): ApiError {
+  if (isProblemDetails(body)) return new ApiError(body, retryAfter)
+  return new ApiError({ status, title: status >= 500 ? 'Server error' : 'Request failed' }, retryAfter)
 }
 
 export const fieldErrorsOf = (error: unknown, field: string): string[] =>
