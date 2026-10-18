@@ -7,11 +7,19 @@ type Call = { url: string; method: string; headers: Record<string, string> }
 const unauthorized = () =>
   Object.assign(new Error('401'), { status: 401, data: { title: 'Unauthorized', status: 401 } })
 
+const tooManyRequests = (retryAfter?: string) =>
+  Object.assign(new Error('429'), {
+    status: 429,
+    response: { headers: new Headers(retryAfter === undefined ? {} : { 'Retry-After': retryAfter }) },
+  })
+
 const setup = (
   handler: (call: Call, index: number) => unknown | Promise<unknown>,
   token: () => string | undefined = () => 'tok',
+  refresh?: boolean,
 ) => {
   const calls: Call[] = []
+  const sleeps: number[] = []
   let expired = 0
   const fetcher: Fetcher = async (url, options) => {
     const call = { url, method: options.method, headers: options.headers }
@@ -25,8 +33,12 @@ const setup = (
     onSessionExpired: () => {
       expired++
     },
+    sleep: async (ms) => {
+      sleeps.push(ms)
+    },
+    ...(refresh === undefined ? {} : { refresh }),
   })
-  return { transport, calls, expired: () => expired }
+  return { transport, calls, sleeps, expired: () => expired }
 }
 
 describe('http transport xsrf header', () => {
@@ -107,14 +119,57 @@ describe('http transport refresh', () => {
     expect(calls).toHaveLength(2)
   })
 
-  it('treats a 429 refresh as failure', async () => {
-    const { transport, expired } = setup((call) => {
-      if (call.url === '/v1/auth/refresh') throw Object.assign(new Error('429'), { status: 429 })
+  it('waits Retry-After and refreshes again after a 429', async () => {
+    let refreshCalls = 0
+    const { transport, calls, expired, sleeps } = setup((call) => {
+      if (call.url === '/v1/auth/refresh') {
+        refreshCalls++
+        if (refreshCalls === 1) throw tooManyRequests('0')
+        return undefined
+      }
+      if (refreshCalls < 2) throw unauthorized()
+      return { ok: true }
+    })
+    expect(await transport({ method: 'GET', path: '/v1/me' })).toEqual({ ok: true })
+    expect(calls.filter((c) => c.url === '/v1/auth/refresh')).toHaveLength(2)
+    expect(sleeps).toEqual([0])
+    expect(expired()).toBe(0)
+  })
+
+  it('throws the original 401 without expiry when refresh answers 503', async () => {
+    const { transport, calls, expired } = setup((call) => {
+      if (call.url === '/v1/auth/refresh') throw Object.assign(new Error('503'), { status: 503 })
       throw unauthorized()
     })
     const error = await transport({ method: 'GET', path: '/v1/me' }).catch((e: unknown) => e)
     expect((error as ApiError).status).toBe(401)
+    expect(calls.filter((c) => c.url === '/v1/auth/refresh')).toHaveLength(1)
+    expect(expired()).toBe(0)
+  })
+
+  it('refreshes once and signals expiry once for concurrent 401s when refresh answers 401', async () => {
+    const { transport, calls, expired } = setup(async (call) => {
+      if (call.url === '/v1/auth/refresh') await new Promise((resolve) => setTimeout(resolve, 5))
+      throw unauthorized()
+    })
+    const errors = await Promise.all(
+      Array.from({ length: 5 }, () => transport({ method: 'GET', path: '/v1/me' }).catch((e: unknown) => e)),
+    )
+    expect(errors.map((e) => (e as ApiError).status)).toEqual([401, 401, 401, 401, 401])
+    expect(calls.filter((c) => c.url === '/v1/auth/refresh')).toHaveLength(1)
     expect(expired()).toBe(1)
+  })
+
+  it('gives up without expiry after three 429 refresh answers', async () => {
+    const { transport, calls, expired, sleeps } = setup((call) => {
+      if (call.url === '/v1/auth/refresh') throw tooManyRequests(calls.length === 2 ? undefined : '120')
+      throw unauthorized()
+    })
+    const error = await transport({ method: 'GET', path: '/v1/me' }).catch((e: unknown) => e)
+    expect((error as ApiError).status).toBe(401)
+    expect(calls.filter((c) => c.url === '/v1/auth/refresh')).toHaveLength(3)
+    expect(sleeps).toEqual([1000, 30000])
+    expect(expired()).toBe(0)
   })
 
   it('does not refresh for /v1/auth/* paths', async () => {
@@ -124,6 +179,20 @@ describe('http transport refresh', () => {
     const error = await transport({ method: 'POST', path: '/v1/auth/login' }).catch((e: unknown) => e)
     expect((error as ApiError).status).toBe(401)
     expect(calls).toHaveLength(1)
+    expect(expired()).toBe(0)
+  })
+
+  it('throws the 401 without refreshing or signalling expiry when refresh is disabled', async () => {
+    const { transport, calls, expired } = setup(
+      () => {
+        throw unauthorized()
+      },
+      () => 'tok',
+      false,
+    )
+    const error = await transport({ method: 'GET', path: '/v1/me' }).catch((e: unknown) => e)
+    expect((error as ApiError).status).toBe(401)
+    expect(calls.map((c) => c.url)).toEqual(['/v1/me'])
     expect(expired()).toBe(0)
   })
 

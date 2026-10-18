@@ -62,6 +62,9 @@
       "searchMessage": "Знайдено результатів: {0}",
       "selectionMessage": "Вибрано елементів: {0}",
       "close": "Закрити"
+    },
+    "session": {
+      "loading": "Перевіряємо сесію"
     }
   },
   "settings": {

@@ -62,6 +62,9 @@
       "searchMessage": "Results available: {0}",
       "selectionMessage": "Items selected: {0}",
       "close": "Close"
+    },
+    "session": {
+      "loading": "Checking your session"
     }
   },
   "settings": {
