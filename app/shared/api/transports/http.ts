@@ -1,5 +1,5 @@
-import { toApiError } from '../problem'
-import type { HttpMethod, QueryValue, Transport } from '../transport'
+import { ApiError, toApiError } from '../problem'
+import type { ApiRequest, HttpMethod, QueryValue, Transport } from '../transport'
 
 export type Fetcher = (
   url: string,
@@ -27,18 +27,59 @@ const statusOf = (error: unknown): number => {
   return typeof status === 'number' ? status : 503
 }
 
-export function createHttpTransport(fetcher: Fetcher, options: { baseUrl: string; locale: () => string }): Transport {
-  return async (request) => {
+const XSRF_METHODS = new Set<HttpMethod>(['POST', 'PUT', 'DELETE'])
+const REFRESH_PATH = '/v1/auth/refresh'
+const isAuthPath = (path: string) => path.startsWith('/v1/auth/')
+
+export function createHttpTransport(
+  fetcher: Fetcher,
+  options: {
+    baseUrl: string
+    locale: () => string
+    xsrfToken: () => string | undefined
+    onSessionExpired: () => void
+  },
+): Transport {
+  const send = async (request: ApiRequest) => {
+    const headers: Record<string, string> = { 'Accept-Language': options.locale() }
+    if (XSRF_METHODS.has(request.method)) {
+      const token = options.xsrfToken()
+      if (token) headers['X-XSRF-TOKEN'] = token
+    }
     try {
       return await fetcher(`${options.baseUrl}${request.path}`, {
         method: request.method,
         query: definedOnly(request.query),
         body: request.body,
-        headers: { 'Accept-Language': options.locale() },
+        headers,
         credentials: 'include',
       })
     } catch (error) {
       throw toApiError(statusOf(error), (error as { data?: unknown } | null)?.data)
+    }
+  }
+
+  let refreshing: Promise<boolean> | undefined
+  const refresh = () => {
+    refreshing ??= send({ method: 'POST', path: REFRESH_PATH })
+      .then(() => true)
+      .catch(() => {
+        options.onSessionExpired()
+        return false
+      })
+      .finally(() => {
+        refreshing = undefined
+      })
+    return refreshing
+  }
+
+  return async (request) => {
+    try {
+      return await send(request)
+    } catch (error) {
+      if (!(error instanceof ApiError) || error.status !== 401 || isAuthPath(request.path)) throw error
+      if (!(await refresh())) throw error
+      return send(request)
     }
   }
 }

@@ -57,7 +57,12 @@ describe('createHttpTransport', () => {
       calls.push(args)
       return { id: 1 }
     }
-    const transport = createHttpTransport(fetcher, { baseUrl: 'https://api.test', locale: () => 'pl' })
+    const transport = createHttpTransport(fetcher, {
+      baseUrl: 'https://api.test',
+      locale: () => 'pl',
+      xsrfToken: () => undefined,
+      onSessionExpired: () => {},
+    })
     const result = await transport({ method: 'GET', path: '/v1/items', query: { page: 1, search: undefined } })
     expect(result).toEqual({ id: 1 })
     expect(calls[0]).toEqual([
@@ -79,7 +84,12 @@ describe('createHttpTransport', () => {
         data: { title: 'Invalid', status: 400, errors: { Name: ['x'] } },
       })
     }
-    const transport = createHttpTransport(fetcher, { baseUrl: '', locale: () => 'en' })
+    const transport = createHttpTransport(fetcher, {
+      baseUrl: '',
+      locale: () => 'en',
+      xsrfToken: () => undefined,
+      onSessionExpired: () => {},
+    })
     const error = await transport({ method: 'POST', path: '/v1/items' }).catch((e: unknown) => e)
     expect(error).toBeInstanceOf(ApiError)
     expect((error as ApiError).fieldErrors).toEqual({ name: ['x'] })
@@ -89,7 +99,12 @@ describe('createHttpTransport', () => {
     const fetcher: Fetcher = async () => {
       throw new TypeError('fetch failed')
     }
-    const transport = createHttpTransport(fetcher, { baseUrl: '', locale: () => 'en' })
+    const transport = createHttpTransport(fetcher, {
+      baseUrl: '',
+      locale: () => 'en',
+      xsrfToken: () => undefined,
+      onSessionExpired: () => {},
+    })
     const error = await transport({ method: 'GET', path: '/v1/items' }).catch((e: unknown) => e)
     expect(error).toMatchObject({ status: 503, title: 'Server error' })
   })
