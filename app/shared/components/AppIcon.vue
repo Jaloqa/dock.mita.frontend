@@ -64,5 +64,15 @@ withDefaults(defineProps<{ name: IconName; size?: number; strokeWidth?: number }
     <path v-else-if="name === 'arrowUp'" d="M12 19V5M6 11l6-6 6 6" />
     <path v-else-if="name === 'arrowDown'" d="M12 5v14M6 13l6 6 6-6" />
     <path v-else-if="name === 'backspace'" d="M21 5H9l-6 7 6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1zM12 9l6 6M18 9l-6 6" />
+    <template v-else-if="name === 'eye'">
+      <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" />
+      <circle cx="12" cy="12" r="3" />
+    </template>
+    <template v-else-if="name === 'eyeOff'">
+      <path
+        d="M10.6 5.6A9.6 9.6 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-2.6 3.4M6.6 6.6A16.6 16.6 0 0 0 2.5 12S6 18.5 12 18.5a9.3 9.3 0 0 0 5.4-1.6"
+      />
+      <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2M3 3l18 18" />
+    </template>
   </svg>
 </template>

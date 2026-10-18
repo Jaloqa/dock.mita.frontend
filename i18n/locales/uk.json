@@ -628,6 +628,38 @@
       "showYear": "Показати рік"
     }
   },
+  "auth": {
+    "login": {
+      "title": "Вхід",
+      "subtitle": "З поверненням. Введіть email і пароль.",
+      "submit": "Увійти",
+      "noAccount": "Ще немає акаунта?",
+      "registerLink": "Зареєструватися",
+      "demoHint": "Демо-акаунти: {anna} або {oleh}, пароль {password}"
+    },
+    "register": {
+      "title": "Реєстрація",
+      "subtitle": "Сплануйте бюджет за кілька хвилин.",
+      "submit": "Створити акаунт",
+      "hasAccount": "Вже маєте акаунт?",
+      "loginLink": "Увійти",
+      "passwordHint": "Мінімум 10 символів"
+    },
+    "fields": {
+      "name": "Ім'я",
+      "email": "Email",
+      "password": "Пароль"
+    },
+    "password": {
+      "show": "Показати пароль"
+    },
+    "errors": {
+      "invalidCredentials": "Неправильний email або пароль.",
+      "tooManyAttempts": "Забагато спроб. Зачекайте трохи й спробуйте знову.",
+      "sessionExpired": "Сесія закінчилася. Увійдіть знову."
+    },
+    "preferences": "Налаштування відображення"
+  },
   "validation": {
     "required": "Обов'язкове поле.",
     "invalidValue": "Неприпустиме значення.",
@@ -655,6 +687,7 @@
     "invalidEmail": "Введіть коректний email.",
     "emailTaken": "Цей email уже використовується.",
     "passwordTooShort": "Не менше 10 символів.",
-    "passwordTooLong": "Не більше 128 символів."
+    "passwordTooLong": "Не більше 128 символів.",
+    "invalidPassword": "Неправильний пароль."
   }
 }

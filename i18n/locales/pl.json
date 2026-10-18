@@ -628,6 +628,38 @@
       "showYear": "Pokaż rok"
     }
   },
+  "auth": {
+    "login": {
+      "title": "Zaloguj się",
+      "subtitle": "Witaj ponownie. Podaj e-mail i hasło.",
+      "submit": "Zaloguj się",
+      "noAccount": "Nie masz konta?",
+      "registerLink": "Załóż je",
+      "demoHint": "Konta demo: {anna} lub {oleh}, hasło {password}"
+    },
+    "register": {
+      "title": "Załóż konto",
+      "subtitle": "Zaplanuj budżet w kilka minut.",
+      "submit": "Załóż konto",
+      "hasAccount": "Masz już konto?",
+      "loginLink": "Zaloguj się",
+      "passwordHint": "Min. 10 znaków"
+    },
+    "fields": {
+      "name": "Imię",
+      "email": "E-mail",
+      "password": "Hasło"
+    },
+    "password": {
+      "show": "Pokaż hasło"
+    },
+    "errors": {
+      "invalidCredentials": "Nieprawidłowy e-mail lub hasło.",
+      "tooManyAttempts": "Zbyt wiele prób. Odczekaj chwilę i spróbuj ponownie.",
+      "sessionExpired": "Sesja wygasła. Zaloguj się ponownie."
+    },
+    "preferences": "Ustawienia wyświetlania"
+  },
   "validation": {
     "required": "To pole jest wymagane.",
     "invalidValue": "Ta wartość jest nieprawidłowa.",
@@ -655,6 +687,7 @@
     "invalidEmail": "Wpisz poprawny adres e-mail.",
     "emailTaken": "Ten adres e-mail jest już używany.",
     "passwordTooShort": "Użyj co najmniej 10 znaków.",
-    "passwordTooLong": "Użyj najwyżej 128 znaków."
+    "passwordTooLong": "Użyj najwyżej 128 znaków.",
+    "invalidPassword": "Nieprawidłowe hasło."
   }
 }
