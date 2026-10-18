@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useVuelidate } from '@vuelidate/core'
+import { useSession } from '~/shared/auth/useSession'
 import { useCurrentUser } from '~/shared/user/useCurrentUser'
 import { type ProfileForm, profileRules } from '../schemas/profileSchema'
 
@@ -8,6 +9,17 @@ const notify = useNotify()
 const server = useServerErrors()
 const { user, isPending, isError, refetch } = useCurrentUser()
 const update = useProfileUpdate()
+const { logout } = useSession()
+const signingOut = ref(false)
+
+async function signOut() {
+  signingOut.value = true
+  try {
+    await logout()
+  } finally {
+    signingOut.value = false
+  }
+}
 
 const fields = ['name', 'email'] as const
 type Field = (typeof fields)[number]
@@ -97,13 +109,25 @@ async function submit() {
           />
         </template>
       </FormRow>
-      <Button
-        type="submit"
-        :label="t('shared.actions.save')"
-        class="min-h-11 self-start"
-        :loading="update.isPending.value"
-        :disabled="update.isPending.value"
-      />
+      <div class="flex flex-wrap gap-2">
+        <Button
+          type="submit"
+          :label="t('shared.actions.save')"
+          class="min-h-11"
+          :loading="update.isPending.value"
+          :disabled="update.isPending.value"
+        />
+        <Button
+          type="button"
+          :label="t('auth.logout')"
+          severity="secondary"
+          outlined
+          class="min-h-11"
+          :loading="signingOut"
+          :disabled="signingOut"
+          @click="signOut"
+        />
+      </div>
     </form>
   </SettingsCard>
 </template>

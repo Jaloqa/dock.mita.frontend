@@ -115,7 +115,9 @@
       "description": "Your accounts, transactions, budgets, goals, categories and settings will be erased and the demo data restored. This cannot be undone.",
       "confirmLabel": "Type {email} to confirm",
       "confirm": "Delete account",
-      "done": "Account deleted. Demo data restored."
+      "done": "Account deleted. Demo data restored.",
+      "passwordLabel": "Password",
+      "realDescription": "Your account and all its data will be permanently erased. This cannot be undone. Enter your password to confirm."
     },
     "demo": {
       "title": "Demo",
@@ -658,7 +660,8 @@
       "tooManyAttempts": "Too many attempts. Wait a moment and try again.",
       "sessionExpired": "Your session has expired. Sign in again."
     },
-    "preferences": "Display preferences"
+    "preferences": "Display preferences",
+    "logout": "Sign out"
   },
   "validation": {
     "required": "This field is required.",

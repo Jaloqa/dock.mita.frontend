@@ -1,5 +1,5 @@
 <script setup lang="ts">
-defineProps<{ exporting: boolean; canDeleteAccount: boolean }>()
+defineProps<{ exporting: boolean }>()
 const emit = defineEmits<{ export: []; import: []; manageCategories: []; deleteAccount: [] }>()
 const { t } = useI18n()
 
@@ -29,7 +29,6 @@ const actionClass =
         {{ t('settings.data.manageCategories') }}
       </button>
       <button
-        v-if="canDeleteAccount"
         type="button"
         class="mt-2 min-h-11 self-start rounded-(--radius-control) px-1 text-sm font-semibold text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         @click="emit('deleteAccount')"

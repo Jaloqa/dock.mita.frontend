@@ -35,7 +35,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   if (import.meta.server) {
-    const meIsReal = !config.public.apiMocks || matchesRealPath(ME_PATH, parseRealPaths(config.public.apiRealPaths))
+    const mode = useApiMode()
+    const meIsReal =
+      mode === 'real' || (mode === 'hybrid' && matchesRealPath(ME_PATH, parseRealPaths(config.public.apiRealPaths)))
     // Without the proxy target a same-origin /v1/me would be rendered by Nuxt itself and run this middleware again.
     const reachable = config.apiProxyTarget !== ''
     if (meIsReal && reachable && status.value === 'unknown') await probe(false, 'unknown')

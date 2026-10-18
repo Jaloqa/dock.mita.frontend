@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useVuelidate } from '@vuelidate/core'
-import { parseRealPaths } from '~/shared/api/transports/routing'
 import { useSession } from '~/shared/auth/useSession'
 import { type LoginFields, loginRules } from '../schemas/authSchema'
 import { authMessageKey } from '../utils/authMessage'
@@ -8,7 +7,6 @@ import { demoAccounts } from '../utils/demoAccounts'
 
 const { t } = useI18n()
 const route = useRoute()
-const config = useRuntimeConfig().public
 const session = useSession()
 const server = useServerErrors()
 const { linkTo, continueToApp } = useAuthRedirect()
@@ -22,7 +20,7 @@ const formEl = ref<HTMLFormElement | null>(null)
 const pending = ref(false)
 const hydrated = ref(false)
 const messageKey = ref(route.query.expired === '1' ? 'auth.errors.sessionExpired' : undefined)
-const pureMocks = config.apiMocks && parseRealPaths(config.apiRealPaths).length === 0
+const pureMocks = useApiMode() === 'mock'
 const [annaEmail, olehEmail] = demoAccounts.emails
 
 // Until hydration a click would submit the native form as a GET to the same page and drop what was typed.
