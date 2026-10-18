@@ -35,7 +35,9 @@ export function createMockApi(options: {
     db,
     handle: async (request) => {
       const isDemo = request.path.startsWith('/v1/demo/')
-      if (db.state.simulateErrors && !isDemo && random() < SIMULATED_ERROR_RATE) {
+      // A failed session probe signs the user out, which would turn the error demo into a logout demo.
+      const isSession = request.path.startsWith('/v1/auth/') || (request.method === 'GET' && request.path === '/v1/me')
+      if (db.state.simulateErrors && !isDemo && !isSession && random() < SIMULATED_ERROR_RATE) {
         throw new MockHttpError({ status: 500, title: 'Simulated server error' })
       }
       const match = router.match(request.method, request.path) ?? notFound()

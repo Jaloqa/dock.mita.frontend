@@ -118,6 +118,23 @@ describe('mock api', () => {
     })
     expect(await api.handle({ method: 'GET', path: '/v1/demo/ping' })).toBe('pong')
   })
+
+  it('never simulates errors on the session probe and the auth endpoints', async () => {
+    const api = loggedIn({
+      random: () => 0,
+      register: [
+        (router) => router.on('GET', '/v1/me', () => 'me'),
+        (router) => router.on('PUT', '/v1/me', () => 'updated'),
+        (router) => router.on('POST', '/v1/auth/login', () => 'signed in'),
+      ],
+    })
+    api.db.state.simulateErrors = true
+    expect(await api.handle({ method: 'GET', path: '/v1/me' })).toBe('me')
+    expect(await api.handle({ method: 'POST', path: '/v1/auth/login' })).toBe('signed in')
+    expect(await api.handle({ method: 'PUT', path: '/v1/me' }).catch((e: unknown) => e)).toMatchObject({
+      problem: { status: 500 },
+    })
+  })
 })
 
 describe('mock transport', () => {

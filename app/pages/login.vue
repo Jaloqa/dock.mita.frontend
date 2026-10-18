@@ -1,7 +1,11 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'focus' })
+definePageMeta({ layout: 'auth' })
+
+const { t } = useI18n()
+
+useHead({ title: () => t('auth.login.title') })
 </script>
 
 <template>
-  <div data-testid="login-page" />
+  <LoginForm />
 </template>

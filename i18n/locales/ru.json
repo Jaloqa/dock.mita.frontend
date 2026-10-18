@@ -628,6 +628,38 @@
       "showYear": "Показать год"
     }
   },
+  "auth": {
+    "login": {
+      "title": "Вход",
+      "subtitle": "С возвращением. Введите email и пароль.",
+      "submit": "Войти",
+      "noAccount": "Ещё нет аккаунта?",
+      "registerLink": "Зарегистрироваться",
+      "demoHint": "Демо-аккаунты: {anna} или {oleh}, пароль {password}"
+    },
+    "register": {
+      "title": "Регистрация",
+      "subtitle": "Спланируйте бюджет за несколько минут.",
+      "submit": "Создать аккаунт",
+      "hasAccount": "Уже есть аккаунт?",
+      "loginLink": "Войти",
+      "passwordHint": "Минимум 10 символов"
+    },
+    "fields": {
+      "name": "Имя",
+      "email": "Email",
+      "password": "Пароль"
+    },
+    "password": {
+      "show": "Показать пароль"
+    },
+    "errors": {
+      "invalidCredentials": "Неверный email или пароль.",
+      "tooManyAttempts": "Слишком много попыток. Подождите немного и попробуйте снова.",
+      "sessionExpired": "Сессия истекла. Войдите снова."
+    },
+    "preferences": "Настройки отображения"
+  },
   "validation": {
     "required": "Обязательное поле.",
     "invalidValue": "Недопустимое значение.",
@@ -655,6 +687,7 @@
     "invalidEmail": "Введите корректный email.",
     "emailTaken": "Этот email уже используется.",
     "passwordTooShort": "Не меньше 10 символов.",
-    "passwordTooLong": "Не больше 128 символов."
+    "passwordTooLong": "Не больше 128 символов.",
+    "invalidPassword": "Неверный пароль."
   }
 }

@@ -628,6 +628,38 @@
       "showYear": "Show the year"
     }
   },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Welcome back. Enter your email and password.",
+      "submit": "Sign in",
+      "noAccount": "No account yet?",
+      "registerLink": "Create one",
+      "demoHint": "Demo accounts: {anna} or {oleh}, password {password}"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Plan your budget in a few minutes.",
+      "submit": "Create account",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "passwordHint": "Min. 10 characters"
+    },
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "password": "Password"
+    },
+    "password": {
+      "show": "Show password"
+    },
+    "errors": {
+      "invalidCredentials": "Wrong email or password.",
+      "tooManyAttempts": "Too many attempts. Wait a moment and try again.",
+      "sessionExpired": "Your session has expired. Sign in again."
+    },
+    "preferences": "Display preferences"
+  },
   "validation": {
     "required": "This field is required.",
     "invalidValue": "This value is not valid.",
@@ -655,6 +687,7 @@
     "invalidEmail": "Enter a valid email address.",
     "emailTaken": "This email is already in use.",
     "passwordTooShort": "Use at least 10 characters.",
-    "passwordTooLong": "Use at most 128 characters."
+    "passwordTooLong": "Use at most 128 characters.",
+    "invalidPassword": "Wrong password."
   }
 }

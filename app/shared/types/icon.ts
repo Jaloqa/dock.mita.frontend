@@ -18,3 +18,5 @@ export type IconName =
   | 'arrowUp'
   | 'arrowDown'
   | 'backspace'
+  | 'eye'
+  | 'eyeOff'

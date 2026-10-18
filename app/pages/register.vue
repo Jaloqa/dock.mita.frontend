@@ -1,7 +1,11 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'focus' })
+definePageMeta({ layout: 'auth' })
+
+const { t } = useI18n()
+
+useHead({ title: () => t('auth.register.title') })
 </script>
 
 <template>
-  <div data-testid="register-page" />
+  <RegisterForm />
 </template>
