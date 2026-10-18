@@ -2,12 +2,12 @@ import { describe, expect, it } from 'bun:test'
 import type { AccountDto, Page, TransferDto } from '../../../app/shared/api/contract'
 import { convertMinor } from '../../../app/shared/money/money'
 import { addDaysIso, todayIso } from '../../../app/shared/period/period'
-import { createMockApi, type MockApi } from '../../../mocks/api'
-import { defaultHandlers } from '../../../mocks/handlers'
+import type { MockApi } from '../../../mocks/api'
 import { oneYearAhead } from '../../../mocks/handlers/transfers'
 import { rateOn } from '../../../mocks/rates'
+import { loggedInMockApi } from './session'
 
-const api = () => createMockApi({ register: defaultHandlers })
+const api = () => loggedInMockApi()
 const today = todayIso()
 const failure = (promise: Promise<unknown>) => promise.catch((error: unknown) => error)
 

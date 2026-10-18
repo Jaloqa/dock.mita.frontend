@@ -31,7 +31,7 @@ export type SettingsDto = {
 export type Page<T> = { items: T[]; page: number; pageSize: number; total: number }
 
 export type DemoStateDto = {
-  activeUserId: string
+  activeUserId: string | null
   users: { id: string; name: string }[]
   simulateErrors: boolean
 }

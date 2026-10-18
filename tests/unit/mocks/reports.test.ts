@@ -2,11 +2,11 @@ import { describe, expect, it } from 'bun:test'
 import type { ReportDto } from '../../../app/shared/api/contract'
 import { convertMinor } from '../../../app/shared/money/money'
 import { addDaysIso, periodFor, shiftPeriod, todayIso } from '../../../app/shared/period/period'
-import { createMockApi, type MockApi } from '../../../mocks/api'
-import { defaultHandlers } from '../../../mocks/handlers'
+import type { MockApi } from '../../../mocks/api'
 import { lastPeriods } from '../../../mocks/overview'
 import { rateOn } from '../../../mocks/rates'
 import { savingsRateOf } from '../../../mocks/reports'
+import { loggedInMockApi } from './session'
 
 const today = todayIso()
 const current = periodFor(today, 1)
@@ -17,7 +17,7 @@ const salary = 'cat_anna_income_salary'
 const failure = (promise: Promise<unknown>) => promise.catch((error: unknown) => error)
 
 const api = (): MockApi => {
-  const mock = createMockApi({ register: defaultHandlers })
+  const mock = loggedInMockApi()
   Object.assign(mock.db.state, { transactions: [], transfers: [], budgets: [], goals: [], goalContributions: [] })
   return mock
 }

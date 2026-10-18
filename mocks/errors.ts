@@ -11,6 +11,10 @@ export const notFound = (): never => {
   throw new MockHttpError({ status: 404, title: 'Not Found' })
 }
 
+export const unauthorized = (code: string): never => {
+  throw new MockHttpError({ status: 401, title: 'Unauthorized', code })
+}
+
 export const badRequest = (errors: Record<string, string[]>): never => {
   throw new MockHttpError({ status: 400, title: 'Validation failed', errors })
 }

@@ -2,19 +2,19 @@ import { describe, expect, it } from 'bun:test'
 import type { AccountDto, CategoryDto, Page, TransactionDto, TransactionPage } from '../../../app/shared/api/contract'
 import { convertMinor } from '../../../app/shared/money/money'
 import { addDaysIso, todayIso } from '../../../app/shared/period/period'
-import { createMockApi, type MockApi } from '../../../mocks/api'
+import type { MockApi } from '../../../mocks/api'
 import { createDb, type KeyValueStorage, STORAGE_KEY } from '../../../mocks/db'
-import { defaultHandlers } from '../../../mocks/handlers'
 import { oneYearAhead } from '../../../mocks/handlers/transfers'
 import { rateOn } from '../../../mocks/rates'
 import { seedState } from '../../../mocks/seed'
+import { loggedInMockApi } from './session'
 
 const today = todayIso()
 const failure = (promise: Promise<unknown>) => promise.catch((error: unknown) => error)
 const field = (name: string, code: string) => ({ problem: { status: 400, errors: { [name]: [code] } } })
 
 const api = (): MockApi => {
-  const mock = createMockApi({ register: defaultHandlers })
+  const mock = loggedInMockApi()
   mock.db.state.transactions = []
   return mock
 }

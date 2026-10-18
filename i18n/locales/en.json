@@ -650,6 +650,8 @@
     "deadlinePast": "Choose this month or a later one.",
     "savingsAccountOnly": "Choose a savings account.",
     "invalidEmail": "Enter a valid email address.",
-    "emailTaken": "This email is already in use."
+    "emailTaken": "This email is already in use.",
+    "passwordTooShort": "Use at least 10 characters.",
+    "passwordTooLong": "Use at most 128 characters."
   }
 }

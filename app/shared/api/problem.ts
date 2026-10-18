@@ -3,6 +3,7 @@ export type ProblemDetails = {
   title: string
   status: number
   detail?: string
+  code?: string
   errors?: Record<string, string[]>
 }
 
@@ -11,6 +12,7 @@ const camelCase = (field: string): string => field.charAt(0).toLowerCase() + fie
 export class ApiError extends Error {
   readonly status: number
   readonly title: string
+  readonly code: string | undefined
   readonly fieldErrors: Record<string, string[]>
 
   constructor(problem: ProblemDetails) {
@@ -18,6 +20,7 @@ export class ApiError extends Error {
     this.name = 'ApiError'
     this.status = problem.status
     this.title = problem.title
+    this.code = problem.code
     this.fieldErrors = Object.fromEntries(
       Object.entries(problem.errors ?? {}).map(([field, messages]) => [camelCase(field), messages]),
     )

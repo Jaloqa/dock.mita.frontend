@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it } from 'bun:test'
 import type { CategoryDto, CategoryInput, Page } from '../../../app/shared/api/contract'
-import { createMockApi, type MockApi } from '../../../mocks/api'
+import type { MockApi } from '../../../mocks/api'
 import { type CategoryReference, categoryReferences } from '../../../mocks/categories'
-import { defaultHandlers } from '../../../mocks/handlers'
+import { loggedInMockApi } from './session'
 
-const api = () => createMockApi({ register: defaultHandlers })
+const api = () => loggedInMockApi()
 const failure = (promise: Promise<unknown>) => promise.catch((error: unknown) => error)
 const list = async (mock: MockApi) =>
   ((await mock.handle({ method: 'GET', path: '/v1/categories' })) as Page<CategoryDto>).items

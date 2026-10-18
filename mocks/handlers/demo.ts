@@ -16,7 +16,12 @@ export function registerDemoHandlers(router: MockRouter) {
   router.on('GET', '/v1/demo/state', ({ db }) => demoState(db))
 
   router.on('POST', '/v1/demo/reset', ({ db }) => {
+    const previous = db.state.activeUserId
     db.reset()
+    if (previous !== null && db.state.users.some((user) => user.id === previous)) {
+      db.state.activeUserId = previous
+      db.save()
+    }
     return demoState(db)
   })
 

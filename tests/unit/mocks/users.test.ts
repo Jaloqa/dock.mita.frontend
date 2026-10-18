@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'bun:test'
 import type { SettingsDto } from '../../../app/shared/api/contract'
-import { createMockApi, type MockApi } from '../../../mocks/api'
-import { defaultHandlers } from '../../../mocks/handlers'
+import type { MockApi } from '../../../mocks/api'
+import { loggedInMockApi } from './session'
 
-const api = () => createMockApi({ register: defaultHandlers })
+const api = () => loggedInMockApi()
 
 const validSettings: SettingsDto = {
   baseCurrency: 'EUR',
