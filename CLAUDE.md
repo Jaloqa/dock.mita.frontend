@@ -79,6 +79,17 @@ Until the backend is ready the app runs on mocks. `runtimeConfig.public.apiMocks
 - The HTTP transport is same-origin: a Nitro middleware (`server/middleware/apiProxy.ts`) forwards `/v1/**` to `NUXT_API_PROXY_TARGET` (`http://localhost:8080` locally, `http://host.docker.internal:8080` in Docker dev). The target is read at runtime from `runtimeConfig.apiProxyTarget`, so a built image honours the variable; when it is empty the middleware does nothing.
 - `mocks/` is loaded only when the flag is on. Removing mocks later means deleting `mocks/` and the mock transport; nothing else changes.
 
+## Running against the backend
+
+Authentication, the profile and the settings come from the real backend in hybrid mode; every other screen stays on mocks, which clone the demo data for a newly seen user.
+
+1. Start the backend from its repository (`dock.mita.backend`): `cp .env.example .env` once, then `docker compose up -d --build`. The API listens on `http://localhost:8080`; `GET /health/ready` answers 200 when it is up.
+2. Start the frontend in hybrid mode: `docker compose up --build` with the values from `.env.example`, or locally `NUXT_PUBLIC_API_MOCKS=true NUXT_PUBLIC_API_REAL_PATHS=/v1/auth,/v1/me,/v1/settings NUXT_API_PROXY_TARGET=http://localhost:8080 bun run dev`.
+3. Run the end-to-end check against it: `bun run test:e2e:hybrid` (`E2E_BASE_URL` selects the dev server, `http://localhost:3000` by default). It registers a new user with a unique email, changes a setting, signs out and in, and deletes the account. The backend allows 10 register, login and delete calls per minute per IP, so wait a minute between repeated runs.
+4. Stop the backend with `docker compose down` (add `-v` to drop its database).
+
+The hybrid suite lives in `tests/e2e-hybrid` with its own `playwright.hybrid.config.ts`; it signs in for real and never uses the mock sign-in state of `bun run test:e2e`.
+
 ## Internationalization
 
 - No user-facing text is hard-coded. Every string goes through `t()` / `$t()`, including labels, placeholders, `aria-label`, page titles and validation messages.
@@ -152,6 +163,7 @@ bun run lint
 bun run typecheck
 bun run test
 bun run test:e2e
+bun run test:e2e:hybrid                       # against the real backend, see "Running against the backend"
 bun run api:generate
 ```
 
