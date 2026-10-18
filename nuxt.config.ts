@@ -36,9 +36,10 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    apiProxyTarget: '',
     public: {
-      apiBaseUrl: 'http://localhost:8080',
       apiMocks: true,
+      apiRealPaths: '',
       i18n: {
         baseUrl: 'http://localhost:3000',
       },
