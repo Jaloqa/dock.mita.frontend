@@ -6,6 +6,12 @@ import { badRequest } from '../../../mocks/errors'
 import { createRouter } from '../../../mocks/router'
 import { createMockTransport } from '../../../mocks/transport'
 
+const loggedIn = (options: Parameters<typeof createMockApi>[0]) => {
+  const api = createMockApi(options)
+  api.db.state.activeUserId = 'usr_anna'
+  return api
+}
+
 describe('mock router', () => {
   it('matches static and parameterized paths', () => {
     const router = createRouter()
@@ -28,7 +34,7 @@ describe('mock router', () => {
 
 describe('mock api', () => {
   const echo = (
-    api = createMockApi({
+    api = loggedIn({
       register: [
         (router) =>
           router.on('POST', '/v1/echo/:id', ({ userId, params, query, body }) => ({ userId, params, query, body })),
@@ -57,21 +63,21 @@ describe('mock api', () => {
   })
 
   it('answers unknown routes with a 404 problem', async () => {
-    const error = await createMockApi({})
+    const error = await loggedIn({})
       .handle({ method: 'GET', path: '/v1/nope' })
       .catch((e: unknown) => e)
     expect(error).toMatchObject({ problem: { status: 404, title: 'Not Found' } })
   })
 
   it('answers undecodable path segments with a 404 problem', async () => {
-    const api = createMockApi({ register: [(router) => router.on('GET', '/v1/items/:id', () => 'item')] })
+    const api = loggedIn({ register: [(router) => router.on('GET', '/v1/items/:id', () => 'item')] })
     const error = await api.handle({ method: 'GET', path: '/v1/items/%E0%A4%A' }).catch((e: unknown) => e)
     expect(error).toMatchObject({ problem: { status: 404 } })
   })
 
   it('does not let handlers mutate the caller body', async () => {
     const body = { nested: { value: 1 } }
-    const api = createMockApi({
+    const api = loggedIn({
       register: [
         (router) =>
           router.on('POST', '/v1/mutate', ({ body: received }) => {
@@ -86,7 +92,7 @@ describe('mock api', () => {
   })
 
   it('sends bodies and results over the wire as JSON', async () => {
-    const api = createMockApi({
+    const api = loggedIn({
       register: [
         (router) => router.on('POST', '/v1/body', ({ body }) => body),
         (router) => router.on('GET', '/v1/dates', () => ({ when: new Date('2026-10-15T00:00:00Z'), skip: undefined })),
@@ -99,7 +105,7 @@ describe('mock api', () => {
   })
 
   it('simulates server errors except for demo endpoints', async () => {
-    const api = createMockApi({
+    const api = loggedIn({
       random: () => 0,
       register: [
         (router) => router.on('GET', '/v1/ping', () => 'pong'),
@@ -116,12 +122,12 @@ describe('mock api', () => {
 
 describe('mock transport', () => {
   it('returns handler results', async () => {
-    const api = createMockApi({ register: [(router) => router.on('GET', '/v1/ping', () => ({ pong: true }))] })
+    const api = loggedIn({ register: [(router) => router.on('GET', '/v1/ping', () => ({ pong: true }))] })
     expect(await createMockTransport(api, () => 0)({ method: 'GET', path: '/v1/ping' })).toEqual({ pong: true })
   })
 
   it('turns mock errors into ApiError with field errors', async () => {
-    const api = createMockApi({
+    const api = loggedIn({
       register: [(router) => router.on('POST', '/v1/things', () => badRequest({ name: ['validation.required'] }))],
     })
     const error = await createMockTransport(
@@ -133,7 +139,7 @@ describe('mock transport', () => {
   })
 
   it('turns unexpected handler errors into a 500 ApiError', async () => {
-    const api = createMockApi({
+    const api = loggedIn({
       register: [
         (router) =>
           router.on('GET', '/v1/boom', () => {

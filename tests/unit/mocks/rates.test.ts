@@ -1,14 +1,13 @@
 import { describe, expect, it } from 'bun:test'
 import type { RateDto } from '../../../app/shared/api/contract'
 import { addDaysIso, todayIso } from '../../../app/shared/period/period'
-import { createMockApi } from '../../../mocks/api'
 import { createDb, type RateRow } from '../../../mocks/db'
-import { defaultHandlers } from '../../../mocks/handlers'
 import { rateOn } from '../../../mocks/rates'
 import { seedState } from '../../../mocks/seed'
 import { RATE_HISTORY_DAYS, seedRates } from '../../../mocks/seed/rates'
+import { loggedInMockApi } from './session'
 
-const api = () => createMockApi({ register: defaultHandlers })
+const api = () => loggedInMockApi()
 const today = todayIso()
 
 describe('rate table', () => {

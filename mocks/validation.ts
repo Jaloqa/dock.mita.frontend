@@ -9,6 +9,28 @@ export const isMissing = (value: unknown): boolean =>
 
 export const isCurrency = (value: unknown): value is Currency => currencies.includes(value as Currency)
 
+export const NAME_MAX = 40
+export const EMAIL_MAX = 254
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+export type ErrorCollector = ReturnType<typeof collectErrors>
+
+export function checkName(errors: ErrorCollector, name: unknown): void {
+  if (isMissing(name)) errors.add('name', 'validation.required')
+  else if (typeof name !== 'string') errors.add('name', 'validation.invalidValue')
+  else if (name.trim().length > NAME_MAX) errors.add('name', 'validation.nameTooLong')
+}
+
+export function checkEmail(errors: ErrorCollector, email: unknown, isTaken: (address: string) => boolean): void {
+  if (isMissing(email)) errors.add('email', 'validation.required')
+  else if (typeof email !== 'string') errors.add('email', 'validation.invalidValue')
+  else {
+    const address = email.trim()
+    if (address.length > EMAIL_MAX || !EMAIL_PATTERN.test(address)) errors.add('email', 'validation.invalidEmail')
+    else if (isTaken(address)) errors.add('email', 'validation.emailTaken')
+  }
+}
+
 export function collectErrors() {
   const errors: Record<string, string[]> = {}
   return {

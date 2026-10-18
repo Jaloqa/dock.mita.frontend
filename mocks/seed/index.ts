@@ -18,9 +18,10 @@ export const seedState = (today: string = todayIso()): MockState => {
   const { goals, contributions } = demoGoals(today, settings, designed, transfers, rates)
   return {
     version: 1,
-    activeUserId: 'usr_anna',
+    activeUserId: null,
     simulateErrors: false,
     users: demoUsers(),
+    credentials: [],
     settings,
     rates,
     accounts: withTransactionHistory(designed, transactions),

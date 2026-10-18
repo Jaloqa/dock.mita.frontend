@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import { EMAIL_MAX, PROFILE_NAME_MAX, profileRules } from '../../../../app/features/settings/schemas/profileSchema'
-import { createMockApi } from '../../../../mocks/api'
-import { defaultHandlers } from '../../../../mocks/handlers'
+import { loggedInMockApi } from '../../mocks/session'
 
 type Rule = { $validator: unknown }
 
@@ -14,7 +13,7 @@ const rules = profileRules((key) => key)
 
 async function serverAccepts(field: 'name' | 'email', value: string): Promise<boolean> {
   const body = { name: 'Anna Nowak', email: 'anna@demo.mita.app', [field]: value }
-  const error = await createMockApi({ register: defaultHandlers })
+  const error = await loggedInMockApi()
     .handle({ method: 'PUT', path: '/v1/me', body })
     .then(() => undefined)
     .catch((e: unknown) => e as { problem?: { errors?: Record<string, string[]> } })

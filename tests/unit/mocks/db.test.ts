@@ -16,7 +16,7 @@ const memoryStorage = (initial?: string): KeyValueStorage & { value: string | nu
 describe('mock db', () => {
   it('starts from the seed when storage is empty', () => {
     const db = createDb(memoryStorage(), seedState)
-    expect(db.state.activeUserId).toBe('usr_anna')
+    expect(db.state.activeUserId).toBeNull()
     expect(db.state.users.map((user) => user.id)).toEqual(['usr_anna', 'usr_oleh'])
     expect(db.state.settings).toHaveLength(2)
   })
@@ -96,7 +96,7 @@ describe('mock db', () => {
     const db = createDb(storage, seedState)
     db.state.activeUserId = 'usr_oleh'
     db.reset()
-    expect(db.state.activeUserId).toBe('usr_anna')
-    expect(JSON.parse(storage.value ?? '{}').activeUserId).toBe('usr_anna')
+    expect(db.state.activeUserId).toBeNull()
+    expect(JSON.parse(storage.value ?? '{}').activeUserId).toBeNull()
   })
 })

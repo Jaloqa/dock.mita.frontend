@@ -1,11 +1,10 @@
 import { describe, expect, it } from 'bun:test'
 import type { AccountDto, GoalPage, Page } from '../../../app/shared/api/contract'
 import { addDaysIso } from '../../../app/shared/period/period'
-import { createMockApi } from '../../../mocks/api'
 import { addMonthsToKey, goalsOf, summarizeGoals } from '../../../mocks/goals'
-import { defaultHandlers } from '../../../mocks/handlers'
 import { accountBalances } from '../../../mocks/ledger'
 import { seedState } from '../../../mocks/seed'
+import { loggedInMockApi } from './session'
 
 const seedDays = ['2026-10-16', '2026-03-01', '2026-12-31', '2027-05-31', '2027-07-09']
 
@@ -103,7 +102,7 @@ describe('seeded goals', () => {
   })
 
   it('serves the design figures through the API and marks the savings account as linked', async () => {
-    const mock = createMockApi({ register: defaultHandlers })
+    const mock = loggedInMockApi()
     const page = (await mock.handle({ method: 'GET', path: '/v1/goals' })) as GoalPage
     expect(page.summary).toEqual({ saved: 1_430_000, monthly: 140_000, active: 3 })
     expect(page.items.map((goal) => [goal.name, goal.percent, goal.monthly])).toEqual([

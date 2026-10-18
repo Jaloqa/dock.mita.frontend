@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'bun:test'
 import { type CategoryDto, categoryColors, type Page } from '../../../app/shared/api/contract'
-import { createMockApi, type MockApi } from '../../../mocks/api'
+import type { MockApi } from '../../../mocks/api'
 import { createDb, type KeyValueStorage, STORAGE_KEY } from '../../../mocks/db'
-import { defaultHandlers } from '../../../mocks/handlers'
 import { seedState } from '../../../mocks/seed'
+import { loggedInMockApi } from './session'
 
-const api = () => createMockApi({ register: defaultHandlers })
+const api = () => loggedInMockApi()
 const failure = (promise: Promise<unknown>) => promise.catch((error: unknown) => error)
 const list = async (mock: MockApi, query?: Record<string, string>) =>
   (await mock.handle({ method: 'GET', path: '/v1/categories', query })) as Page<CategoryDto>

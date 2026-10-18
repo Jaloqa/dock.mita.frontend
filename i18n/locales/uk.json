@@ -650,6 +650,8 @@
     "deadlinePast": "Оберіть поточний або пізніший місяць.",
     "savingsAccountOnly": "Оберіть накопичувальний рахунок.",
     "invalidEmail": "Введіть коректний email.",
-    "emailTaken": "Цей email уже використовується."
+    "emailTaken": "Цей email уже використовується.",
+    "passwordTooShort": "Не менше 10 символів.",
+    "passwordTooLong": "Не більше 128 символів."
   }
 }

@@ -650,6 +650,8 @@
     "deadlinePast": "Wybierz bieżący lub późniejszy miesiąc.",
     "savingsAccountOnly": "Wybierz konto oszczędnościowe.",
     "invalidEmail": "Wpisz poprawny adres e-mail.",
-    "emailTaken": "Ten adres e-mail jest już używany."
+    "emailTaken": "Ten adres e-mail jest już używany.",
+    "passwordTooShort": "Użyj co najmniej 10 znaków.",
+    "passwordTooLong": "Użyj najwyżej 128 znaków."
   }
 }

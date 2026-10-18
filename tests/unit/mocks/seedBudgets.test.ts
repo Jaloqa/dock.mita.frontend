@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'bun:test'
 import type { BudgetPage } from '../../../app/shared/api/contract'
 import { periodFor, shiftPeriod } from '../../../app/shared/period/period'
-import { createMockApi } from '../../../mocks/api'
-import { defaultHandlers } from '../../../mocks/handlers'
 import { seedState } from '../../../mocks/seed'
+import { loggedInMockApi } from './session'
 
 const seedDays = ['2026-10-16', '2026-03-01', '2026-12-31', '2027-01-05']
 
@@ -58,7 +57,7 @@ describe('seeded budgets', () => {
   })
 
   it('plans 7 000 zł for Anna in the current period through the API', async () => {
-    const mock = createMockApi({ register: defaultHandlers })
+    const mock = loggedInMockApi()
     const page = (await mock.handle({ method: 'GET', path: '/v1/budgets' })) as BudgetPage
     expect(page.total).toBe(8)
     expect(page.currency).toBe('PLN')

@@ -2,12 +2,12 @@ import { describe, expect, it } from 'bun:test'
 import type { AccountDto, GoalDto, GoalPage, Page, TransferDto } from '../../../app/shared/api/contract'
 import { convertMinor } from '../../../app/shared/money/money'
 import { addDaysIso, todayIso } from '../../../app/shared/period/period'
-import { createMockApi, type MockApi } from '../../../mocks/api'
+import type { MockApi } from '../../../mocks/api'
 import { addMonthsToKey, goalStatus, monthlyHint, monthsBefore, monthsUntil } from '../../../mocks/goals'
-import { defaultHandlers } from '../../../mocks/handlers'
 import { oneYearAhead } from '../../../mocks/handlers/transfers'
 import { accountBalances } from '../../../mocks/ledger'
 import { rateOn } from '../../../mocks/rates'
+import { loggedInMockApi } from './session'
 
 const today = todayIso()
 const thisMonth = today.slice(0, 7)
@@ -18,7 +18,7 @@ const failure = (promise: Promise<unknown>) => promise.catch((error: unknown) =>
 const field = (name: string, code: string) => ({ problem: { status: 400, errors: { [name]: [code] } } })
 
 const api = (): MockApi => {
-  const mock = createMockApi({ register: defaultHandlers })
+  const mock = loggedInMockApi()
   mock.db.state.goals = []
   mock.db.state.goalContributions = []
   return mock

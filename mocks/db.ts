@@ -57,11 +57,14 @@ export type GoalContributionRow = {
   baseCurrency: Currency
 }
 
+export type CredentialRow = { userId: string; password: string }
+
 export type MockState = {
   version: 1
-  activeUserId: string
+  activeUserId: string | null
   simulateErrors: boolean
   users: UserRow[]
+  credentials: CredentialRow[]
   settings: SettingsRow[]
   rates: RateRow[]
   accounts: AccountRow[]
@@ -84,9 +87,10 @@ const isState = (value: unknown, seed: MockState): value is MockState => {
   const state = value as Record<string, unknown>
   return (
     state.version === 1 &&
-    Object.entries(seed).every(([key, seedValue]) =>
-      Array.isArray(seedValue) ? Array.isArray(state[key]) : typeof state[key] === typeof seedValue,
-    )
+    Object.entries(seed).every(([key, seedValue]) => {
+      if (key === 'activeUserId') return state[key] === null || typeof state[key] === 'string'
+      return Array.isArray(seedValue) ? Array.isArray(state[key]) : typeof state[key] === typeof seedValue
+    })
   )
 }
 
