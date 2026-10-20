@@ -17,6 +17,31 @@ const hasDotSegment = (path: string) =>
     return decoded === null || isDotSegment(segment) || isDotSegment(decoded)
   })
 
+export function isApiPath(requestUrl: string): boolean {
+  const path = requestUrl.split('?')[0] ?? ''
+  return path === PREFIX || path.startsWith(`${PREFIX}/`)
+}
+
+const IPV4_MAPPED = /^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/i
+
+const splitList = (value: string | undefined) =>
+  (value ?? '')
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+
+export function forwardedHeaders(
+  incoming: { forwardedFor?: string; forwardedProto?: string },
+  peer: { ip?: string; protocol: 'http' | 'https' },
+): { 'x-forwarded-for': string; 'x-forwarded-proto': string } {
+  if (!peer.ip) return { 'x-forwarded-for': '', 'x-forwarded-proto': '' }
+  const ip = peer.ip.replace(IPV4_MAPPED, '$1')
+  return {
+    'x-forwarded-for': [...splitList(incoming.forwardedFor), ip].join(', '),
+    'x-forwarded-proto': [...splitList(incoming.forwardedProto), peer.protocol].join(', '),
+  }
+}
+
 export function resolveProxyUrl(target: string, requestUrl: string): string | null {
   const base = target.trim().replace(/\/+$/, '')
   if (!base) return null
