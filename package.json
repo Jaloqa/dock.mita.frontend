@@ -13,7 +13,7 @@
     "typecheck": "nuxt typecheck",
     "test": "bun test tests/unit",
     "test:e2e": "playwright test",
-    "test:e2e:hybrid": "playwright test --config playwright.hybrid.config.ts",
+    "test:e2e:real": "playwright test --config playwright.real.config.ts",
     "api:generate": "openapi-typescript ${API_SCHEMA_URL:-http://localhost:8080/openapi/v1.json} -o app/shared/api/schema.d.ts"
   },
   "dependencies": {

@@ -1,8 +1,8 @@
 import { expect, type Page, test } from '@playwright/test'
 
-const name = 'Hybrid Smoke'
-const email = `hybrid-${Date.now()}@example.com`
-const password = 'hybrid-smoke-password'
+const name = 'Real Smoke'
+const email = `real-${Date.now()}@example.com`
+const password = 'real-smoke-password'
 
 const mainNav = (page: Page) => page.getByRole('navigation', { name: 'Main navigation' }).filter({ visible: true })
 const section = (page: Page, title: string) => page.getByRole('region', { name: title, exact: true })
@@ -21,9 +21,15 @@ const signIn = async (page: Page) => {
 const openSettings = async (page: Page) => {
   await page.goto('/settings')
   await expect(section(page, 'Profile').getByLabel('Name', { exact: true })).toHaveValue(name)
+  await expect(section(page, 'Demo')).toHaveCount(0)
+  await expect(page.getByText('This section exists only in demo mode.')).toHaveCount(0)
 }
 
 test('a real account registers, keeps its settings, signs out and in, and is deleted', async ({ page }) => {
+  await page.goto('/login')
+  await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeEnabled()
+  await expect(page.getByText('Demo accounts:')).toHaveCount(0)
+
   await page.goto('/register')
   const create = page.getByRole('button', { name: 'Create account', exact: true })
   await expect(create).toBeEnabled()
@@ -38,7 +44,6 @@ test('a real account registers, keeps its settings, signs out and in, and is del
   await expect(page.getByRole('heading', { name: 'Accounts', exact: true })).toBeVisible()
 
   await openSettings(page)
-  await expect(section(page, 'Demo')).toHaveCount(0)
   const currency = baseCurrency(page)
   await expect(currency).toHaveText('PLN — zł')
   await currency.click()

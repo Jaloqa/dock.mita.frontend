@@ -12,6 +12,8 @@ const choose = async (page: Page, combobox: Locator, option: string | RegExp) =>
   await expect(page.getByRole('listbox')).toHaveCount(0)
   await combobox.click()
   await page.getByRole('listbox').getByRole('option', { name: option }).click()
+  await expect(page.getByRole('listbox')).toHaveCount(0)
+  await expect(combobox).toBeFocused()
 }
 
 const addTransaction = async (

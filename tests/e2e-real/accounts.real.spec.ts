@@ -12,6 +12,8 @@ const choose = async (page: Page, combobox: Locator, option: string) => {
   await expect(page.getByRole('listbox')).toHaveCount(0)
   await combobox.click()
   await page.getByRole('listbox').getByRole('option', { name: option, exact: true }).click()
+  await expect(page.getByRole('listbox')).toHaveCount(0)
+  await expect(combobox).toBeFocused()
 }
 
 const addAccount = async (page: Page, title: string, type: 'Card' | 'Cash', balance: string, last4?: string) => {
@@ -49,7 +51,9 @@ test('a real account manages accounts and transfers against the backend', async 
   const transfer = page.getByRole('dialog', { name: 'Transfer' })
   await choose(page, transfer.getByRole('combobox', { name: 'From' }), 'Cash · PLN')
   await choose(page, transfer.getByRole('combobox', { name: 'To' }), 'Card · PLN')
-  await transfer.getByLabel('Amount').pressSequentially('25')
+  const amount = transfer.getByLabel('Amount')
+  await amount.pressSequentially('25')
+  await expect(amount).toHaveValue(/25\.00/)
   await transfer.getByRole('button', { name: 'Save', exact: true }).click()
   await expect(transfer).toBeHidden()
   await expect(card(page, 'Cash')).toContainText('zł 75.00')
