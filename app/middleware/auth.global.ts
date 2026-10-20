@@ -1,12 +1,10 @@
 import { ApiError } from '~/shared/api/problem'
-import { matchesRealPath, parseRealPaths } from '~/shared/api/transports/routing'
 import { isPublicRoute } from '~/shared/auth/publicRoutes'
 import { safeRedirect } from '~/shared/auth/safeRedirect'
 import { type SessionStatus, useSessionStatus } from '~/shared/auth/sessionStatus'
 import { userKeys } from '~/shared/user/keys'
 import { meQueryOptions } from '~/shared/user/useCurrentUser'
 
-const ME_PATH = '/v1/me'
 const MAX_PROBE_RETRIES = 2
 
 const isUnauthorized = (error: unknown) => error instanceof ApiError && error.status === 401
@@ -35,12 +33,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   if (import.meta.server) {
-    const mode = useApiMode()
-    const meIsReal =
-      mode === 'real' || (mode === 'hybrid' && matchesRealPath(ME_PATH, parseRealPaths(config.public.apiRealPaths)))
-    // Without the proxy target a same-origin /v1/me would be rendered by Nuxt itself and run this middleware again.
-    const reachable = config.apiProxyTarget !== ''
-    if (meIsReal && reachable && status.value === 'unknown') await probe(false, 'unknown')
+    const reachable = config.apiProxyTarget.trim() !== ''
+    if (useApiMode() === 'real' && reachable && status.value === 'unknown') await probe(false, 'unknown')
   } else if (
     status.value !== 'anonymous' &&
     (status.value === 'unknown' || queryClient.getQueryData(userKeys.me) === undefined)

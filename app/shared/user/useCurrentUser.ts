@@ -7,7 +7,7 @@ import { userApi } from './userApi'
 export const meQueryOptions = (api: ApiClient) => ({
   queryKey: userKeys.me,
   queryFn: userApi(api).me,
-  // In hybrid mode the mock transport reads the session user id from this entry, so it must outlive its observers.
+  // The auth middleware treats a missing entry as an unknown session, so it must outlive its observers.
   gcTime: Number.POSITIVE_INFINITY,
 })
 
