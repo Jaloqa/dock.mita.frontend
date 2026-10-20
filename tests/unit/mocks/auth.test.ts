@@ -170,49 +170,6 @@ describe('mock auth', () => {
   })
 })
 
-describe('mock api in hybrid mode', () => {
-  const hybrid = (session: { current: string | undefined }) =>
-    createMockApi({ register: defaultHandlers, currentUserId: () => session.current })
-
-  const annaCount = (table: 'accounts' | 'transactions') =>
-    seedState()[table].filter((row) => row.userId === 'usr_anna').length
-
-  it('seeds an unknown session user with a copy of the demo data', async () => {
-    const api = hybrid({ current: 'u-real-1' })
-    const accounts = (await api.handle({ method: 'GET', path: '/v1/accounts' })) as { total: number }
-    expect(accounts.total).toBe(annaCount('accounts'))
-    const transactions = (await api.handle({ method: 'GET', path: '/v1/transactions', query: { pageSize: 5 } })) as {
-      total: number
-    }
-    expect(transactions.total).toBe(annaCount('transactions'))
-    const annaIds = new Set(api.db.state.accounts.filter((row) => row.userId === 'usr_anna').map((row) => row.id))
-    const copied = api.db.state.accounts.filter((row) => row.userId === 'u-real-1')
-    expect(copied.some((row) => annaIds.has(row.id))).toBe(false)
-  })
-
-  it('seeds once and answers 401 while the getter has no user', async () => {
-    const session: { current: string | undefined } = { current: undefined }
-    const api = hybrid(session)
-    expect(await failure(api.handle({ method: 'GET', path: '/v1/accounts' }))).toMatchObject({
-      problem: { status: 401 },
-    })
-    session.current = 'u-real-1'
-    await api.handle({ method: 'GET', path: '/v1/accounts' })
-    await api.handle({ method: 'GET', path: '/v1/accounts' })
-    expect(api.db.state.accounts.filter((row) => row.userId === 'u-real-1')).toHaveLength(annaCount('accounts'))
-  })
-
-  it('keeps ids unique across users', async () => {
-    const session: { current: string | undefined } = { current: 'u-real-1' }
-    const api = hybrid(session)
-    await api.handle({ method: 'GET', path: '/v1/accounts' })
-    session.current = 'u-real-2'
-    await api.handle({ method: 'GET', path: '/v1/accounts' })
-    const ids = api.db.state.accounts.map((row) => row.id)
-    expect(new Set(ids).size).toBe(ids.length)
-  })
-})
-
 describe('mock db session persistence', () => {
   it('keeps a stored logged-in state instead of discarding it', () => {
     const stored = JSON.stringify({ ...seedState(), activeUserId: 'usr_oleh' })

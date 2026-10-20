@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 import { SIGNED_IN_STATE as storageState } from './tests/e2e/signedInState'
 
-const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost:3000'
+const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost:3100'
 
 export default defineConfig({
   testDir: 'tests/e2e',
@@ -16,5 +16,10 @@ export default defineConfig({
   ],
   webServer: process.env.E2E_BASE_URL
     ? undefined
-    : { command: 'bun run dev', url: baseURL, reuseExistingServer: true, timeout: 120_000 },
+    : {
+        command: 'NUXT_PUBLIC_API_MOCKS=true bun run dev --port 3100',
+        url: baseURL,
+        reuseExistingServer: false,
+        timeout: 120_000,
+      },
 })

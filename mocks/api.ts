@@ -3,9 +3,6 @@ import { createDb, type KeyValueStorage, type MockDb } from './db'
 import { MockHttpError, notFound, unauthorized } from './errors'
 import { createRouter, type MockRouter } from './router'
 import { seedState } from './seed'
-import { cloneUserData } from './seed/cloneUser'
-
-const DEMO_SOURCE_USER = 'usr_anna'
 
 export type MockApi = { db: MockDb; handle(request: ApiRequest): Promise<unknown> }
 
@@ -24,7 +21,6 @@ export function createMockApi(options: {
   storage?: KeyValueStorage
   random?: () => number
   register?: ((router: MockRouter) => void)[]
-  currentUserId?: () => string | undefined
 }): MockApi {
   const db = createDb(options.storage, seedState)
   const router = createRouter()
@@ -41,16 +37,9 @@ export function createMockApi(options: {
         throw new MockHttpError({ status: 500, title: 'Simulated server error' })
       }
       const match = router.match(request.method, request.path) ?? notFound()
-      const sessionUserId = options.currentUserId ? options.currentUserId() : (db.state.activeUserId ?? undefined)
+      const sessionUserId = db.state.activeUserId ?? undefined
       const open = isDemo || request.path.startsWith('/v1/auth/')
       if (sessionUserId === undefined && !open) unauthorized('auth.sessionExpired')
-      if (
-        options.currentUserId &&
-        sessionUserId !== undefined &&
-        cloneUserData(db.state, DEMO_SOURCE_USER, sessionUserId)
-      ) {
-        db.save()
-      }
       const result = match.handler({
         db,
         userId: sessionUserId ?? '',

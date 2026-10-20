@@ -6,9 +6,5 @@ services:
     user: node
     volumes:
       - .:/app
-    extra_hosts:
-      - 'host.docker.internal:host-gateway'
-    environment:
-      NUXT_API_PROXY_TARGET: http://host.docker.internal:8080
     command: ['sh', '-c', 'bun install --frozen-lockfile && npm run dev -- --host 0.0.0.0']
     restart: 'no'
