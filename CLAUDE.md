@@ -68,27 +68,46 @@ Rules:
 - Prefer Tailwind utility classes. Avoid custom CSS unless a utility cannot express it.
 - Accessibility is required: semantic elements, labels for inputs, keyboard navigation.
 
-## Mocks
+## API modes
 
-Until the backend is ready the app runs on mocks. `runtimeConfig.public.apiMocks` (`NUXT_PUBLIC_API_MOCKS`) switches the transport of the shared API client between `http` and `mock`. Full design: [docs/superpowers/specs/2026-10-15-frontend-mocks-design.md](docs/superpowers/specs/2026-10-15-frontend-mocks-design.md).
+`runtimeConfig.public.apiMocks` (`NUXT_PUBLIC_API_MOCKS`) switches the transport of the shared API client between `http` and `mock`. Mock design: [docs/superpowers/specs/2026-10-15-frontend-mocks-design.md](docs/superpowers/specs/2026-10-15-frontend-mocks-design.md).
 
+- Real mode is the default (`NUXT_PUBLIC_API_MOCKS=false`): every request goes over HTTP to the real backend.
+- The HTTP transport is same-origin: a Nitro middleware (`server/middleware/apiProxy.ts`) forwards `/v1/**` to `NUXT_API_PROXY_TARGET` (`http://localhost:8080` locally, `http://host.docker.internal:8080` in Docker, where `compose.yaml` takes it from `COMPOSE_API_PROXY_TARGET` so the `.env` value for `bun run dev` does not leak into the container). The target is read at runtime from `runtimeConfig.apiProxyTarget`, so a built image honours the variable. The proxy appends the client address it sees to `X-Forwarded-For` and its own scheme to `X-Forwarded-Proto`; the backend decides which proxies it trusts. When no target is set, `/v1` and `/v1/**` answer 503 `application/problem+json`. Server-side rendered requests reach the backend with the proxy's own address (no client address), which is fine because SSR only calls `GET /v1/me`, which is not rate-limited.
+- Pure mock mode (`NUXT_PUBLIC_API_MOCKS=true`) serves every request from mocks, including the demo endpoints (`/v1/demo/*`) and the demo UI (demo accounts on the login page, the Demo section in Settings). `bun run test:e2e` runs in this mode: its Playwright web server starts `NUXT_PUBLIC_API_MOCKS=true bun run dev --port 3100` (never reusing a running server) and `E2E_BASE_URL` defaults to `http://localhost:3100`; an external server selected with `E2E_BASE_URL` must be started with that variable.
 - Feature API modules (`features/<x>/api`) call `apiClient` only. They never know which transport is active.
-- The mock transport routes requests to handlers in `mocks/handlers`, which work on a `localStorage` database. Business rules (balances, currency conversion, budget statuses, aggregates) live in those handlers, as they will in the backend.
-- Mock handlers behave like the real API: `/v1` paths, `userId` from the session, paginated lists, latency, RFC 9457 ProblemDetails for validation errors.
-- Hybrid mode: with `NUXT_PUBLIC_API_MOCKS=true`, `NUXT_PUBLIC_API_REAL_PATHS` (comma-separated, whole path segments, e.g. `/v1/auth,/v1/me,/v1/settings`) routes those paths to the real backend and the rest to mocks. An empty list is pure mock mode; `NUXT_PUBLIC_API_MOCKS=false` sends everything over HTTP.
-- The HTTP transport is same-origin: a Nitro middleware (`server/middleware/apiProxy.ts`) forwards `/v1/**` to `NUXT_API_PROXY_TARGET` (`http://localhost:8080` locally, `http://host.docker.internal:8080` in Docker dev). The target is read at runtime from `runtimeConfig.apiProxyTarget`, so a built image honours the variable; when it is empty the middleware does nothing.
-- `mocks/` is loaded only when the flag is on. Removing mocks later means deleting `mocks/` and the mock transport; nothing else changes.
+- The mock transport routes requests to handlers in `mocks/handlers`, which work on a `localStorage` database. Mock handlers behave like the real API: `/v1` paths, `userId` from the session, paginated lists, latency, RFC 9457 ProblemDetails for validation errors.
+- `mocks/` is loaded only in mock mode. Removing mocks later means deleting `mocks/` and the mock transport; nothing else changes.
 
-## Running against the backend
+## Running the app
 
-Authentication, the profile, the settings, the exchange rates, accounts, transfers, categories, transactions, budgets, goals, the overview and reports (`/v1/auth`, `/v1/me`, `/v1/settings`, `/v1/rates`, `/v1/accounts`, `/v1/transfers`, `/v1/categories`, `/v1/transactions`, `/v1/budgets`, `/v1/goals`, `/v1/overview`, `/v1/reports`) come from the real backend in hybrid mode. Only the demo endpoints (`/v1/demo/*`) stay on mocks.
+1. Start the backend from its repository (`dock.mita.backend`): `cp .env.example .env` once, then `docker compose up -d --build`. The API listens on `http://localhost:8080`; `GET /health/ready` answers 200 when it is up. Stop it with `docker compose down` (add `-v` to drop its database).
+2. Start the frontend: `docker compose up --build` (dev target with hot reload, proxy target `http://host.docker.internal:8080`), or locally `cp .env.example .env && bun run dev`. Open `http://localhost:3000`.
+3. Without the backend, run on mocks: `NUXT_PUBLIC_API_MOCKS=true bun run dev`.
 
-1. Start the backend from its repository (`dock.mita.backend`): `cp .env.example .env` once, then `docker compose up -d --build`. The API listens on `http://localhost:8080`; `GET /health/ready` answers 200 when it is up.
-2. Start the frontend in hybrid mode: `docker compose up --build` with the values from `.env.example`, or locally `NUXT_PUBLIC_API_MOCKS=true NUXT_PUBLIC_API_REAL_PATHS=/v1/auth,/v1/me,/v1/settings,/v1/rates,/v1/accounts,/v1/transfers,/v1/categories,/v1/transactions,/v1/budgets,/v1/goals,/v1/overview,/v1/reports NUXT_API_PROXY_TARGET=http://localhost:8080 bun run dev`.
-3. Run the end-to-end check against it: `bun run test:e2e:hybrid` (`E2E_BASE_URL` selects the dev server, `http://localhost:3000` by default). It registers a new user with a unique email, changes a setting, signs out and in, and deletes the account. The accounts spec creates accounts, transfers between them and archives one; the transactions spec adds an account and a transaction, edits and deletes it, and manages categories; the budgets and goals spec adds two accounts and an expense, creates and edits a budget, creates a goal and contributes to it (a transfer into the linked account), then deletes both; the overview and reports spec adds an account, an income and an expense, then checks the totals, recent transactions and spending breakdown on the overview and the averages, savings rate and spending structure on reports. The backend allows 10 register, login and delete calls per minute per IP, so wait a minute between repeated runs.
-4. Stop the backend with `docker compose down` (add `-v` to drop its database).
+### Real-backend suite
 
-The hybrid suite lives in `tests/e2e-hybrid` with its own `playwright.hybrid.config.ts`; it signs in for real and never uses the mock sign-in state of `bun run test:e2e`.
+`bun run test:e2e:real` runs `tests/e2e-real` (`playwright.real.config.ts`, one worker, no web server) against a running app in real mode; `E2E_BASE_URL` selects it, `http://localhost:3000` by default. Every spec registers its own user with a unique email and deletes it at the end. The backend allows 10 register, login and delete calls per minute per client, and one run makes about 15 of them, so waiting between runs does not help against a stock backend (10 per minute): set `RateLimiting__AuthPermitLimit` (e.g. `100` in the backend's `.env`) for local runs.
+
+- `auth`: demo UI is hidden, registers, changes the base currency, signs out and in, checks a wrong password and a rate-limited delete, deletes the account.
+- `accounts`: creates accounts, transfers between them and archives one.
+- `transactions`: adds an account and a transaction, edits and deletes it, and manages categories.
+- `budgets-goals`: adds two accounts and an expense, creates and edits a budget, creates a goal and contributes to it (a transfer into the linked account), then deletes both.
+- `overview-reports`: adds an account, an income and an expense, then checks the totals, recent transactions and spending breakdown on the overview and the averages, savings rate and spending structure on reports.
+- `navigation`: opens every page from the main navigation as a new user and checks its heading and that no section fails to load.
+
+### Docker smoke
+
+To check the production image against the backend without touching a running dev container:
+
+1. Start the backend stack with a raised auth limit: in `dock.mita.backend`, `docker compose -f compose.yaml -f compose.override.yaml -f <override> up -d --build`, where the override sets `services.api.environment.RateLimiting__AuthPermitLimit: "100"`.
+2. Start the frontend production image on another port with its own project name: `APP_PORT=3100 docker compose -p dock-mita-frontend-smoke -f compose.yaml -f <override> up -d --build`, where the override sets `services.web.image: dock-mita-frontend-smoke` (so the build does not retag `dock-mita-frontend`) and `services.web.environment.NUXT_PUBLIC_API_MOCKS: "false"`. Wait for `http://localhost:3100/login` (200); `http://localhost:3100/v1/me` answers 401 when the proxy reaches the backend.
+3. Run Playwright against it: `docker run --rm --user 1000:1000 -e HOME=/tmp --network host --ipc=host -v "$PWD":/work -w /work -e E2E_BASE_URL=http://localhost:3100 mcr.microsoft.com/playwright:v1.64.1-noble npx playwright test --config playwright.real.config.ts --reporter=line`.
+4. Tear down: `docker compose -p dock-mita-frontend-smoke -f compose.yaml down` and `docker image rm dock-mita-frontend-smoke` here, `docker compose down -v` in the backend (only if you started it for the smoke); remove `test-results` and `playwright-report` once any failure is understood.
+
+### Deployed proxy
+
+The backend trusts `X-Forwarded-For` only from the networks in its `ForwardedHeaders` settings and reads at most `ForwardedHeaders:ForwardLimit` entries from the end of the chain. Behind ingress -> frontend proxy -> API set `ForwardedHeaders__ForwardLimit=2` and trust the networks of both the ingress and the frontend pods (the pod network, plus the node addresses for a host-network ingress controller), so the rate limit sees the real client address.
 
 ## Internationalization
 
@@ -155,15 +174,15 @@ Chart series, in order: light `#25282F #C43F73 #7C818C #E59AB8 #B5B9C1 #F3D3E0`,
 
 ```
 docker compose up --build                     # dev: compose.override.yaml adds hot reload
-docker compose -f compose.yaml up -d --build  # preprod / prod: built image, config from .env
+docker compose -f compose.yaml up -d --build  # preprod / prod: built image, config from .env (proxy target: COMPOSE_API_PROXY_TARGET)
 bun install
 bun run dev
 bun run build
 bun run lint
 bun run typecheck
 bun run test
-bun run test:e2e
-bun run test:e2e:hybrid                       # against the real backend, see "Running against the backend"
+bun run test:e2e                              # on mocks: starts its own server on port 3100 with NUXT_PUBLIC_API_MOCKS=true
+bun run test:e2e:real                         # against the real backend, see "Running the app"
 bun run api:generate
 ```
 
