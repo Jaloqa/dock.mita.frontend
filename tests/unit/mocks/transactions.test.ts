@@ -69,6 +69,7 @@ describe('transactions', () => {
       'kind',
       'note',
       'rate',
+      'tags',
       'title',
     ])
     expect(await balanceOf(mock, 'acc_anna_card')).toBe(before - 14_230)
@@ -349,6 +350,85 @@ describe('transactions', () => {
     expect(await failure(mock.handle({ method: 'DELETE', path: `/v1/accounts/${account.id}` }))).toMatchObject(
       field('id', 'validation.accountInUse'),
     )
+  })
+
+  it('creates tags by name, merges duplicates and reuses the stored spelling', async () => {
+    const mock = api()
+    const created = await create(mock, { ...lidl, tags: [' Trip ', 'trip', 'food'] })
+    expect(created.tags).toMatchObject([{ name: 'food' }, { name: 'Trip' }])
+    const trip = created.tags[1]
+    const again = await create(mock, { ...lidl, tags: ['TRIP'] })
+    expect(again.tags).toEqual([trip])
+    expect(mock.db.state.tags.filter((tag) => tag.name.toLowerCase() === 'trip')).toHaveLength(1)
+  })
+
+  it('validates tags in order and stores no tag for a rejected create', async () => {
+    const mock = api()
+    const before = mock.db.state.tags.length
+    expect(await failure(create(mock, { ...lidl, tags: 'a' }))).toMatchObject(field('tags', 'validation.invalidValue'))
+    expect(await failure(create(mock, { ...lidl, tags: ['a', 1] }))).toMatchObject(
+      field('tags', 'validation.invalidValue'),
+    )
+    expect(await failure(create(mock, { ...lidl, tags: ['a', '  '] }))).toMatchObject(
+      field('tags', 'validation.invalidValue'),
+    )
+    expect(await failure(create(mock, { ...lidl, tags: ['a\nb'] }))).toMatchObject(
+      field('tags', 'validation.invalidValue'),
+    )
+    expect(await failure(create(mock, { ...lidl, tags: ['x'.repeat(31), 1] }))).toMatchObject(
+      field('tags', 'validation.invalidValue'),
+    )
+    expect(await failure(create(mock, { ...lidl, tags: ['x'.repeat(31)] }))).toMatchObject(
+      field('tags', 'validation.tagTooLong'),
+    )
+    const eleven = Array.from({ length: 11 }, (_, index) => `t${index}`)
+    expect(await failure(create(mock, { ...lidl, tags: eleven }))).toMatchObject(
+      field('tags', 'validation.tooManyTags'),
+    )
+    const merged = await create(mock, { ...lidl, tags: [...eleven.slice(0, 10), 'T0'] })
+    expect(merged.tags).toHaveLength(10)
+    expect(await failure(create(mock, { ...lidl, tags: ['fresh'], amount: 0 }))).toMatchObject(
+      field('amount', 'validation.positiveAmount'),
+    )
+    expect(mock.db.state.tags.some((tag) => tag.name === 'fresh')).toBe(false)
+    expect(mock.db.state.tags.length).toBe(before + 10)
+  })
+
+  it('clears the tags when a PUT omits them', async () => {
+    const mock = api()
+    const created = await create(mock, { ...lidl, tags: ['trip'] })
+    const path = `/v1/transactions/${created.id}`
+    expect(await mock.handle({ method: 'PUT', path, body: { ...lidl, tags: ['trip', 'food'] } })).toMatchObject({
+      tags: [{ name: 'food' }, { name: 'trip' }],
+    })
+    expect(await mock.handle({ method: 'PUT', path, body: lidl })).toMatchObject({ tags: [] })
+  })
+
+  it('filters by any of the tag ids, counts a doubly tagged row once and searches tag names', async () => {
+    const mock = api()
+    const both = await create(mock, { ...lidl, title: 'Both', tags: ['a', 'b'] })
+    await create(mock, { ...lidl, title: 'Only a', tags: ['a'] })
+    await create(mock, { ...lidl, title: 'None' })
+    const [a, b] = both.tags
+    const ids = `${a?.id},${b?.id}`
+    const page = await list(mock, { tagIds: ids })
+    expect(page.items.map((item) => item.title).sort()).toEqual(['Both', 'Only a'])
+    expect(page.total).toBe(2)
+    expect(page.sum).toBe(-2 * 14_230)
+    expect(await titles(mock, { tagIds: String(b?.id) })).toEqual(['Both'])
+    expect(await titles(mock, { tagIds: 'tag_unknown' })).toEqual([])
+    expect(await titles(mock, { tagIds: ' ' })).toHaveLength(3)
+    expect(page.items.find((item) => item.title === 'Both')?.tags).toEqual(both.tags)
+    await create(mock, { ...lidl, title: 'Plain', tags: ['Zebra'] })
+    expect(await titles(mock, { search: ' zeb ' })).toEqual(['Plain'])
+    const eleven = Array.from({ length: 11 }, (_, index) => `tag_${index}`).join(',')
+    expect(await failure(list(mock, { tagIds: eleven }))).toMatchObject(field('tagIds', 'validation.invalidValue'))
+    expect(await failure(list(mock, { tagIds: 'a,,b' }))).toMatchObject(field('tagIds', 'validation.invalidValue'))
+  })
+
+  it('finds a seeded row by the name of its tag', async () => {
+    const mock = loggedInMockApi()
+    expect(await titles(mock, { search: 'barc' })).toContain('Booking.com — hotel Barcelona')
   })
 
   it('starts from the seed when the stored database has no transactions table', () => {

@@ -14,9 +14,10 @@ type Planned = {
   amount: number
   currency?: Currency
   note?: string
+  tags?: string[]
 }
 
-type Extra = Pick<Planned, 'currency' | 'note'>
+type Extra = Pick<Planned, 'currency' | 'note' | 'tags'>
 
 type Day = {
   daysAgo: number
@@ -75,22 +76,27 @@ const income = (title: string, category: string, account: string, amount: number
   ...extra,
 })
 
+const abonament = 'tag_anna_abonament'
+const praca = 'tag_anna_praca'
+const barcelona = 'tag_anna_barcelona'
+
 function annaDay(day: Day): Planned[] {
   const card = 'acc_anna_card'
   const cash = 'acc_anna_cash'
   const eur = 'acc_anna_eur'
   const items: Planned[] = []
   const date = day.dayOfMonth
-  if (date === 1) items.push(expense('Karnet na siłownię', 'sport', card, 12_900))
-  if (date === 2) items.push(expense('Internet UPC', 'housing', card, 5_900))
-  if (date === 3 && day.month % 2 === 0) items.push(income('Zlecenie — projekt logo', 'freelance', card, 80_000))
+  if (date === 1) items.push(expense('Karnet na siłownię', 'sport', card, 12_900, { tags: [abonament] }))
+  if (date === 2) items.push(expense('Internet UPC', 'housing', card, 5_900, { tags: [abonament] }))
+  if (date === 3 && day.month % 2 === 0)
+    items.push(income('Zlecenie — projekt logo', 'freelance', card, 80_000, { tags: [praca] }))
   if (date === 5) items.push(expense('Czynsz', 'housing', card, 210_000))
   if (date === 8) items.push(expense('Steam', 'leisure', card, 1_999, { currency: 'EUR' }))
   if (date === 10) items.push(income('Wynagrodzenie', 'salary', card, 740_000))
   if (date === 12) items.push(expense('Apteka', 'health', cash, day.between(2_500, 6_000)))
   if (date === 14) items.push(expense('Bilet miesięczny MZK', 'transport', card, 9_200))
   if (date === 17) items.push(expense('Rossmann', 'shopping', card, day.between(4_000, 12_000)))
-  if (date === 18) items.push(expense('Abonament Play', 'other', card, 5_900))
+  if (date === 18) items.push(expense('Abonament Play', 'other', card, 5_900, { tags: [abonament] }))
   if (date === 19 && day.month % 2 === 1) items.push(expense('Dentysta', 'health', card, 35_000))
   if (date === 20) items.push(expense('Prąd — Tauron', 'housing', card, day.between(15_000, 21_000)))
   if (date === 22 && day.month % 2 === 1)
@@ -114,10 +120,14 @@ function annaDay(day: Day): Planned[] {
   }
   if (day.chance(0.07)) items.push(expense('Bolt', 'transport', card, day.between(1_800, 4_500)))
   if (day.daysAgo === 118) {
-    items.push(expense('Laptop — Media Expert', 'shopping', card, 429_900, { note: 'Nowy laptop do pracy' }))
+    items.push(
+      expense('Laptop — Media Expert', 'shopping', card, 429_900, { note: 'Nowy laptop do pracy', tags: [praca] }),
+    )
   }
   if (day.daysAgo === 60)
-    items.push(expense('Booking.com — hotel Barcelona', 'leisure', card, 42_000, { currency: 'EUR' }))
+    items.push(
+      expense('Booking.com — hotel Barcelona', 'leisure', card, 42_000, { currency: 'EUR', tags: [barcelona] }),
+    )
   if (day.daysAgo === 59) {
     items.push(expense('Ryanair', 'transport', card, 17_800, { currency: 'EUR', note: 'Kraków – Barcelona, 2 osoby' }))
   }
@@ -194,6 +204,7 @@ export function demoTransactions(
           date,
           title: planned.title,
           note: planned.note ?? null,
+          tagIds: planned.tags ?? [],
           categoryId: `cat_${planner.short}_${planned.kind}_${planned.category}`,
           accountId: account.id,
           amount: planned.amount,
