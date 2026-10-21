@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { type AccountDto, type CategoryDto, categoryKinds } from '~/shared/api/contract'
+import { type AccountDto, type CategoryDto, categoryKinds, type TransactionTagDto } from '~/shared/api/contract'
 import { type PeriodPreset, periodPresets } from '../utils/filters'
 
 const props = defineProps<{ idPrefix: string; categories: CategoryDto[]; accounts: AccountDto[] }>()
 const categoryId = defineModel<string | null>('categoryId', { required: true })
 const accountId = defineModel<string | null>('accountId', { required: true })
+const tags = defineModel<TransactionTagDto[]>('tags', { required: true })
 const period = defineModel<PeriodPreset>('period', { required: true })
 const { t } = useI18n()
 
@@ -53,6 +54,11 @@ const periodOptions = computed(() =>
         :aria-labelledby="labelId"
         fluid
       />
+    </template>
+  </FormRow>
+  <FormRow :id="`${idPrefix}-tags`" :label="t('transactions.filters.tags')" class="min-w-0 flex-[1_1_150px]">
+    <template #default>
+      <TransactionTagFilter v-model="tags" :id="`${idPrefix}-tags`" />
     </template>
   </FormRow>
   <FormRow :id="`${idPrefix}-period`" :label="t('transactions.filters.period')" class="min-w-0 flex-[1_1_150px]">

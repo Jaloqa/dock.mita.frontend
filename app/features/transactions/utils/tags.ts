@@ -29,3 +29,7 @@ function suggestionsOf(existing: readonly string[], key: string, taken: Readonly
     .slice(0, TAG_SUGGESTIONS_MAX)
     .map((name) => ({ name, create: false }))
 }
+
+export function visibleTags(names: readonly string[], limit: number): { shown: string[]; hidden: number } {
+  return { shown: names.slice(0, limit), hidden: Math.max(0, names.length - limit) }
+}

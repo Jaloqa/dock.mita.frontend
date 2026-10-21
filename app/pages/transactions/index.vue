@@ -66,6 +66,7 @@ useHead({ title: () => t('navigation.transactions') })
     <TransactionFilterFields
       v-model:category-id="filters.categoryId"
       v-model:account-id="filters.accountId"
+      v-model:tags="filters.tags"
       v-model:period="filters.period"
       id-prefix="transactions"
       :categories="screen.categories.value"
@@ -172,6 +173,7 @@ useHead({ title: () => t('navigation.transactions') })
   <Drawer
     v-model:visible="filtersOpen"
     position="bottom"
+    block-scroll
     :header="t('transactions.filters.label')"
     :aria-label="t('transactions.filters.label')"
     class="h-auto! rounded-t-(--radius-panel)"
@@ -180,6 +182,7 @@ useHead({ title: () => t('navigation.transactions') })
       <TransactionFilterFields
         v-model:category-id="filters.categoryId"
         v-model:account-id="filters.accountId"
+        v-model:tags="filters.tags"
         v-model:period="filters.period"
         id-prefix="transactions-drawer"
         :categories="screen.categories.value"

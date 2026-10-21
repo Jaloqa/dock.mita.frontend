@@ -266,11 +266,13 @@
     "filters": {
       "label": "Фильтры",
       "search": "Поиск",
-      "searchPlaceholder": "Название, заметка или сумма",
+      "searchPlaceholder": "Название, заметка, тег или сумма",
       "category": "Категория",
       "allCategories": "Все категории",
       "account": "Счёт",
       "allAccounts": "Все счета",
+      "tags": "Теги",
+      "allTags": "Все теги",
       "kind": "Тип",
       "period": "Период"
     },
@@ -340,7 +342,8 @@
       "label": "Теги",
       "placeholder": "Введите, чтобы добавить тег",
       "create": "+ “{name}”",
-      "remove": "Удалить тег {name}"
+      "remove": "Удалить тег {name}",
+      "more": "+{count} тег | +{count} тега | +{count} тегов"
     },
     "add": {
       "close": "Закрыть",
@@ -377,7 +380,8 @@
       "rate": "Курс",
       "baseAmount": "Сумма в базовой валюте",
       "baseCurrency": "Базовая валюта",
-      "note": "Заметка"
+      "note": "Заметка",
+      "tags": "Теги"
     }
   },
   "budgets": {

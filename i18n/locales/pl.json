@@ -266,11 +266,13 @@
     "filters": {
       "label": "Filtry",
       "search": "Szukaj",
-      "searchPlaceholder": "Nazwa, notatka lub kwota",
+      "searchPlaceholder": "Nazwa, notatka, tag lub kwota",
       "category": "Kategoria",
       "allCategories": "Wszystkie kategorie",
       "account": "Konto",
       "allAccounts": "Wszystkie konta",
+      "tags": "Tagi",
+      "allTags": "Wszystkie tagi",
       "kind": "Typ",
       "period": "Okres"
     },
@@ -340,7 +342,8 @@
       "label": "Tagi",
       "placeholder": "Wpisz, aby dodać tag",
       "create": "+ “{name}”",
-      "remove": "Usuń tag {name}"
+      "remove": "Usuń tag {name}",
+      "more": "+{count} tag | +{count} tagi | +{count} tagów"
     },
     "add": {
       "close": "Zamknij",
@@ -377,7 +380,8 @@
       "rate": "Kurs wymiany",
       "baseAmount": "Kwota w walucie bazowej",
       "baseCurrency": "Waluta bazowa",
-      "note": "Notatka"
+      "note": "Notatka",
+      "tags": "Tagi"
     }
   },
   "budgets": {

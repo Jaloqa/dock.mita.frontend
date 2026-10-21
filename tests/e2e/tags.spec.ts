@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { expect, type Locator, type Page, test } from '@playwright/test'
 import { overlayOption, pickOverlayOption } from './overlayOption'
 
@@ -118,4 +119,62 @@ test('removes a tag with its labelled button', async ({ page, isMobile }) => {
   const dialog = await openEditDialog(page, isMobile, 'Booking.com — hotel Barcelona')
   await chip(dialog, 'barcelona').click()
   await expect(chip(dialog, 'barcelona')).toHaveCount(0)
+})
+
+test.describe('tag filter on the desktop table', () => {
+  test.skip(({ isMobile }) => isMobile, 'the table is the desktop layout')
+
+  const filterRegion = (page: Page) => page.getByRole('region', { name: 'Filters' })
+  const rows = (page: Page) => page.getByRole('region', { name: 'Transactions' }).locator('tbody tr')
+  const pickTag = async (page: Page, text: string, name: string) => {
+    const field = filterRegion(page).getByRole('combobox', { name: 'Tags' })
+    await field.fill(text)
+    await pickOverlayOption(page, name)
+    await expect(filterRegion(page).getByRole('button', { name: `Remove tag ${name}`, exact: true })).toBeVisible()
+  }
+
+  test('filters by tag and the sum follows', async ({ page }) => {
+    await page.goto('/transactions')
+    await expect(page.getByRole('heading', { level: 1, name: 'Transactions' })).toBeVisible()
+    await showAllTime(page, false)
+    await pickTag(page, 'barc', 'barcelona')
+    const summary = page.getByRole('region', { name: 'Filter summary' })
+    await expect(rows(page)).toHaveCount(1)
+    await expect(rows(page).first()).toContainText('Booking.com — hotel Barcelona')
+    await expect(rows(page).first().getByRole('list', { name: 'Tags' })).toContainText('barcelona')
+    await expect(summary).toContainText('Found: 1 transaction')
+    const downloading = page.waitForEvent('download')
+    await page.getByRole('button', { name: 'Export CSV' }).click()
+    const lines = readFileSync(await (await downloading).path(), 'utf8')
+      .trimEnd()
+      .split('\r\n')
+    const baseAmount = Math.abs(Number(lines[1]?.split(',')[10]))
+    expect(baseAmount).toBeGreaterThan(0)
+    await expect(summary).toContainText(baseAmount.toLocaleString('en-US', { minimumFractionDigits: 2 }))
+    await pickTag(page, 'prac', 'praca')
+    await expect(rows(page).filter({ hasText: 'Laptop — Media Expert' })).toHaveCount(1)
+    await expect(rows(page).filter({ hasText: 'Lidl' })).toHaveCount(0)
+    await expect(summary).toContainText('Found: 5 transactions')
+    await expect(rows(page).filter({ hasText: 'Booking.com — hotel Barcelona' })).toHaveCount(1)
+    await filterRegion(page).getByRole('button', { name: 'Remove tag praca', exact: true }).click()
+    await filterRegion(page).getByRole('button', { name: 'Remove tag barcelona', exact: true }).click()
+    await expect(summary).not.toContainText('Found: 1 transaction')
+    await expect(rows(page).nth(5)).toBeVisible()
+  })
+
+  test('exports tags in the CSV', async ({ page }) => {
+    await page.goto('/transactions')
+    await showAllTime(page, false)
+    await pickTag(page, 'barc', 'barcelona')
+    await expect(rows(page)).toHaveCount(1)
+    const downloading = page.waitForEvent('download')
+    await page.getByRole('button', { name: 'Export CSV' }).click()
+    const download = await downloading
+    const lines = readFileSync(await download.path(), 'utf8')
+      .trimEnd()
+      .split('\r\n')
+    expect(lines).toHaveLength(2)
+    expect(lines[0]?.endsWith(',Tags')).toBe(true)
+    expect(lines[1]?.endsWith(',barcelona')).toBe(true)
+  })
 })

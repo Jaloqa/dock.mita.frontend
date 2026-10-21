@@ -44,5 +44,7 @@ export function useTagSuggestions(chosen: MaybeRefOrGetter<readonly string[]> = 
 
   onScopeDispose(() => clearTimeout(timer))
 
-  return { options, matches, pending: readonly(pending), search }
+  const loading = computed(() => pending.value || query.isFetching.value)
+
+  return { options, matches, loading, pending: readonly(pending), search }
 }

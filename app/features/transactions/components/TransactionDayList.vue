@@ -55,6 +55,7 @@ const label = (date: string) => {
             <span class="flex min-w-0 flex-auto flex-col gap-0.5">
               <span class="truncate text-sm font-medium text-ink">{{ row.title }}</span>
               <span class="truncate text-xs text-muted">{{ row.categoryName }}</span>
+              <TransactionTagChips :tags="row.tags" :limit="2" />
             </span>
             <MoneyText
               :amount="signedAmount(row.transaction)"

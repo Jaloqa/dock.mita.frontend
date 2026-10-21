@@ -138,6 +138,7 @@ const converted = (row: TransactionView) =>
             <span v-if="row.original.transaction.note" class="block text-xs text-muted">
               {{ row.original.transaction.note }}
             </span>
+            <TransactionTagChips :tags="row.original.tags" :limit="3" class="mt-1" />
           </td>
           <td class="border-b border-bg px-4 py-3.5">
             <span
