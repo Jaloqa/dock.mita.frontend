@@ -178,3 +178,120 @@ test.describe('tag filter on the desktop table', () => {
     expect(lines[1]?.endsWith(',barcelona')).toBe(true)
   })
 })
+
+const mainNav = (page: Page) => page.getByRole('navigation', { name: 'Main navigation' }).filter({ visible: true })
+
+const openSettingsInApp = async (page: Page, isMobile: boolean) => {
+  if (isMobile) {
+    await mainNav(page).getByRole('link', { name: 'Overview', exact: true }).click()
+    await expect(page).toHaveURL('/')
+    await page.getByRole('link', { name: 'Settings' }).filter({ visible: true }).click()
+  } else {
+    await mainNav(page).getByRole('link', { name: 'Settings', exact: true }).click()
+  }
+  await expect(page).toHaveURL('/settings')
+}
+
+const openTransactionsInApp = async (page: Page) => {
+  await mainNav(page).getByRole('link', { name: 'Transactions', exact: true }).click()
+  await expect(page).toHaveURL('/transactions')
+  await expect(page.getByRole('heading', { level: 1, name: 'Transactions' })).toBeVisible()
+}
+
+const openTagManager = async (page: Page) => {
+  await page.getByRole('button', { name: 'Manage tags' }).click()
+  const dialog = page.getByRole('dialog', { name: 'Tags' })
+  await expect(dialog.getByRole('button', { name: 'Close', exact: true })).toBeFocused()
+  return dialog
+}
+
+const closeTagManager = async (dialog: Locator) => {
+  await dialog.getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(dialog).toBeHidden()
+}
+
+const rowChips = (page: Page, name: string) =>
+  page.getByRole('main').getByRole('list', { name: 'Tags' }).getByText(name, { exact: true })
+
+const withFilters = async (page: Page, isMobile: boolean, action: (scope: Locator) => Promise<void>) => {
+  if (!isMobile) {
+    await action(page.getByRole('region', { name: 'Filters' }))
+    return
+  }
+  await page.getByRole('button', { name: 'Filters' }).click()
+  const drawer = page.getByRole('dialog', { name: 'Filters' })
+  await action(drawer)
+  await drawer.getByRole('button', { name: 'Show results' }).click()
+  await expect(drawer).toBeHidden()
+}
+
+test('renaming and deleting a tag updates the rows', async ({ page, isMobile }) => {
+  await page.goto('/transactions')
+  await expect(page.getByRole('heading', { level: 1, name: 'Transactions' })).toBeVisible()
+  await showAllTime(page, isMobile)
+  await page.getByRole('searchbox', { name: 'Search' }).fill('Play')
+  await expect(rowChips(page, 'abonament').first()).toBeVisible()
+
+  await openSettingsInApp(page, isMobile)
+  let dialog = await openTagManager(page)
+  const list = dialog.getByRole('list', { name: 'Tags' })
+  await expect(list.getByRole('listitem')).toHaveCount(4)
+  await expect(list.getByRole('listitem').filter({ hasText: 'remont' })).toContainText('0 transactions')
+  const usage = await list
+    .getByRole('listitem')
+    .filter({ hasText: 'abonament' })
+    .getByText(/^\d+ transactions$/)
+    .textContent()
+  const count = Number.parseInt(usage ?? '', 10)
+  expect(count).toBeGreaterThan(1)
+
+  await dialog.getByRole('button', { name: 'Rename abonament' }).click()
+  const name = dialog.getByLabel('Name', { exact: true })
+  await expect(name).toBeFocused()
+  await name.fill('praca')
+  await dialog.getByRole('button', { name: 'Save' }).click()
+  await expect(dialog.getByText('A tag with this name already exists.')).toBeVisible()
+  await name.fill('subskrypcja')
+  await dialog.getByRole('button', { name: 'Save' }).click()
+  await expect(page.getByText('Tag renamed')).toBeVisible()
+  await expect(dialog.getByRole('button', { name: 'Rename subskrypcja' })).toBeFocused()
+  await closeTagManager(dialog)
+
+  await openTransactionsInApp(page)
+  await showAllTime(page, isMobile)
+  await page.getByRole('searchbox', { name: 'Search' }).fill('Play')
+  await expect(rowChips(page, 'subskrypcja').first()).toBeVisible()
+  await expect(rowChips(page, 'abonament')).toHaveCount(0)
+
+  await withFilters(page, isMobile, async (scope) => {
+    const field = scope.getByRole('combobox', { name: 'Tags' })
+    await field.fill('subskr')
+    await pickOverlayOption(page, 'subskrypcja')
+    await expect(scope.getByRole('button', { name: 'Remove tag subskrypcja', exact: true })).toBeVisible()
+  })
+  await expect(rowChips(page, 'subskrypcja').first()).toBeVisible()
+
+  await openSettingsInApp(page, isMobile)
+  dialog = await openTagManager(page)
+  await dialog.getByRole('button', { name: 'Delete subskrypcja' }).click()
+  const confirm = page.getByRole('alertdialog')
+  await expect(confirm).toContainText(`“subskrypcja” will be removed from ${count} transactions.`)
+  await confirm.getByRole('button', { name: 'Delete' }).click()
+  await expect(page.getByText('Tag deleted')).toBeVisible()
+  await expect(dialog.getByRole('list', { name: 'Tags' }).getByRole('listitem')).toHaveCount(3)
+  await closeTagManager(dialog)
+
+  await openTransactionsInApp(page)
+  await showAllTime(page, isMobile)
+  await expect(rowChips(page, 'subskrypcja')).toHaveCount(0)
+  await withFilters(page, isMobile, async (scope) => {
+    await expect(scope.getByRole('combobox', { name: 'Tags' })).toHaveValue('')
+    await expect(scope.getByRole('button', { name: /^Remove tag/ })).toHaveCount(0)
+  })
+})
+
+test('tag manager is localized', async ({ page }) => {
+  await page.goto('/pl/settings')
+  await page.getByRole('button', { name: 'Zarządzaj tagami' }).click()
+  await expect(page.getByRole('dialog', { name: 'Tagi' })).toBeVisible()
+})

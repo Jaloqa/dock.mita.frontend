@@ -3,6 +3,7 @@ const { t } = useI18n()
 const notify = useNotify()
 const { exporting, exportCsv } = useTransactionExport()
 const categoriesOpen = ref(false)
+const tagsOpen = ref(false)
 const deleteOpen = ref(false)
 const apiMode = useApiMode()
 
@@ -20,11 +21,13 @@ useHead({ title: () => t('navigation.settings') })
       @export="exportCsv({})"
       @import="notify.info(t('settings.data.importSoon'))"
       @manage-categories="categoriesOpen = true"
+      @manage-tags="tagsOpen = true"
       @delete-account="deleteOpen = true"
     />
     <DemoSection v-if="apiMode === 'mock'" />
   </div>
   <CategoryManagerDialog v-model:visible="categoriesOpen" />
+  <TagManagerDialog v-model:visible="tagsOpen" />
   <DeleteAccountDialog v-if="apiMode === 'mock'" v-model:visible="deleteOpen" />
   <DeleteAccountPasswordDialog v-else v-model:visible="deleteOpen" />
 </template>

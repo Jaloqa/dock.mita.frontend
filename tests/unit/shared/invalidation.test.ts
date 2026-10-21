@@ -45,4 +45,9 @@ describe('invalidation map', () => {
   it('refreshes only the demo users after a profile change because the response replaces the current user', () => {
     expect(invalidationMap.profile).toEqual([['demo']])
   })
+
+  it('refreshes tags and the transaction pages that show them after a tag change', () => {
+    expect(invalidationMap.tags).toEqual([['tags'], ['transactions']])
+    expect(invalidationMap.transactions).toContainEqual(['tags'])
+  })
 })

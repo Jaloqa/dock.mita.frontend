@@ -8,6 +8,7 @@ export type DataChange =
   | 'transfers'
   | 'categories'
   | 'transactions'
+  | 'tags'
   | 'budgets'
   | 'goals'
   | 'goalContributions'
@@ -19,7 +20,8 @@ export const invalidationMap: Record<DataChange, readonly QueryKey[]> = {
   accounts: [['accounts'], ['transfers'], ['transactions'], ['overview'], ['reports'], ['goals']],
   transfers: [['transfers'], ['accounts'], ['overview']],
   categories: [['categories'], ['transactions'], ['budgets'], ['overview'], ['reports']],
-  transactions: [['transactions'], ['accounts'], ['categories'], ['budgets'], ['overview'], ['reports']],
+  transactions: [['transactions'], ['tags'], ['accounts'], ['categories'], ['budgets'], ['overview'], ['reports']],
+  tags: [['tags'], ['transactions']],
   budgets: [['budgets'], ['overview']],
   goals: [['goals'], ['accounts'], ['overview']],
   goalContributions: [['goals'], ['accounts'], ['transfers'], ['overview']],

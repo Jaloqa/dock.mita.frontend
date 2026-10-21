@@ -162,6 +162,13 @@ test('import is announced and export downloads every transaction', async ({ page
   await expect(page.getByText(/^Exported \d+ transactions$/)).toBeVisible()
 })
 
+test('data lists tag management after category management', async ({ page }) => {
+  await openSettings(page)
+  const names = await section(page, 'Data').getByRole('button').allTextContents()
+  const trimmed = names.map((name) => name.trim())
+  expect(trimmed.indexOf('Manage tags')).toBe(trimmed.indexOf('Manage categories') + 1)
+})
+
 test('settings are localized', async ({ page }) => {
   await page.goto('/uk/settings')
   await expect(page.getByRole('heading', { level: 1, name: 'Налаштування' })).toBeVisible()

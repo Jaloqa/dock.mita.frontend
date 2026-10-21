@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'bun:test'
+import { tagRules } from '../../../../app/features/transactions/schemas/tagSchema'
 import {
   isPositiveMinor,
   isPositiveOrEmpty,
@@ -74,5 +75,41 @@ describe('transaction form rules', () => {
     expect(message(rules.amount.positive)).toBe('validation.positiveAmount')
     expect(validate(rules.categoryId.required, null)).toBe(false)
     expect(validate(rules.accountId.required, 'acc')).toBe(true)
+  })
+})
+
+describe('tag rename rules', () => {
+  const rules = tagRules(
+    (key) => key,
+    () => ['praca', 'Barcelona'],
+  )
+
+  it('requires a name', () => {
+    expect(validate(rules.name.required, '')).toBe(false)
+    expect(validate(rules.name.required, '   ')).toBe(false)
+    expect(validate(rules.name.required, 'kino')).toBe(true)
+    expect(message(rules.name.required)).toBe('validation.required')
+  })
+
+  it('limits the trimmed length', () => {
+    expect(validate(rules.name.tooLong, 'a'.repeat(TAG_NAME_MAX))).toBe(true)
+    expect(validate(rules.name.tooLong, ` ${'a'.repeat(TAG_NAME_MAX)} `)).toBe(true)
+    expect(validate(rules.name.tooLong, 'a'.repeat(TAG_NAME_MAX + 1))).toBe(false)
+    expect(message(rules.name.tooLong)).toBe('validation.tagTooLong')
+  })
+
+  it('refuses a name another tag has, ignoring case and surrounding spaces', () => {
+    expect(validate(rules.name.taken, ' PRACA ')).toBe(false)
+    expect(validate(rules.name.taken, 'barcelona')).toBe(false)
+    expect(validate(rules.name.taken, 'kino')).toBe(true)
+    expect(message(rules.name.taken)).toBe('validation.tagNameTaken')
+  })
+
+  it('allows the own name in another case because it is not among the other tags', () => {
+    const own = tagRules(
+      (key) => key,
+      () => ['barcelona'],
+    )
+    expect(validate(own.name.taken, 'Praca')).toBe(true)
   })
 })
