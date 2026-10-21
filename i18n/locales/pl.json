@@ -108,6 +108,7 @@
       "import": "Importuj wyciąg bankowy",
       "importSoon": "Import wyciągów bankowych będzie dostępny wkrótce",
       "manageCategories": "Zarządzaj kategoriami",
+      "manageTags": "Zarządzaj tagami",
       "deleteAccount": "Usuń konto"
     },
     "delete": {
@@ -344,6 +345,22 @@
       "create": "+ “{name}”",
       "remove": "Usuń tag {name}",
       "more": "+{count} tag | +{count} tagi | +{count} tagów"
+    },
+    "tagManager": {
+      "title": "Tagi",
+      "empty": "Brak tagów. Tagi dodane do operacji pojawią się tutaj.",
+      "usage": "{count} operacja | {count} operacje | {count} operacji",
+      "rename": "Zmień nazwę: {name}",
+      "delete": "Usuń: {name}",
+      "name": "Nazwa",
+      "confirmDelete": "Usuń",
+      "deleteTitle": "Usunąć tag?",
+      "deleteMessage": "Tag „{name}” zostanie usunięty z {count} operacji. | Tag „{name}” zostanie usunięty z {count} operacji. | Tag „{name}” zostanie usunięty z {count} operacji.",
+      "deleteUnusedMessage": "Tag „{name}” zostanie usunięty. Żadna operacja go nie używa.",
+      "toast": {
+        "renamed": "Zmieniono nazwę tagu",
+        "deleted": "Usunięto tag"
+      }
     },
     "add": {
       "close": "Zamknij",

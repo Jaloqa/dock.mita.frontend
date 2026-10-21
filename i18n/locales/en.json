@@ -108,6 +108,7 @@
       "import": "Import bank statement",
       "importSoon": "Bank statement import is coming soon",
       "manageCategories": "Manage categories",
+      "manageTags": "Manage tags",
       "deleteAccount": "Delete account"
     },
     "delete": {
@@ -344,6 +345,22 @@
       "create": "+ “{name}”",
       "remove": "Remove tag {name}",
       "more": "+{count} tag | +{count} tags"
+    },
+    "tagManager": {
+      "title": "Tags",
+      "empty": "No tags yet. Tags you add to transactions appear here.",
+      "usage": "{count} transaction | {count} transactions",
+      "rename": "Rename {name}",
+      "delete": "Delete {name}",
+      "name": "Name",
+      "confirmDelete": "Delete",
+      "deleteTitle": "Delete tag?",
+      "deleteMessage": "“{name}” will be removed from {count} transaction. | “{name}” will be removed from {count} transactions.",
+      "deleteUnusedMessage": "“{name}” will be deleted. No transaction uses it.",
+      "toast": {
+        "renamed": "Tag renamed",
+        "deleted": "Tag deleted"
+      }
     },
     "add": {
       "close": "Close",

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 defineProps<{ exporting: boolean }>()
-const emit = defineEmits<{ export: []; import: []; manageCategories: []; deleteAccount: [] }>()
+const emit = defineEmits<{ export: []; import: []; manageCategories: []; manageTags: []; deleteAccount: [] }>()
 const { t } = useI18n()
 
 const actionClass =
@@ -27,6 +27,10 @@ const actionClass =
       <button type="button" :class="actionClass" @click="emit('manageCategories')">
         <AppIcon name="budgets" />
         {{ t('settings.data.manageCategories') }}
+      </button>
+      <button type="button" :class="actionClass" @click="emit('manageTags')">
+        <AppIcon name="budgets" />
+        {{ t('settings.data.manageTags') }}
       </button>
       <button
         type="button"
