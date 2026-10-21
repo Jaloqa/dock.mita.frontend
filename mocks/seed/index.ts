@@ -5,6 +5,7 @@ import { demoBudgets } from './budgets'
 import { demoCategories } from './categories'
 import { demoGoals } from './goals'
 import { seedRates } from './rates'
+import { demoTags } from './tags'
 import { demoTransactions, withTransactionHistory } from './transactions'
 import { demoTransfers } from './transfers'
 import { demoSettings, demoUsers } from './users'
@@ -27,6 +28,7 @@ export const seedState = (today: string = todayIso()): MockState => {
     accounts: withTransactionHistory(designed, transactions),
     transfers,
     categories: demoCategories(),
+    tags: demoTags(),
     transactions,
     budgets: demoBudgets(today, settings),
     goals,

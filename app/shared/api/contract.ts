@@ -122,6 +122,16 @@ export type TransactionSort = '-date' | 'date' | '-amount' | 'amount'
 
 export const transactionSorts: readonly TransactionSort[] = ['-date', 'date', '-amount', 'amount']
 
+export const TAG_NAME_MAX = 30
+
+export const TAGS_PER_TRANSACTION_MAX = 10
+
+export type TransactionTagDto = { id: string; name: string }
+
+export type TagDto = { id: string; name: string; usage: number }
+
+export type TagInput = { name: string }
+
 export type TransactionDto = {
   id: string
   kind: CategoryKind
@@ -135,6 +145,7 @@ export type TransactionDto = {
   accountAmount: number
   rate: number
   baseAmount: number
+  tags: TransactionTagDto[]
 }
 
 export type TransactionInput = {
@@ -147,12 +158,14 @@ export type TransactionInput = {
   amount: number
   currency: Currency
   rate?: number
+  tags?: string[]
 }
 
 export type TransactionQuery = {
   search?: string
   categoryId?: string
   accountId?: string
+  tagIds?: string
   kind?: CategoryKind
   from?: string
   to?: string

@@ -60,6 +60,11 @@ describe('mock db', () => {
     expect(createDb(memoryStorage(stored), seedState).state.settings).toHaveLength(2)
   })
 
+  it('falls back to the seed when stored state has no tags', () => {
+    const { tags: _tags, ...older } = seedState()
+    expect(createDb(memoryStorage(JSON.stringify(older)), seedState).state.tags).toHaveLength(4)
+  })
+
   it('falls back to the seed when a stored key has the wrong kind', () => {
     const stored = JSON.stringify({ ...seedState(), users: 'x' })
     expect(createDb(memoryStorage(stored), seedState).state.users).toHaveLength(2)

@@ -21,7 +21,14 @@ export type TransferRow = TransferDto & { userId: string }
 
 export type CategoryRow = Omit<CategoryDto, 'inUse'> & { userId: string }
 
-export type TransactionRow = TransactionDto & { userId: string; accountCurrency: Currency; baseCurrency: Currency }
+export type TagRow = { id: string; userId: string; name: string }
+
+export type TransactionRow = Omit<TransactionDto, 'tags'> & {
+  userId: string
+  accountCurrency: Currency
+  baseCurrency: Currency
+  tagIds: string[]
+}
 
 export type BudgetRow = {
   id: string
@@ -70,6 +77,7 @@ export type MockState = {
   accounts: AccountRow[]
   transfers: TransferRow[]
   categories: CategoryRow[]
+  tags: TagRow[]
   transactions: TransactionRow[]
   budgets: BudgetRow[]
   goals: GoalRow[]

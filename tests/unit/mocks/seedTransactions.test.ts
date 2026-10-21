@@ -94,6 +94,23 @@ describe('seeded transactions', () => {
     expect(day('2026-10-16')).toEqual(day('2026-10-20'))
   })
 
+  it('tags the planned rows of Anna and nothing else', () => {
+    const state = seedState('2026-10-16')
+    const byTag = (id: string) => [
+      ...new Set(state.transactions.filter((row) => row.tagIds.includes(id)).map((row) => row.title)),
+    ]
+    expect(byTag('tag_anna_abonament').sort()).toEqual(['Abonament Play', 'Internet UPC', 'Karnet na siłownię'])
+    expect(byTag('tag_anna_praca').sort()).toEqual(['Laptop — Media Expert', 'Zlecenie — projekt logo'])
+    expect(byTag('tag_anna_barcelona')).toEqual(['Booking.com — hotel Barcelona'])
+    expect(byTag('tag_anna_remont')).toEqual([])
+    expect(state.transactions.filter((row) => row.userId === 'usr_oleh').every((row) => row.tagIds.length === 0)).toBe(
+      true,
+    )
+    const known = new Set(state.tags.map((tag) => tag.id))
+    for (const row of state.transactions) for (const id of row.tagIds) expect(known.has(id)).toBe(true)
+    expect(state.tags.every((tag) => tag.userId === 'usr_anna')).toBe(true)
+  })
+
   it('serves the seeded history through the list endpoint', async () => {
     const mock = loggedInMockApi()
     const page = (await mock.handle({
