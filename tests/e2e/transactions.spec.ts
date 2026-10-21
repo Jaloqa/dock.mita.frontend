@@ -109,7 +109,7 @@ test('exports every filtered transaction as CSV', async ({ page }) => {
     .trimEnd()
     .split('\r\n')
   expect(lines[0]).toBe(
-    '﻿Date,Type,Description,Category,Account,Amount,Currency,Account amount,Account currency,Exchange rate,Amount in base currency,Base currency,Note',
+    '﻿Date,Type,Description,Category,Account,Amount,Currency,Account amount,Account currency,Exchange rate,Amount in base currency,Base currency,Note,Tags',
   )
   expect(lines.length).toBeGreaterThan(21)
   expect(lines.slice(1).every((line) => line.includes(',Expense,Lidl,Spożywcze,Konto główne,'))).toBe(true)

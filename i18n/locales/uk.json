@@ -266,11 +266,13 @@
     "filters": {
       "label": "Фільтри",
       "search": "Пошук",
-      "searchPlaceholder": "Назва, нотатка або сума",
+      "searchPlaceholder": "Назва, нотатка, тег або сума",
       "category": "Категорія",
       "allCategories": "Усі категорії",
       "account": "Рахунок",
       "allAccounts": "Усі рахунки",
+      "tags": "Теги",
+      "allTags": "Усі теги",
       "kind": "Тип",
       "period": "Період"
     },
@@ -340,7 +342,8 @@
       "label": "Теги",
       "placeholder": "Введіть, щоб додати тег",
       "create": "+ “{name}”",
-      "remove": "Видалити тег {name}"
+      "remove": "Видалити тег {name}",
+      "more": "+{count} тег | +{count} теги | +{count} тегів"
     },
     "add": {
       "close": "Закрити",
@@ -377,7 +380,8 @@
       "rate": "Курс",
       "baseAmount": "Сума в базовій валюті",
       "baseCurrency": "Базова валюта",
-      "note": "Нотатка"
+      "note": "Нотатка",
+      "tags": "Теги"
     }
   },
   "budgets": {

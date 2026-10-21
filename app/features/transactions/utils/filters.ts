@@ -1,4 +1,4 @@
-import type { CategoryKind, TransactionQuery, TransactionSort } from '../../../shared/api/contract'
+import type { CategoryKind, TransactionQuery, TransactionSort, TransactionTagDto } from '../../../shared/api/contract'
 import { type MonthStart, periodFor, shiftPeriod } from '../../../shared/period/period'
 
 export type KindFilter = CategoryKind | 'all'
@@ -13,6 +13,7 @@ export type TransactionFilters = {
   accountId: string | null
   kind: KindFilter
   period: PeriodPreset
+  tags: TransactionTagDto[]
 }
 
 export const defaultFilters = (): TransactionFilters => ({
@@ -21,10 +22,15 @@ export const defaultFilters = (): TransactionFilters => ({
   accountId: null,
   kind: 'all',
   period: 'thisPeriod',
+  tags: [],
 })
 
 const hasNonPeriodFilters = (filters: TransactionFilters): boolean =>
-  filters.search.trim() !== '' || filters.categoryId !== null || filters.accountId !== null || filters.kind !== 'all'
+  filters.search.trim() !== '' ||
+  filters.categoryId !== null ||
+  filters.accountId !== null ||
+  filters.kind !== 'all' ||
+  filters.tags.length > 0
 
 export const isDefaultFilters = (filters: TransactionFilters): boolean =>
   !hasNonPeriodFilters(filters) && filters.period === 'thisPeriod'
@@ -89,6 +95,7 @@ export function toQuery(
     ...(filters.categoryId ? { categoryId: filters.categoryId } : {}),
     ...(filters.accountId ? { accountId: filters.accountId } : {}),
     ...(filters.kind !== 'all' ? { kind: filters.kind } : {}),
+    ...(filters.tags.length > 0 ? { tagIds: filters.tags.map((tag) => tag.id).join(',') } : {}),
     ...periodRange(filters.period, today, monthStart),
     sort,
   }

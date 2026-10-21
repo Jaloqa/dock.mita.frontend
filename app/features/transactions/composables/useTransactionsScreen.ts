@@ -53,6 +53,7 @@ export function useTransactionsScreen() {
         accountName: account?.name ?? '',
         accountCurrency: account?.currency,
         initial: (categoryName || title).charAt(0).toLocaleUpperCase(),
+        tags: transaction.tags.map((tag) => tag.name),
       }
     }),
   )

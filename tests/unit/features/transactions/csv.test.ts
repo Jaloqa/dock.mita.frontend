@@ -22,6 +22,7 @@ const eurLunch: TransactionDto = {
   accountAmount: 10_889,
   rate: 4.27,
   baseAmount: 10_889,
+  tags: [],
 }
 
 describe('csv', () => {
@@ -60,10 +61,35 @@ describe('csv', () => {
     })
     expect(csv.slice(1).split('\r\n')).toEqual([
       csvColumns.map((column) => column.toUpperCase()).join(','),
-      '2026-10-14,Expense,"Lunch, ""Tapas""",Cafes,Main card,-25.50,EUR,-108.89,PLN,4.27,-108.89,PLN,\'=SUM(A1)',
-      '2026-10-14,Income,,Cafes,Main card,25.50,EUR,108.89,PLN,4.27,108.89,PLN,',
+      '2026-10-14,Expense,"Lunch, ""Tapas""",Cafes,Main card,-25.50,EUR,-108.89,PLN,4.27,-108.89,PLN,\'=SUM(A1),',
+      '2026-10-14,Income,,Cafes,Main card,25.50,EUR,108.89,PLN,4.27,108.89,PLN,,',
       '',
     ])
+  })
+
+  it('writes the tag names last, each guarded against formulas', () => {
+    const csv = transactionsCsv(
+      [
+        {
+          ...eurLunch,
+          note: null,
+          tags: [
+            { id: 'tag_1', name: '=x' },
+            { id: 'tag_2', name: 'y' },
+          ],
+        },
+      ],
+      {
+        header: (column) => (column === 'tags' ? 'Tags' : column),
+        kind: () => 'Expense',
+        categoryName: () => 'Cafes',
+        account: () => ({ name: 'Main card', currency: 'PLN' }),
+        baseCurrency: 'PLN',
+      },
+    )
+    const [header, row] = csv.slice(1).split('\r\n')
+    expect(header?.endsWith(',Tags')).toBe(true)
+    expect(row?.endsWith(",'=x; y")).toBe(true)
   })
 
   it('collects every page until the total is reached', async () => {

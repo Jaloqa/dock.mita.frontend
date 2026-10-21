@@ -16,6 +16,7 @@ export const csvColumns = [
   'baseAmount',
   'baseCurrency',
   'note',
+  'tags',
 ] as const
 
 export type CsvColumn = (typeof csvColumns)[number]
@@ -63,6 +64,7 @@ export function transactionsCsv(items: readonly TransactionDto[], context: CsvCo
         decimal(signedBaseAmount(item)),
         context.baseCurrency,
         csvText(item.note ?? ''),
+        item.tags.map((tag) => csvText(tag.name)).join('; '),
       ]
     }),
   ])

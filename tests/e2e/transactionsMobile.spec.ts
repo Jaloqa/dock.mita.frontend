@@ -1,4 +1,5 @@
 import { expect, type Page, test } from '@playwright/test'
+import { overlayOption, pickOverlayOption } from './overlayOption'
 
 test.skip(({ isMobile }) => !isMobile, 'cards grouped by day are the mobile layout')
 
@@ -125,4 +126,38 @@ test('shows a server error under the date when the date is too far ahead', async
   await expect(dateButton).toHaveAttribute('aria-invalid', 'true')
   await expect(dateButton).toHaveAccessibleDescription('The date can be at most one year ahead.')
   await expect(page).toHaveURL('/transactions/new')
+})
+
+test('shows tag chips on cards and filters by tag in the drawer', async ({ page }) => {
+  await page.goto('/transactions')
+  await showAllTime(page)
+  await page.getByRole('searchbox', { name: 'Search' }).fill('Booking')
+  const card = list(page).getByRole('listitem').filter({ hasText: 'Booking.com — hotel Barcelona' })
+  await expect(card.getByRole('list', { name: 'Tags' })).toContainText('barcelona')
+  await page.getByRole('searchbox', { name: 'Search' }).fill('')
+  await page.getByRole('button', { name: 'Filters' }).click()
+  const drawer = page.getByRole('dialog', { name: 'Filters' })
+  await drawer.getByRole('combobox', { name: 'Tags' }).fill('barc')
+  await pickOverlayOption(page, 'barcelona')
+  await expect(drawer.getByRole('button', { name: 'Remove tag barcelona', exact: true })).toBeVisible()
+  await drawer.getByRole('button', { name: 'Show results' }).click()
+  await expect(drawer).toBeHidden()
+  await expect(list(page).getByRole('listitem').filter({ hasText: 'Booking.com — hotel Barcelona' })).toHaveCount(1)
+  await expect(page.getByRole('region', { name: 'Filter summary' })).toContainText('Found: 1 transaction')
+})
+
+test('scrolling over tag suggestions keeps the page behind the drawer still', async ({ page }) => {
+  await page.goto('/transactions')
+  await showAllTime(page)
+  await page.getByRole('button', { name: 'Filters' }).click()
+  const drawer = page.getByRole('dialog', { name: 'Filters' })
+  await drawer.getByRole('combobox', { name: 'Tags' }).fill('barc')
+  const suggestion = overlayOption(page, 'barcelona')
+  await expect(suggestion).toBeVisible()
+  const box = await suggestion.boundingBox()
+  await page.mouse.move((box?.x ?? 0) + 20, (box?.y ?? 0) + 10)
+  await page.mouse.wheel(0, 150)
+  await pickOverlayOption(page, 'barcelona')
+  await expect(drawer.getByRole('button', { name: 'Remove tag barcelona', exact: true })).toBeVisible()
+  expect(await page.evaluate(() => window.scrollY)).toBe(0)
 })

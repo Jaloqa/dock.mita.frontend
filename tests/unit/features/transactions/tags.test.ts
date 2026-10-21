@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { addTag, normalizeTag, tagSuggestions } from '../../../../app/features/transactions/utils/tags'
+import { addTag, normalizeTag, tagSuggestions, visibleTags } from '../../../../app/features/transactions/utils/tags'
 
 describe('tag helpers', () => {
   it('normalizes a name by trimming and lower-casing', () => {
@@ -43,5 +43,11 @@ describe('tag helpers', () => {
     expect(addTag([], ' Food ')).toEqual(['Food'])
     expect(addTag(['Trip'], 'Food')).toEqual(['Trip', 'Food'])
     expect(addTag(['Trip'], '   ')).toEqual(['Trip'])
+  })
+
+  it('shows the first tags and counts the hidden ones', () => {
+    expect(visibleTags(['a', 'b', 'c', 'd'], 2)).toEqual({ shown: ['a', 'b'], hidden: 2 })
+    expect(visibleTags(['a', 'b'], 3)).toEqual({ shown: ['a', 'b'], hidden: 0 })
+    expect(visibleTags([], 3)).toEqual({ shown: [], hidden: 0 })
   })
 })

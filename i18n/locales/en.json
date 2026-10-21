@@ -266,11 +266,13 @@
     "filters": {
       "label": "Filters",
       "search": "Search",
-      "searchPlaceholder": "Title, note or amount",
+      "searchPlaceholder": "Title, note, tag or amount",
       "category": "Category",
       "allCategories": "All categories",
       "account": "Account",
       "allAccounts": "All accounts",
+      "tags": "Tags",
+      "allTags": "All tags",
       "kind": "Type",
       "period": "Period"
     },
@@ -340,7 +342,8 @@
       "label": "Tags",
       "placeholder": "Type to add a tag",
       "create": "+ “{name}”",
-      "remove": "Remove tag {name}"
+      "remove": "Remove tag {name}",
+      "more": "+{count} tag | +{count} tags"
     },
     "add": {
       "close": "Close",
@@ -377,7 +380,8 @@
       "rate": "Exchange rate",
       "baseAmount": "Amount in base currency",
       "baseCurrency": "Base currency",
-      "note": "Note"
+      "note": "Note",
+      "tags": "Tags"
     }
   },
   "budgets": {

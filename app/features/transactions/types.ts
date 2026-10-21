@@ -9,4 +9,5 @@ export type TransactionView = {
   accountName: string
   accountCurrency?: Currency
   initial: string
+  tags: string[]
 }

@@ -35,7 +35,7 @@ describe('transaction filters', () => {
     })
     expect(
       toQuery(
-        { search: '  lidl ', categoryId: 'cat_1', accountId: 'acc_1', kind: 'expense', period: 'all' },
+        { search: '  lidl ', categoryId: 'cat_1', accountId: 'acc_1', kind: 'expense', period: 'all', tags: [] },
         'amount',
         '2026-10-16',
         1,
@@ -43,11 +43,24 @@ describe('transaction filters', () => {
     ).toEqual({ search: 'lidl', categoryId: 'cat_1', accountId: 'acc_1', kind: 'expense', sort: 'amount' })
   })
 
+  it('sends the selected tag ids comma-separated', () => {
+    const tags = [
+      { id: 'tag_a', name: 'a' },
+      { id: 'tag_b', name: 'b' },
+    ]
+    expect(toQuery({ ...defaultFilters(), period: 'all', tags }, '-date', '2026-10-16', 1)).toEqual({
+      tagIds: 'tag_a,tag_b',
+      sort: '-date',
+    })
+    expect('tagIds' in toQuery(defaultFilters(), '-date', '2026-10-16', 1)).toBe(false)
+  })
+
   it('knows when filters are untouched', () => {
     expect(isDefaultFilters(defaultFilters())).toBe(true)
     expect(isDefaultFilters({ ...defaultFilters(), search: '   ' })).toBe(true)
     expect(isDefaultFilters({ ...defaultFilters(), kind: 'income' })).toBe(false)
     expect(isDefaultFilters({ ...defaultFilters(), period: 'all' })).toBe(false)
+    expect(isDefaultFilters({ ...defaultFilters(), tags: [{ id: 'tag_a', name: 'a' }] })).toBe(false)
   })
 
   it('invites to add the first transaction only when there is no history at all', () => {
@@ -67,6 +80,7 @@ describe('transaction filters', () => {
     expect(emptyStateOf({ ...defaultFilters(), accountId: 'acc_1' }, true)).toBe('filtered')
     expect(emptyStateOf({ ...defaultFilters(), categoryId: 'cat_1' }, true)).toBe('filtered')
     expect(emptyStateOf({ ...defaultFilters(), period: 'all' }, true)).toBe('filtered')
+    expect(emptyStateOf({ ...defaultFilters(), tags: [{ id: 'tag_a', name: 'a' }] }, true)).toBe('filtered')
   })
 
   it('offers all time next to a reset whenever a period bound applies', () => {
