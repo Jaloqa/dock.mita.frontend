@@ -336,6 +336,12 @@
       "noAccounts": "Najpierw dodaj konto, aby zapisywać operacje.",
       "goToAccounts": "Przejdź do kont"
     },
+    "tags": {
+      "label": "Tagi",
+      "placeholder": "Wpisz, aby dodać tag",
+      "create": "+ “{name}”",
+      "remove": "Usuń tag {name}"
+    },
     "add": {
       "close": "Zamknij",
       "amount": "Kwota",

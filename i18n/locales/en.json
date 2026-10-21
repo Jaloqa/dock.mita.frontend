@@ -336,6 +336,12 @@
       "noAccounts": "Add an account first to record transactions.",
       "goToAccounts": "Go to accounts"
     },
+    "tags": {
+      "label": "Tags",
+      "placeholder": "Type to add a tag",
+      "create": "+ “{name}”",
+      "remove": "Remove tag {name}"
+    },
     "add": {
       "close": "Close",
       "amount": "Amount",

@@ -42,6 +42,7 @@ const form = reactive<TransactionForm>({
   date: toLocalDate(todayIso()),
   title: '',
   note: '',
+  tags: [],
 })
 const formEl = ref<HTMLFormElement | null>(null)
 

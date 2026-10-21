@@ -27,7 +27,18 @@ const {
 const { categories, pickable, nameOf, isError: categoriesError, refetch: refetchCategories } = useCategories()
 const { create, update, remove } = useTransactionMutations()
 
-const fields = ['kind', 'amount', 'currency', 'rate', 'categoryId', 'accountId', 'date', 'title', 'note'] as const
+const fields = [
+  'kind',
+  'amount',
+  'currency',
+  'rate',
+  'categoryId',
+  'accountId',
+  'date',
+  'title',
+  'note',
+  'tags',
+] as const
 type Field = (typeof fields)[number]
 
 const form = reactive<TransactionForm>({
@@ -40,8 +51,10 @@ const form = reactive<TransactionForm>({
   date: toLocalDate(todayIso()),
   title: '',
   note: '',
+  tags: [],
 })
 const formEl = ref<HTMLFormElement | null>(null)
+const tagField = ref<{ flush: () => void } | null>(null)
 const rateEdited = ref(false)
 const currencyEdited = ref(false)
 let syncing = false
@@ -140,6 +153,7 @@ async function reset() {
           date: toLocalDate(transaction.date),
           title: transaction.title,
           note: transaction.note ?? '',
+          tags: transaction.tags.map((tag) => tag.name),
         }
       : {
           kind,
@@ -151,6 +165,7 @@ async function reset() {
           date: toLocalDate(todayIso()),
           title: '',
           note: '',
+          tags: [],
         },
   )
   rateEdited.value = transaction !== undefined
@@ -214,6 +229,7 @@ async function showServerErrors(error: unknown) {
 
 async function submit() {
   server.clear()
+  tagField.value?.flush()
   if (!(await v$.value.$validate())) {
     await nextTick()
     focusFirstInvalid(formEl.value)
@@ -230,6 +246,7 @@ async function submit() {
     currency: form.currency,
     ...(crossCurrency.value && form.rate !== null ? { rate: form.rate } : {}),
     ...(note ? { note } : {}),
+    tags: form.tags,
   }
   const transaction = props.transaction
   if (transaction) {
@@ -400,6 +417,18 @@ function confirmDelete() {
               </span>
             </template>
           </Select>
+        </template>
+      </FormRow>
+      <FormRow id="transaction-tags" :label="t('transactions.tags.label')" :errors="errorsOf('tags')">
+        <template #default="{ invalid, describedBy }">
+          <TransactionTagField
+            ref="tagField"
+            v-model="form.tags"
+            id="transaction-tags"
+            :invalid="invalid"
+            :described-by="describedBy"
+            @update:model-value="touch('tags')"
+          />
         </template>
       </FormRow>
       <FormRow id="transaction-date" :label="t('transactions.dialog.date')" :errors="errorsOf('date')">
