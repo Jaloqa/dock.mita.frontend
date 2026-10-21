@@ -8,6 +8,7 @@ import {
   TRANSACTION_TITLE_MAX,
   transactionRules,
 } from '../../../../app/features/transactions/schemas/transactionSchema'
+import { TAG_NAME_MAX, TAGS_PER_TRANSACTION_MAX } from '../../../../app/shared/api/contract'
 
 type Rule = { $validator: unknown; $message?: unknown }
 
@@ -54,6 +55,17 @@ describe('transaction form rules', () => {
     expect(message(rules.title.maxLength)).toBe('validation.titleTooLong')
     expect(message(rules.note.maxLength)).toBe('validation.noteTooLong')
     expect(message(rules.categoryId.required)).toBe('validation.required')
+  })
+
+  it('limits the number and the length of tags', () => {
+    const rules = transactionRules((key) => key, { crossCurrency: () => false, maxDate: () => limit })
+    const names = (count: number) => Array.from({ length: count }, (_, index) => `tag${index}`)
+    expect(validate(rules.tags.tooMany, names(TAGS_PER_TRANSACTION_MAX))).toBe(true)
+    expect(validate(rules.tags.tooMany, names(TAGS_PER_TRANSACTION_MAX + 1))).toBe(false)
+    expect(validate(rules.tags.tooLong, ['a'.repeat(TAG_NAME_MAX)])).toBe(true)
+    expect(validate(rules.tags.tooLong, ['a'.repeat(TAG_NAME_MAX + 1)])).toBe(false)
+    expect(message(rules.tags.tooMany)).toBe('validation.tooManyTags')
+    expect(message(rules.tags.tooLong)).toBe('validation.tagTooLong')
   })
 
   it('needs an amount, a category and an account on the quick add screen', () => {

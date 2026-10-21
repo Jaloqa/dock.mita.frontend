@@ -1,5 +1,5 @@
 import { helpers, maxLength, minValue, required, requiredIf } from '@vuelidate/validators'
-import type { CategoryKind } from '../../../shared/api/contract'
+import { type CategoryKind, TAG_NAME_MAX, TAGS_PER_TRANSACTION_MAX } from '../../../shared/api/contract'
 import type { Currency } from '../../../shared/money/money'
 
 export const TRANSACTION_TITLE_MAX = 100
@@ -15,6 +15,7 @@ export type TransactionForm = {
   date: Date | null
   title: string
   note: string
+  tags: string[]
 }
 
 type Translate = (key: string) => string
@@ -51,6 +52,16 @@ export const transactionRules = (t: Translate, options: { crossCurrency: () => b
     },
     title: { maxLength: helpers.withMessage(() => t('validation.titleTooLong'), maxLength(TRANSACTION_TITLE_MAX)) },
     note: { maxLength: helpers.withMessage(() => t('validation.noteTooLong'), maxLength(TRANSACTION_NOTE_MAX)) },
+    tags: {
+      tooMany: helpers.withMessage(
+        () => t('validation.tooManyTags'),
+        (value: string[]) => value.length <= TAGS_PER_TRANSACTION_MAX,
+      ),
+      tooLong: helpers.withMessage(
+        () => t('validation.tagTooLong'),
+        (value: string[]) => value.every((name) => name.trim().length <= TAG_NAME_MAX),
+      ),
+    },
   }
 }
 
