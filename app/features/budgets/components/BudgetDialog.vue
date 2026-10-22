@@ -2,6 +2,7 @@
 import { useVuelidate } from '@vuelidate/core'
 import type { BudgetDto, BudgetInput, CategoryDto } from '~/shared/api/contract'
 import { categorySwatchClass } from '~/shared/categories/colors'
+import { currencyDigits } from '~/shared/money/currencies'
 import { type Currency, fromMinor, toMinor } from '~/shared/money/money'
 import { BUDGET_LIMIT_MAX, type BudgetForm, budgetRules } from '../schemas/budgetSchema'
 
@@ -36,7 +37,9 @@ function reset() {
   const budget = props.budget
   Object.assign(
     form,
-    budget ? { categoryId: budget.categoryId, limit: fromMinor(budget.limit) } : { categoryId: null, limit: null },
+    budget
+      ? { categoryId: budget.categoryId, limit: fromMinor(budget.limit, props.currency) }
+      : { categoryId: null, limit: null },
   )
   server.clear()
   v$.value.$reset()
@@ -79,7 +82,7 @@ async function submit() {
   const input: BudgetInput = {
     categoryId: form.categoryId ?? '',
     period: budget?.period ?? props.period,
-    limit: toMinor(form.limit ?? 0),
+    limit: toMinor(form.limit ?? 0, props.currency),
   }
   if (budget) {
     update.mutate(
@@ -182,8 +185,8 @@ function manageCategories() {
             mode="currency"
             :currency="currency"
             :locale="locale"
-            :min-fraction-digits="2"
-            :max-fraction-digits="2"
+            :min-fraction-digits="currencyDigits(currency)"
+            :max-fraction-digits="currencyDigits(currency)"
             :max="BUDGET_LIMIT_MAX"
             :invalid="invalid"
             :pt="{ pcInputText: { root: { 'aria-describedby': describedBy, 'aria-invalid': invalid || undefined } } }"

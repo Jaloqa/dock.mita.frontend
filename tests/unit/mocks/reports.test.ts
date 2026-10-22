@@ -167,7 +167,8 @@ describe('report', () => {
     const settings = mock.db.state.settings.find((row) => row.userId === 'usr_anna')
     if (!settings) throw new Error('Anna has no settings')
     settings.baseCurrency = 'EUR'
-    const inEur = (amount: number) => convertMinor(amount, rateOn(mock.db.state.rates, today, 'PLN', 'EUR'))
+    const inEur = (amount: number) =>
+      convertMinor(amount, rateOn(mock.db.state.rates, today, 'PLN', 'EUR'), 'PLN', 'EUR')
     const result = await report(mock)
     expect(result.currency).toBe('EUR')
     expect(result.periods.at(-1)).toMatchObject({ income: inEur(50_000), expense: inEur(10_000) })

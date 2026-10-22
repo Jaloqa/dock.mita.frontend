@@ -20,4 +20,11 @@ describe('rate conversion', () => {
     expect(toBaseAmount(500, 'PLN', 'PLN', [])).toBe(500)
     expect(toBaseAmount(500, 'USD', 'PLN', rates)).toBeUndefined()
   })
+
+  it('scales by the minor units of both currencies', () => {
+    const jpy: RateDto[] = [{ date: '2026-10-22', from: 'JPY', to: 'PLN', value: 0.024764 }]
+    expect(toBaseAmount(1500, 'JPY', 'PLN', jpy)).toBe(3715)
+    const kwd: RateDto[] = [{ date: '2026-10-22', from: 'KWD', to: 'PLN', value: 12.6221 }]
+    expect(toBaseAmount(1250, 'KWD', 'PLN', kwd)).toBe(1578)
+  })
 })

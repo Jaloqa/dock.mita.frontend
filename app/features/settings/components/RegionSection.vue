@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { type Locale, type ThemePreference, themePreferences } from '~/shared/api/contract'
-import type { Currency } from '~/shared/money/money'
+import type { BaseCurrency } from '~/shared/money/currencies'
 import type { MonthStart } from '~/shared/period/period'
 import { currencyOptions, monthStartOptions } from '../utils/options'
 
@@ -22,7 +22,7 @@ const shown = computed(() => ({
   theme: draft.value.theme ?? preference.value,
 }))
 
-function selectCurrency(baseCurrency: Currency) {
+function selectCurrency(baseCurrency: BaseCurrency) {
   if (baseCurrency !== shown.value.baseCurrency) change({ baseCurrency })
 }
 

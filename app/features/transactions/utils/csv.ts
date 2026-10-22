@@ -1,5 +1,5 @@
 import type { CategoryKind, Page, TransactionDto } from '../../../shared/api/contract'
-import type { Currency } from '../../../shared/money/money'
+import { type Currency, currencyDigits } from '../../../shared/money/currencies'
 import { signedAccountAmount, signedAmount, signedBaseAmount } from './group'
 
 export const csvColumns = [
@@ -43,7 +43,10 @@ export const csvCell = (value: CsvValue): string => {
 export const toCsv = (rows: readonly (readonly CsvValue[])[]): string =>
   `﻿${rows.map((row) => row.map(csvCell).join(',')).join('\r\n')}\r\n`
 
-export const decimal = (minor: number): string => (minor / 100).toFixed(2)
+export function decimal(minor: number, currency: Currency): string {
+  const digits = currencyDigits(currency)
+  return (minor / 10 ** digits).toFixed(digits)
+}
 
 export function transactionsCsv(items: readonly TransactionDto[], context: CsvContext): string {
   return toCsv([
@@ -56,12 +59,12 @@ export function transactionsCsv(items: readonly TransactionDto[], context: CsvCo
         csvText(item.title),
         csvText(context.categoryName(item.categoryId)),
         csvText(account?.name ?? ''),
-        decimal(signedAmount(item)),
+        decimal(signedAmount(item), item.currency),
         item.currency,
-        decimal(signedAccountAmount(item)),
+        decimal(signedAccountAmount(item), account?.currency ?? item.currency),
         account?.currency ?? '',
         item.rate,
-        decimal(signedBaseAmount(item)),
+        decimal(signedBaseAmount(item), context.baseCurrency),
         context.baseCurrency,
         csvText(item.note ?? ''),
         item.tags.map((tag) => csvText(tag.name)).join('; '),

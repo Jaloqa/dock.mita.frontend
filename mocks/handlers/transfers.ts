@@ -4,7 +4,7 @@ import type { AccountRow, MockDb, TransferRow } from '../db'
 import { paginate } from '../paginate'
 import type { MockRouter } from '../router'
 import { AMOUNT_MAX, checkAccount, transferRow } from '../transfers'
-import { collectErrors, isMissing, objectBody } from '../validation'
+import { collectErrors, isManualRate, isMissing, objectBody } from '../validation'
 
 export const TRANSFER_NOTE_MAX = 200
 
@@ -23,9 +23,7 @@ function createTransfer(db: MockDb, userId: string, body: unknown): TransferRow 
   else if (!Number.isSafeInteger(fromAmount) || (fromAmount as number) > AMOUNT_MAX) {
     errors.add('fromAmount', 'validation.invalidValue')
   } else if ((fromAmount as number) <= 0) errors.add('fromAmount', 'validation.positiveAmount')
-  if (!isMissing(rate) && (typeof rate !== 'number' || !Number.isFinite(rate) || rate <= 0)) {
-    errors.add('rate', 'validation.invalidValue')
-  }
+  if (!isMissing(rate) && !isManualRate(rate)) errors.add('rate', 'validation.invalidValue')
   if (!isMissing(note) && (typeof note !== 'string' || note.trim().length > TRANSFER_NOTE_MAX)) {
     errors.add('note', 'validation.invalidValue')
   }

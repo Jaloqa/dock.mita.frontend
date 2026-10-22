@@ -61,6 +61,17 @@ describe('user endpoints', () => {
     })
   })
 
+  it('accepts only PLN, EUR, USD or UAH as the base currency', async () => {
+    const mock = api()
+    for (const baseCurrency of ['JPY', 'XDR', 'eur']) {
+      const error = await mock
+        .handle({ method: 'PUT', path: '/v1/settings', body: { ...validSettings, baseCurrency } })
+        .catch((e: unknown) => e)
+      expect(error).toMatchObject({ problem: { status: 400, errors: { baseCurrency: ['validation.invalidValue'] } } })
+    }
+    expect(await mock.handle({ method: 'GET', path: '/v1/settings' })).toMatchObject({ baseCurrency: 'PLN' })
+  })
+
   it('rejects a body that is not an object', async () => {
     const error = await api()
       .handle({ method: 'PUT', path: '/v1/settings', body: 'x' })

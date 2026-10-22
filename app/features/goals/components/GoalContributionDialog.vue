@@ -4,10 +4,11 @@ import type { InputNumberInputEvent } from 'primevue/inputnumber'
 import { useAccounts } from '~/shared/accounts/useAccounts'
 import type { GoalContributionInput, GoalDto } from '~/shared/api/contract'
 import { fieldErrorsOf } from '~/shared/api/problem'
-import { toMinor } from '~/shared/money/money'
+import { AMOUNT_MINOR_MAX, currencyDigits } from '~/shared/money/currencies'
+import { fromMinor, toMinor } from '~/shared/money/money'
 import { fromLocalDate, todayIso, toLocalDate } from '~/shared/period/period'
 import { useRates } from '~/shared/rates/useRates'
-import { CONTRIBUTION_AMOUNT_MAX, type ContributionForm, contributionRules } from '../schemas/contributionSchema'
+import { type ContributionForm, contributionRules } from '../schemas/contributionSchema'
 import { contributionSources, receivedAmount } from '../utils/goalView'
 
 const props = defineProps<{ goal: GoalDto }>()
@@ -43,8 +44,13 @@ const crossCurrency = computed(
   () => !!fromAccount.value && !!linkedAccount.value && fromAccount.value.currency !== linkedAccount.value.currency,
 )
 const amountCurrency = computed(() => (isLinked.value ? fromAccount.value?.currency : undefined) ?? props.goal.currency)
+const amountMax = computed(() => fromMinor(AMOUNT_MINOR_MAX, amountCurrency.value))
 const v$ = useVuelidate(
-  contributionRules(t, { linked: () => isLinked.value, crossCurrency: () => crossCurrency.value }),
+  contributionRules(t, {
+    linked: () => isLinked.value,
+    crossCurrency: () => crossCurrency.value,
+    currency: () => amountCurrency.value,
+  }),
   form,
 )
 
@@ -86,7 +92,7 @@ const preview = computed(() => {
 })
 const receives = computed(() => {
   if (!crossCurrency.value || !linkedAccount.value) return undefined
-  const amount = receivedAmount(form.amount, form.rate)
+  const amount = receivedAmount(form.amount, form.rate, amountCurrency.value, linkedAccount.value.currency)
   return amount === undefined
     ? undefined
     : t('goals.contribute.receives', { amount: format(amount, linkedAccount.value.currency) })
@@ -145,7 +151,7 @@ async function submit() {
     return
   }
   const input: GoalContributionInput = {
-    amount: toMinor(form.amount ?? 0),
+    amount: toMinor(form.amount ?? 0, amountCurrency.value),
     date: fromLocalDate(form.date as Date),
     ...(form.fromAccountId ? { fromAccountId: form.fromAccountId } : {}),
     ...(crossCurrency.value && form.rate !== null ? { rate: form.rate } : {}),
@@ -191,10 +197,10 @@ async function submit() {
             mode="currency"
             :currency="amountCurrency"
             :locale="locale"
-            :min-fraction-digits="2"
-            :max-fraction-digits="2"
+            :min-fraction-digits="currencyDigits(amountCurrency)"
+            :max-fraction-digits="currencyDigits(amountCurrency)"
             :min="0"
-            :max="CONTRIBUTION_AMOUNT_MAX"
+            :max="amountMax"
             :disabled="!accountsReady"
             :invalid="invalid"
             :pt="{ pcInputText: { root: { 'aria-describedby': describedBy, 'aria-invalid': invalid || undefined } } }"
@@ -251,7 +257,7 @@ async function submit() {
             input-id="contribution-rate"
             :locale="locale"
             :min-fraction-digits="2"
-            :max-fraction-digits="6"
+            :max-fraction-digits="12"
             :min="0"
             :invalid="invalid"
             :pt="{ pcInputText: { root: { 'aria-describedby': describedBy, 'aria-invalid': invalid || undefined } } }"

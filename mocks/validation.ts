@@ -1,4 +1,4 @@
-import { type Currency, currencies } from '../app/shared/money/money'
+import { MANUAL_RATE_MAX } from '../app/shared/money/currencies'
 import { badRequest } from './errors'
 
 export const objectBody = (body: unknown): Record<string, unknown> =>
@@ -7,7 +7,8 @@ export const objectBody = (body: unknown): Record<string, unknown> =>
 export const isMissing = (value: unknown): boolean =>
   value === undefined || value === null || (typeof value === 'string' && value.trim() === '')
 
-export const isCurrency = (value: unknown): value is Currency => currencies.includes(value as Currency)
+export const isManualRate = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value) && value > 0 && value <= MANUAL_RATE_MAX
 
 export const NAME_MAX = 40
 export const EMAIL_MAX = 254

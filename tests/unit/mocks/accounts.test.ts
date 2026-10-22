@@ -88,7 +88,7 @@ describe('accounts', () => {
       mock.handle({
         method: 'POST',
         path: '/v1/accounts',
-        body: { name: '   ', type: 'loan', currency: 'GBP', openingBalance: 1.5, cardLast4: '12a4' },
+        body: { name: '   ', type: 'loan', currency: 'XDR', openingBalance: 1.5, cardLast4: '12a4' },
       }),
     )
     expect(error).toMatchObject({

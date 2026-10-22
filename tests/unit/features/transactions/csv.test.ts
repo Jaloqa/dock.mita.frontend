@@ -67,6 +67,32 @@ describe('csv', () => {
     ])
   })
 
+  it('writes each amount with the fraction digits of its own currency', () => {
+    const sushi: TransactionDto = {
+      ...eurLunch,
+      title: 'Sushi',
+      note: null,
+      amount: 1_500,
+      currency: 'JPY',
+      accountAmount: 3_715,
+      rate: 0.024764,
+      baseAmount: 3_715,
+    }
+    const context = {
+      header: (column: string) => column,
+      kind: () => 'Expense',
+      categoryName: () => 'Cafes',
+      baseCurrency: 'PLN' as const,
+    }
+    const onPln = transactionsCsv([sushi], { ...context, account: () => ({ name: 'Main card', currency: 'PLN' }) })
+    expect(onPln.split('\r\n')[1]).toBe(
+      '2026-10-14,Expense,Sushi,Cafes,Main card,-1500,JPY,-37.15,PLN,0.024764,-37.15,PLN,,',
+    )
+    const kwd = { ...sushi, amount: 1_250, currency: 'KWD' as const, accountAmount: 1_250, rate: 1, baseAmount: 1_578 }
+    const onKwd = transactionsCsv([kwd], { ...context, account: () => ({ name: 'Kuwait', currency: 'KWD' }) })
+    expect(onKwd.split('\r\n')[1]).toBe('2026-10-14,Expense,Sushi,Cafes,Kuwait,-1.250,KWD,-1.250,KWD,1,-15.78,PLN,,')
+  })
+
   it('writes the tag names last, each guarded against formulas', () => {
     const csv = transactionsCsv(
       [

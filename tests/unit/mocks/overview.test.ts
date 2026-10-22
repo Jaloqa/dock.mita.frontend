@@ -241,7 +241,7 @@ describe('overview', () => {
     const inPln = (row: (typeof own)[number]) =>
       row.currency === 'PLN'
         ? row.openingBalance
-        : convertMinor(row.openingBalance, rateOn(mock.db.state.rates, today, row.currency, 'PLN'))
+        : convertMinor(row.openingBalance, rateOn(mock.db.state.rates, today, row.currency, 'PLN'), row.currency, 'PLN')
     const expected = own.reduce((sum, row) => sum + inPln(row), 0)
     expect((await overview(mock)).balance).toEqual({ amount: expected, accounts: 4 })
     await record(mock, 'expense', expenseCategory('groceries'), 12_345)
@@ -328,7 +328,9 @@ describe('overview', () => {
     settings.baseCurrency = 'EUR'
     const result = await overview(mock)
     expect(result.currency).toBe('EUR')
-    expect(result.expense.amount).toBe(convertMinor(10_000, rateOn(mock.db.state.rates, today, 'PLN', 'EUR')))
+    expect(result.expense.amount).toBe(
+      convertMinor(10_000, rateOn(mock.db.state.rates, today, 'PLN', 'EUR'), 'PLN', 'EUR'),
+    )
   })
 
   it('rejects unknown ranges and serves only the session user', async () => {

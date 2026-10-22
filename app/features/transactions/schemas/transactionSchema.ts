@@ -1,6 +1,7 @@
-import { helpers, maxLength, minValue, required, requiredIf } from '@vuelidate/validators'
+import { helpers, maxLength, required, requiredIf } from '@vuelidate/validators'
 import { type CategoryKind, TAG_NAME_MAX, TAGS_PER_TRANSACTION_MAX } from '../../../shared/api/contract'
-import type { Currency } from '../../../shared/money/money'
+import { AMOUNT_MINOR_MAX, type Currency } from '../../../shared/money/currencies'
+import { withinAmountLimit, withinRateLimit } from '../../../shared/money/money'
 
 export const TRANSACTION_TITLE_MAX = 100
 export const TRANSACTION_NOTE_MAX = 200
@@ -31,18 +32,24 @@ export const notAfter =
   (value: unknown): boolean =>
     !(value instanceof Date) || value.getTime() <= limit().getTime()
 
-export const transactionRules = (t: Translate, options: { crossCurrency: () => boolean; maxDate: () => Date }) => {
+export const transactionRules = (
+  t: Translate,
+  options: { crossCurrency: () => boolean; maxDate: () => Date; currency: () => Currency },
+) => {
   const requiredField = helpers.withMessage(() => t('validation.required'), required)
+  const invalidValue = () => t('validation.invalidValue')
   return {
     kind: { required: requiredField },
     amount: {
       required: requiredField,
-      positive: helpers.withMessage(() => t('validation.positiveAmount'), minValue(0.01)),
+      positive: helpers.withMessage(() => t('validation.positiveAmount'), isPositiveOrEmpty),
+      max: helpers.withMessage(invalidValue, withinAmountLimit(options.currency)),
     },
     currency: { required: requiredField },
     rate: {
       required: helpers.withMessage(() => t('validation.required'), requiredIf(options.crossCurrency)),
       positive: helpers.withMessage(() => t('validation.positiveAmount'), isPositiveOrEmpty),
+      max: helpers.withMessage(invalidValue, withinRateLimit),
     },
     categoryId: { required: requiredField },
     accountId: { required: requiredField },
@@ -68,7 +75,13 @@ export const transactionRules = (t: Translate, options: { crossCurrency: () => b
 export const quickAddRules = (t: Translate) => {
   const requiredField = helpers.withMessage(() => t('validation.required'), required)
   return {
-    amount: { positive: helpers.withMessage(() => t('validation.positiveAmount'), isPositiveMinor) },
+    amount: {
+      positive: helpers.withMessage(() => t('validation.positiveAmount'), isPositiveMinor),
+      max: helpers.withMessage(
+        () => t('validation.invalidValue'),
+        (value: unknown) => typeof value !== 'number' || value <= AMOUNT_MINOR_MAX,
+      ),
+    },
     categoryId: { required: requiredField },
     accountId: { required: requiredField },
   }

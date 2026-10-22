@@ -136,7 +136,7 @@ export function demoGoals(
                 baseAmount:
                   received === base
                     ? transfer.toAmount
-                    : convertMinor(transfer.toAmount, rateOn(rates, transfer.date, received, base)),
+                    : convertMinor(transfer.toAmount, rateOn(rates, transfer.date, received, base), received, base),
                 baseCurrency: base,
               }
             })

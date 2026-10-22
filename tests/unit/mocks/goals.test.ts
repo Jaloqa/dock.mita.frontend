@@ -236,6 +236,7 @@ describe('goals', () => {
       [goal.id, { date: addDaysIso(oneYearAhead(today), 1) }, 'date', 'validation.dateTooFar'],
       [goal.id, { fromAccountId: 'acc_oleh_card' }, 'fromAccountId', 'validation.unknownAccount'],
       [goal.id, { rate: -1 }, 'rate', 'validation.invalidValue'],
+      [goal.id, { rate: 1_000_000_001 }, 'rate', 'validation.invalidValue'],
       [linked.id, { fromAccountId: undefined }, 'fromAccountId', 'validation.required'],
       [linked.id, { fromAccountId: 'acc_anna_savings' }, 'fromAccountId', 'validation.sameAccount'],
     ]
@@ -281,11 +282,11 @@ describe('goals', () => {
     const date = addDaysIso(today, -3)
     const rate = rateOn(mock.db.state.rates, date, 'EUR', 'PLN')
     expect((await contribute(mock, goal.id, { amount: 10_000, date, fromAccountId: 'acc_anna_eur' })).saved).toBe(
-      convertMinor(10_000, rate),
+      convertMinor(10_000, rate, 'EUR', 'PLN'),
     )
     expect(
       (await contribute(mock, goal.id, { amount: 10_000, date, fromAccountId: 'acc_anna_eur', rate: 4 })).saved,
-    ).toBe(convertMinor(10_000, rate) + 40_000)
+    ).toBe(convertMinor(10_000, rate, 'EUR', 'PLN') + 40_000)
     const [latest] = await transfers(mock)
     expect(latest).toMatchObject({ fromAccountId: 'acc_anna_eur', fromAmount: 10_000, toAmount: 40_000, rate: 4 })
     expect(mock.db.state.goalContributions[1]).toMatchObject({
@@ -307,7 +308,7 @@ describe('goals', () => {
       fromAccountId: 'acc_anna_card',
       rate: 0.25,
     })
-    expect(updated.saved).toBe(convertMinor(10_750, rateOn(mock.db.state.rates, date, 'EUR', 'PLN')))
+    expect(updated.saved).toBe(convertMinor(10_750, rateOn(mock.db.state.rates, date, 'EUR', 'PLN'), 'EUR', 'PLN'))
     expect(balances(mock).get(savings.id)).toBe(10_750)
   })
 
@@ -349,26 +350,26 @@ describe('goals', () => {
     const page = await list(mock)
     expect(page.currency).toBe('EUR')
     expect(page.items[0]).toMatchObject({
-      target: convertMinor(800_000, toEur),
-      saved: convertMinor(300_000, toEur),
+      target: convertMinor(800_000, toEur, 'PLN', 'EUR'),
+      saved: convertMinor(300_000, toEur, 'PLN', 'EUR'),
       currency: 'EUR',
     })
     expect(page.summary.monthly).toBe(
-      Math.round(convertMinor(300_000, rateOn(mock.db.state.rates, date, 'PLN', 'EUR')) / 3),
+      Math.round(convertMinor(300_000, rateOn(mock.db.state.rates, date, 'PLN', 'EUR'), 'PLN', 'EUR') / 3),
     )
     expect(await update(mock, goal.id, { name: 'Wakacje', target: 200_000 })).toMatchObject({
       target: 200_000,
-      saved: convertMinor(300_000, toEur),
+      saved: convertMinor(300_000, toEur, 'PLN', 'EUR'),
       currency: 'EUR',
     })
     expect(mock.db.state.goals[0]).toMatchObject({
       currency: 'EUR',
       target: 200_000,
-      saved: convertMinor(300_000, toEur),
+      saved: convertMinor(300_000, toEur, 'PLN', 'EUR'),
     })
     annaSettings(mock).baseCurrency = 'PLN'
     const toPln = rateOn(mock.db.state.rates, today, 'EUR', 'PLN')
-    expect((await list(mock)).items[0]?.target).toBe(convertMinor(200_000, toPln))
+    expect((await list(mock)).items[0]?.target).toBe(convertMinor(200_000, toPln, 'EUR', 'PLN'))
   })
 
   it('serves, changes and deletes own goals only', async () => {

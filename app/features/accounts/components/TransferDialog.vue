@@ -3,6 +3,7 @@ import { useVuelidate } from '@vuelidate/core'
 import type { InputNumberInputEvent } from 'primevue/inputnumber'
 import { useAccounts } from '~/shared/accounts/useAccounts'
 import type { TransferInput } from '~/shared/api/contract'
+import { currencyDigits } from '~/shared/money/currencies'
 import { convertMinor, toMinor } from '~/shared/money/money'
 import { addDaysIso, fromLocalDate, todayIso, toLocalDate } from '~/shared/period/period'
 import { useRates } from '~/shared/rates/useRates'
@@ -35,8 +36,9 @@ const toAccount = computed(() => activeAccounts.value.find((account) => account.
 const crossCurrency = computed(
   () => !!fromAccount.value && !!toAccount.value && fromAccount.value.currency !== toAccount.value.currency,
 )
+const amountCurrency = computed(() => fromAccount.value?.currency ?? 'PLN')
 const v$ = useVuelidate(
-  transferRules(t, form, () => crossCurrency.value),
+  transferRules(t, form, { crossCurrency: () => crossCurrency.value, currency: () => amountCurrency.value }),
   form,
 )
 
@@ -66,8 +68,9 @@ const receives = computed(() => {
   if (!toAccount.value || amount === null || amount <= 0) return undefined
   const rate = crossCurrency.value ? form.rate : 1
   if (rate === null || rate <= 0) return undefined
+  const target = toAccount.value.currency
   return t('accounts.transferDialog.receives', {
-    amount: format(convertMinor(toMinor(amount), rate), toAccount.value.currency),
+    amount: format(convertMinor(toMinor(amount, amountCurrency.value), rate, amountCurrency.value, target), target),
   })
 })
 const rateCurrencies = computed(() => ({
@@ -125,7 +128,7 @@ async function submit() {
     date: fromLocalDate(form.date as Date),
     fromAccountId: form.fromAccountId as string,
     toAccountId: form.toAccountId as string,
-    fromAmount: toMinor(form.amount ?? 0),
+    fromAmount: toMinor(form.amount ?? 0, amountCurrency.value),
     ...(crossCurrency.value && form.rate !== null ? { rate: form.rate } : {}),
     ...(note ? { note } : {}),
   }
@@ -190,10 +193,10 @@ async function submit() {
             v-model="form.amount"
             input-id="transfer-amount"
             mode="currency"
-            :currency="fromAccount?.currency ?? 'PLN'"
+            :currency="amountCurrency"
             :locale="locale"
-            :min-fraction-digits="2"
-            :max-fraction-digits="2"
+            :min-fraction-digits="currencyDigits(amountCurrency)"
+            :max-fraction-digits="currencyDigits(amountCurrency)"
             :min="0"
             :invalid="invalid"
             :pt="{ pcInputText: { root: { 'aria-describedby': describedBy, 'aria-invalid': invalid || undefined } } }"
@@ -231,7 +234,7 @@ async function submit() {
             input-id="transfer-rate"
             :locale="locale"
             :min-fraction-digits="2"
-            :max-fraction-digits="6"
+            :max-fraction-digits="12"
             :min="0"
             :invalid="invalid"
             :pt="{ pcInputText: { root: { 'aria-describedby': describedBy, 'aria-invalid': invalid || undefined } } }"

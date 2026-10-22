@@ -1,5 +1,5 @@
 import { type AccountDto, type AccountType, accountTypes } from '../../app/shared/api/contract'
-import type { Currency } from '../../app/shared/money/money'
+import { type Currency, isCurrency } from '../../app/shared/money/currencies'
 import type { AccountRow, MockDb } from '../db'
 import { badRequest, notFound } from '../errors'
 import { linkedGoalCounts, unlinkAccount } from '../goals'
@@ -7,7 +7,7 @@ import { newId } from '../ids'
 import { accountBalances, accountsInUse } from '../ledger'
 import { paginate } from '../paginate'
 import type { MockRouter } from '../router'
-import { collectErrors, isCurrency, isMissing, objectBody } from '../validation'
+import { collectErrors, isMissing, objectBody } from '../validation'
 
 export const ACCOUNT_NAME_MAX = 40
 const MAX_AMOUNT = 100_000_000_000
