@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'bun:test'
-import { createDb, type KeyValueStorage, STORAGE_KEY } from '../../../mocks/db'
+import type { RateDto } from '../../../app/shared/api/contract'
+import { addDaysIso, todayIso } from '../../../app/shared/period/period'
+import { createMockApi } from '../../../mocks/api'
+import { createDb, type KeyValueStorage, type RateRow, STORAGE_KEY } from '../../../mocks/db'
+import { defaultHandlers } from '../../../mocks/handlers'
+import { freshRateOn } from '../../../mocks/rates'
 import { seedState } from '../../../mocks/seed'
+import { seedRates } from '../../../mocks/seed/rates'
 
 const memoryStorage = (initial?: string): KeyValueStorage & { value: string | null } => {
   const store = {
@@ -52,7 +58,63 @@ describe('mock db', () => {
   })
 
   it('falls back to the seed when stored data has another version', () => {
-    expect(createDb(memoryStorage(JSON.stringify({ version: 0 })), seedState).state.version).toBe(1)
+    expect(createDb(memoryStorage(JSON.stringify({ version: 0 })), seedState).state.version).toBe(2)
+  })
+
+  it('reseeds a stored state of version 1 so every currency gets rates', () => {
+    const stored = JSON.stringify({ ...seedState(), version: 1, rates: [], simulateErrors: true })
+    const { state } = createDb(memoryStorage(stored), seedState)
+    expect(state.version).toBe(2)
+    expect(state.simulateErrors).toBe(false)
+    expect(state.rates.some((row) => row.from === 'KWD')).toBe(true)
+  })
+
+  it('keeps a stored state of the current version', () => {
+    const stored = JSON.stringify({ ...seedState(), simulateErrors: true })
+    expect(createDb(memoryStorage(stored), seedState).state.simulateErrors).toBe(true)
+  })
+
+  describe('stored rates', () => {
+    const today = todayIso()
+    const seededLongAgo = () => ({ ...seedState(addDaysIso(today, -40)), activeUserId: 'usr_oleh' })
+    const latest = (rows: RateRow[]) => rows.reduce((date, row) => (row.date > date ? row.date : date), '')
+
+    it('tops up the rates of a state seeded more than 30 days ago and keeps the rest', () => {
+      const old = { ...seededLongAgo(), simulateErrors: true }
+      const { state } = createDb(memoryStorage(JSON.stringify(old)), seedState)
+      expect(state.activeUserId).toBe('usr_oleh')
+      expect(state.simulateErrors).toBe(true)
+      expect(state.accounts).toEqual(old.accounts)
+      expect(state.transactions).toEqual(old.transactions)
+      expect(state.rates.slice(0, old.rates.length)).toEqual(old.rates)
+      expect(state.rates.slice(old.rates.length)).toEqual(
+        seedRates(today).filter((row) => row.date > latest(old.rates)),
+      )
+      expect(latest(state.rates)).toBe(today)
+      expect(freshRateOn(state.rates, today, today, 'EUR', 'PLN')).toBeDefined()
+      expect(freshRateOn(state.rates, today, today, 'KWD', 'PLN')).toBeDefined()
+    })
+
+    it('answers every pair of GET /v1/rates after the stored rates went stale', async () => {
+      const storage = memoryStorage(JSON.stringify(seededLongAgo()))
+      const rates = (await createMockApi({ storage, register: defaultHandlers }).handle({
+        method: 'GET',
+        path: '/v1/rates',
+        query: { to: 'PLN' },
+      })) as RateDto[]
+      expect(rates).toHaveLength(147)
+    })
+
+    it('persists the topped-up rates once and adds nothing on a later load', () => {
+      const storage = memoryStorage(JSON.stringify(seededLongAgo()))
+      const db = createDb(storage, seedState)
+      db.save()
+      expect(latest(JSON.parse(storage.value ?? '{}').rates)).toBe(today)
+      const reloaded = createDb(storage, seedState).state.rates
+      expect(reloaded).toEqual(db.state.rates)
+      const keys = reloaded.map((row) => `${row.from}|${row.date}`)
+      expect(new Set(keys).size).toBe(keys.length)
+    })
   })
 
   it('falls back to the seed when stored state misses a key', () => {

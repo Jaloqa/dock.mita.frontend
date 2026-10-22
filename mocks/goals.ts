@@ -2,7 +2,8 @@ import type { GoalDto, GoalStatus, GoalSummary } from '../app/shared/api/contrac
 import { type Currency, convertMinor } from '../app/shared/money/money'
 import { shiftPeriod, toIsoDate } from '../app/shared/period/period'
 import type { GoalContributionRow, GoalRow, MockState } from './db'
-import { rateOn } from './rates'
+import { ratesUnavailable } from './errors'
+import { freshRateOn, rateOn } from './rates'
 import { baseCurrencyOf } from './transactions'
 
 export const GOAL_DEADLINE_MAX_MONTHS = 600
@@ -41,6 +42,18 @@ export function monthsBefore(iso: string, months: number): string {
 
 export const amountIn = (state: MockState, amount: number, from: Currency, to: Currency, date: string): number =>
   from === to ? amount : convertMinor(amount, rateOn(state.rates, date, from, to), from, to)
+
+export const freshAmountIn = (
+  state: MockState,
+  amount: number,
+  from: Currency,
+  to: Currency,
+  date: string,
+  today: string,
+): number =>
+  from === to
+    ? amount
+    : convertMinor(amount, freshRateOn(state.rates, date, today, from, to) ?? ratesUnavailable(), from, to)
 
 export function rebaseGoal(state: MockState, row: GoalRow, base: Currency, today: string): void {
   if (row.currency === base) return

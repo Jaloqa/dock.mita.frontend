@@ -6,7 +6,7 @@ import { addDaysIso, todayIso } from '../../../app/shared/period/period'
 import type { MockApi } from '../../../mocks/api'
 import { oneYearAhead } from '../../../mocks/handlers/transfers'
 import { rateOn } from '../../../mocks/rates'
-import { loggedInMockApi } from './session'
+import { loggedInMockApi, quoteRate } from './session'
 
 const api = () => loggedInMockApi()
 const today = todayIso()
@@ -89,6 +89,40 @@ describe('transfers', () => {
       note: null,
     })
     expect(await transfer(mock, { ...body, rate: 0.25 })).toMatchObject({ rate: 0.25, toAmount: 25_000 })
+  })
+
+  it('refuses an automatic cross-currency transfer from a rate older than 30 days but takes a manual rate', async () => {
+    const mock = api()
+    const dinar = (await mock.handle({
+      method: 'POST',
+      path: '/v1/accounts',
+      body: { name: 'Dinar', type: 'cash', currency: 'KWD', openingBalance: 0 },
+    })) as AccountDto
+    quoteRate(mock, 'KWD', 12.6221, addDaysIso(today, -40))
+    const body = { date: today, fromAccountId: 'acc_anna_card', toAccountId: dinar.id, fromAmount: 100_000 }
+    const before = mock.db.state.transfers.length
+    expect(await failure(transfer(mock, body))).toMatchObject({
+      problem: { status: 503, code: 'rates.unavailable' },
+    })
+    expect(mock.db.state.transfers).toHaveLength(before)
+    expect(await transfer(mock, { ...body, rate: 0.08 })).toMatchObject({ rate: 0.08, toAmount: 80_000 })
+  })
+
+  it('converts into a three-digit currency with a rate published a few days earlier', async () => {
+    const mock = api()
+    const dinar = (await mock.handle({
+      method: 'POST',
+      path: '/v1/accounts',
+      body: { name: 'Dinar', type: 'cash', currency: 'KWD', openingBalance: 0 },
+    })) as AccountDto
+    quoteRate(mock, 'KWD', 12.6221, addDaysIso(today, -5))
+    const created = await transfer(mock, {
+      date: today,
+      fromAccountId: 'acc_anna_card',
+      toAccountId: dinar.id,
+      fromAmount: 126_221,
+    })
+    expect(created).toMatchObject({ rate: 0.0792261, toAmount: 100_000 })
   })
 
   it('refuses a manual rate above the maximum', async () => {

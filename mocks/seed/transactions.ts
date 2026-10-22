@@ -211,6 +211,7 @@ export function demoTransactions(
           currency,
           ...priceTransaction(rates, {
             date,
+            today,
             amount: planned.amount,
             currency,
             accountCurrency: account.currency,

@@ -67,7 +67,7 @@ export type GoalContributionRow = {
 export type CredentialRow = { userId: string; password: string }
 
 export type MockState = {
-  version: 1
+  version: 2
   activeUserId: string | null
   simulateErrors: boolean
   users: UserRow[]
@@ -94,7 +94,7 @@ const isState = (value: unknown, seed: MockState): value is MockState => {
   if (typeof value !== 'object' || value === null) return false
   const state = value as Record<string, unknown>
   return (
-    state.version === 1 &&
+    state.version === 2 &&
     Object.entries(seed).every(([key, seedValue]) => {
       if (key === 'activeUserId') return state[key] === null || typeof state[key] === 'string'
       return Array.isArray(seedValue) ? Array.isArray(state[key]) : typeof state[key] === typeof seedValue
@@ -102,12 +102,21 @@ const isState = (value: unknown, seed: MockState): value is MockState => {
   )
 }
 
+const latestDate = (rows: readonly RateRow[]): string =>
+  rows.reduce((latest, row) => (row.date > latest ? row.date : latest), '')
+
+// A rate older than 30 days counts as missing, so a stored state needs the days seeded since it was saved.
+function withCurrentRates(stored: MockState, fresh: MockState): MockState {
+  const latest = latestDate(stored.rates)
+  return { ...stored, rates: [...stored.rates, ...fresh.rates.filter((row) => row.date > latest)] }
+}
+
 function read(storage: KeyValueStorage | undefined, seed: () => MockState): MockState {
   try {
     const raw = storage?.getItem(STORAGE_KEY)
     const parsed: unknown = raw ? JSON.parse(raw) : undefined
     const fresh = seed()
-    return isState(parsed, fresh) ? parsed : fresh
+    return isState(parsed, fresh) ? withCurrentRates(parsed, fresh) : fresh
   } catch {
     return seed()
   }

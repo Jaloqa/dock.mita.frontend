@@ -7,7 +7,7 @@ import {
   type TransactionSort,
   transactionSorts,
 } from '../../app/shared/api/contract'
-import { type Currency, currencyDigits, isCurrency } from '../../app/shared/money/currencies'
+import { AMOUNT_MINOR_MAX, type Currency, currencyDigits, isCurrency } from '../../app/shared/money/currencies'
 import { isIsoDate, todayIso } from '../../app/shared/period/period'
 import { ownCategories } from '../categories'
 import type { AccountRow, CategoryRow, MockDb, MockState, TransactionRow } from '../db'
@@ -22,7 +22,6 @@ import { oneYearAhead } from './transfers'
 
 export const TRANSACTION_TITLE_MAX = 100
 export const TRANSACTION_NOTE_MAX = 200
-const MAX_AMOUNT = 100_000_000_000
 const AMOUNT_SEARCH = /^\d+(?:[.,]\d{0,3})?$/
 
 type Errors = ReturnType<typeof collectErrors>
@@ -94,7 +93,7 @@ function validateTransaction(
   checkCategory(ownCategories(db, userId), categoryId, kind, errors)
   const account = checkAccount(db, userId, accountId, existing, errors)
   if (isMissing(amount)) errors.add('amount', 'validation.required')
-  else if (!Number.isSafeInteger(amount) || (amount as number) > MAX_AMOUNT) {
+  else if (!Number.isSafeInteger(amount) || (amount as number) > AMOUNT_MINOR_MAX) {
     errors.add('amount', 'validation.invalidValue')
   } else if ((amount as number) <= 0) errors.add('amount', 'validation.positiveAmount')
   if (isMissing(currency)) errors.add('currency', 'validation.required')
@@ -107,6 +106,7 @@ function validateTransaction(
   const day = date as string
   const price = priceTransaction(db.state.rates, {
     date: day,
+    today: todayIso(),
     amount: amount as number,
     currency: currency as Currency,
     accountCurrency: target.currency,

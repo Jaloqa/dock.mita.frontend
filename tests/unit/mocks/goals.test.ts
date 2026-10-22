@@ -7,7 +7,7 @@ import { addMonthsToKey, goalStatus, monthlyHint, monthsBefore, monthsUntil } fr
 import { oneYearAhead } from '../../../mocks/handlers/transfers'
 import { accountBalances } from '../../../mocks/ledger'
 import { rateOn } from '../../../mocks/rates'
-import { loggedInMockApi } from './session'
+import { loggedInMockApi, quoteRate } from './session'
 
 const today = todayIso()
 const thisMonth = today.slice(0, 7)
@@ -310,6 +310,28 @@ describe('goals', () => {
     })
     expect(updated.saved).toBe(convertMinor(10_750, rateOn(mock.db.state.rates, date, 'EUR', 'PLN'), 'EUR', 'PLN'))
     expect(balances(mock).get(savings.id)).toBe(10_750)
+  })
+
+  it('refuses a contribution whose account value needs a rate older than 30 days, even with a manual rate', async () => {
+    const mock = api()
+    const dinar = await addAccount(mock, { name: 'Lokata KWD', type: 'savings', currency: 'KWD' })
+    const goal = await create(mock, { ...vacation, accountId: dinar.id })
+    quoteRate(mock, 'KWD', 12.6221, addDaysIso(today, -40))
+    const before = (await transfers(mock)).length
+    const error = await failure(
+      contribute(mock, goal.id, { amount: 10_000, date: today, fromAccountId: 'acc_anna_card', rate: 0.08 }),
+    )
+    expect(error).toMatchObject({ problem: { status: 503, code: 'rates.unavailable' } })
+    expect(await transfers(mock)).toHaveLength(before)
+    expect(mock.db.state.goalContributions).toHaveLength(0)
+    quoteRate(mock, 'KWD', 12.6221, addDaysIso(today, -30))
+    const updated = await contribute(mock, goal.id, {
+      amount: 10_000,
+      date: today,
+      fromAccountId: 'acc_anna_card',
+      rate: 0.08,
+    })
+    expect(updated.saved).toBe(convertMinor(8_000, 12.6221, 'KWD', 'PLN'))
   })
 
   it('lets contributions pass the target and reports the goal as reached', async () => {

@@ -1,11 +1,9 @@
 import { convertMinor, roundRate } from '../app/shared/money/money'
 import type { AccountRow, MockState, TransferRow } from './db'
-import { badRequest } from './errors'
+import { badRequest, ratesUnavailable } from './errors'
 import { newId } from './ids'
-import { rateOn } from './rates'
+import { freshRateOn } from './rates'
 import { type collectErrors, isMissing } from './validation'
-
-export const AMOUNT_MAX = 100_000_000_000
 
 type Errors = ReturnType<typeof collectErrors>
 
@@ -28,6 +26,7 @@ export function checkAccount(
 
 export type TransferDraft = {
   date: string
+  today: string
   from: AccountRow
   to: AccountRow
   fromAmount: number
@@ -41,7 +40,8 @@ export function transferRow(state: MockState, userId: string, draft: TransferDra
       ? 1
       : draft.rate !== undefined
         ? roundRate(draft.rate)
-        : rateOn(state.rates, draft.date, draft.from.currency, draft.to.currency)
+        : (freshRateOn(state.rates, draft.date, draft.today, draft.from.currency, draft.to.currency) ??
+          ratesUnavailable())
   const toAmount = convertMinor(draft.fromAmount, rate, draft.from.currency, draft.to.currency)
   if (toAmount <= 0) badRequest({ rate: ['validation.positiveAmount'] })
   return {
