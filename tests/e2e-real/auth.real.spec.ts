@@ -45,12 +45,12 @@ test('a real account registers, keeps its settings, signs out and in, and is del
 
   await openSettings(page)
   const currency = baseCurrency(page)
-  await expect(currency).toHaveText('PLN — zł')
+  await expect(currency).toHaveText('PLN — Polish Zloty')
   await currency.click()
-  await page.getByRole('option', { name: 'EUR — €', exact: true }).click()
+  await page.getByRole('option', { name: 'EUR — Euro', exact: true }).click()
   await expect(page.getByText('Settings saved')).toBeVisible()
   await page.reload()
-  await expect(baseCurrency(page)).toHaveText('EUR — €')
+  await expect(baseCurrency(page)).toHaveText('EUR — Euro')
 
   await section(page, 'Profile').getByRole('button', { name: 'Sign out' }).click()
   await expect(page).toHaveURL('/login')
