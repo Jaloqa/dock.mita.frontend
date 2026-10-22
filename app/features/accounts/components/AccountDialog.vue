@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useVuelidate } from '@vuelidate/core'
+import { useAccounts } from '~/shared/accounts/useAccounts'
 import { type AccountDto, type AccountInput, accountTypes } from '~/shared/api/contract'
-import { BASE_CURRENCIES, currencyDigits } from '~/shared/money/currencies'
-import { fromMinor, toMinor } from '~/shared/money/money'
+import { currencyDigits } from '~/shared/money/currencies'
+import { fitMajor, fromMinor, toMinor } from '~/shared/money/money'
 import { useUserSettings } from '~/shared/user/useUserSettings'
 import { type AccountForm, accountRules } from '../schemas/accountSchema'
 
@@ -13,6 +14,7 @@ const notify = useNotify()
 const confirm = useConfirm()
 const server = useServerErrors()
 const { baseCurrency } = useUserSettings()
+const { accounts } = useAccounts()
 const { create, update, remove } = useAccountMutations()
 
 const fields = ['name', 'type', 'currency', 'openingBalance', 'cardLast4'] as const
@@ -26,6 +28,7 @@ const isEdit = computed(() => props.account !== undefined)
 const currencyLocked = computed(() => props.account?.inUse === true)
 const saving = computed(() => create.isPending.value || update.isPending.value || remove.isPending.value)
 const typeOptions = computed(() => accountTypes.map((type) => ({ value: type, label: t(`accounts.type.${type}`) })))
+const yourCurrencies = computed(() => [baseCurrency.value, ...accounts.value.map((account) => account.currency)])
 
 const toInput = (account: AccountDto): AccountInput => ({
   name: account.name,
@@ -57,6 +60,13 @@ function reset() {
 watch(visible, (open) => {
   if (open) reset()
 })
+
+watch(
+  () => form.currency,
+  (currency) => {
+    if (form.openingBalance !== null) form.openingBalance = fitMajor(form.openingBalance, currency)
+  },
+)
 
 const errorsOf = (field: Field) => [
   ...v$.value[field].$errors.map((error) => String(unref(error.$message))),
@@ -192,15 +202,14 @@ function confirmDelete() {
         :hint="currencyLocked ? t('accounts.dialog.currencyLocked') : undefined"
       >
         <template #default="{ invalid, describedBy, labelId }">
-          <Select
+          <CurrencySelect
             v-model="form.currency"
             input-id="account-currency"
-            :options="[...BASE_CURRENCIES]"
+            :pinned="yourCurrencies"
             :disabled="currencyLocked"
             :invalid="invalid"
-            :aria-labelledby="labelId"
-            :pt="{ label: { 'aria-describedby': describedBy, 'aria-invalid': invalid || undefined } }"
-            fluid
+            :label-id="labelId"
+            :described-by="describedBy"
           />
         </template>
       </FormRow>

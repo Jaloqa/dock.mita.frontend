@@ -38,6 +38,12 @@
       "label": "Okres",
       "range": "{from} – {to}"
     },
+    "currency": {
+      "pinned": "Twoje waluty",
+      "all": "Wszystkie waluty",
+      "search": "Szukaj po kodzie lub nazwie",
+      "empty": "Nie znaleziono waluty"
+    },
     "dateInputFormat": "dd.mm.yy",
     "monthInputFormat": "mm.yy",
     "primevue": {

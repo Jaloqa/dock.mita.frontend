@@ -38,6 +38,14 @@ export function toMinor(major: number, currency: Currency): number {
 
 export const fromMinor = (minor: number, currency: Currency): number => minor / 10 ** currencyDigits(currency)
 
+export function fitMajor(major: number, currency: Currency): number {
+  if (!Number.isFinite(major)) return major
+  const { digits, exponent } = decimalOf(major)
+  const shift = exponent + currencyDigits(currency)
+  const minor = shift >= 0 ? digits * 10n ** BigInt(shift) : digits / 10n ** BigInt(-shift)
+  return fromMinor(withSign(Math.sign(major), minor), currency)
+}
+
 export function convertMinor(minor: number, rate: number, from: Currency, to: Currency): number {
   if (!Number.isFinite(minor) || !Number.isFinite(rate)) return Number.NaN
   const amount = decimalOf(minor)

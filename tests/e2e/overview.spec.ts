@@ -400,7 +400,7 @@ test('a EUR expense from a PLN card updates the account, the overview and the bu
   await expect(dialog.getByRole('button', { name: 'Close', exact: true })).toBeFocused()
   await dialog.getByLabel('Amount').pressSequentially('50')
   await dialog.getByRole('combobox', { name: 'Currency' }).click()
-  await page.getByRole('option', { name: 'EUR', exact: true }).click()
+  await page.getByRole('option', { name: 'EUR — Euro', exact: true }).click()
   const rate = dialog.getByLabel('Exchange rate (EUR → PLN)')
   await expect(rate).toHaveValue(/^4\.\d+$/)
   await rate.fill('')

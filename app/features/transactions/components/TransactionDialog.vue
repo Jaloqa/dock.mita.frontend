@@ -5,10 +5,11 @@ import { useAccounts } from '~/shared/accounts/useAccounts'
 import { type CategoryKind, categoryKinds, type TransactionDto, type TransactionInput } from '~/shared/api/contract'
 import { categorySwatchClass } from '~/shared/categories/colors'
 import { useCategories } from '~/shared/categories/useCategories'
-import { BASE_CURRENCIES, currencyDigits } from '~/shared/money/currencies'
-import { convertMinor, fromMinor, toMinor } from '~/shared/money/money'
+import { currencyDigits } from '~/shared/money/currencies'
+import { convertMinor, fitMajor, fromMinor, toMinor } from '~/shared/money/money'
 import { addDaysIso, fromLocalDate, todayIso, toLocalDate } from '~/shared/period/period'
 import { useRates } from '~/shared/rates/useRates'
+import { useUserSettings } from '~/shared/user/useUserSettings'
 import { type TransactionForm, transactionRules } from '../schemas/transactionSchema'
 
 const props = defineProps<{ transaction?: TransactionDto; initialKind?: CategoryKind }>()
@@ -26,6 +27,7 @@ const {
   refetch: refetchAccounts,
 } = useAccounts()
 const { categories, pickable, nameOf, isError: categoriesError, refetch: refetchCategories } = useCategories()
+const { baseCurrency } = useUserSettings()
 const { create, update, remove } = useTransactionMutations()
 
 const fields = [
@@ -95,6 +97,11 @@ const accountOptions = computed(() => {
   const list = own?.archived ? [...activeAccounts.value, own] : activeAccounts.value
   return list.map((row) => ({ value: row.id, label: `${row.name} · ${row.currency}` }))
 })
+const yourCurrencies = computed(() => [
+  ...(account.value ? [account.value.currency] : []),
+  baseCurrency.value,
+  ...accounts.value.map((row) => row.currency),
+])
 const rateCurrencies = computed(() => ({ from: form.currency, to: account.value?.currency ?? '' }))
 const accountAmountText = computed(() => {
   const target = account.value
@@ -122,6 +129,13 @@ watch(
   () => form.accountId,
   () => {
     if (!syncing && !currencyEdited.value && account.value) form.currency = account.value.currency
+  },
+)
+
+watch(
+  () => form.currency,
+  (currency) => {
+    if (form.amount !== null) form.amount = fitMajor(form.amount, currency)
   },
 )
 
@@ -334,14 +348,14 @@ function confirmDelete() {
         </FormRow>
         <FormRow id="transaction-currency" :label="t('transactions.dialog.currency')" :errors="errorsOf('currency')">
           <template #default="{ invalid, describedBy, labelId }">
-            <Select
+            <CurrencySelect
               v-model="form.currency"
               input-id="transaction-currency"
-              :options="[...BASE_CURRENCIES]"
+              :pinned="yourCurrencies"
+              compact
               :invalid="invalid"
-              :aria-labelledby="labelId"
-              :pt="{ label: { 'aria-describedby': describedBy, 'aria-invalid': invalid || undefined } }"
-              fluid
+              :label-id="labelId"
+              :described-by="describedBy"
               @change="onCurrencyChange"
             />
           </template>

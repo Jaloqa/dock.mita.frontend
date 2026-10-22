@@ -3,6 +3,7 @@ import type { Currency } from '../../../app/shared/money/currencies'
 import { currencyFormat } from '../../../app/shared/money/format'
 import {
   convertMinor,
+  fitMajor,
   fromMinor,
   roundRate,
   sumMinor,
@@ -37,6 +38,26 @@ describe('money', () => {
     expect(fromMinor(123456, 'PLN')).toBe(1234.56)
     expect(fromMinor(1250, 'KWD')).toBe(1.25)
     expect(fromMinor(1500, 'JPY')).toBe(1500)
+  })
+
+  it.each([
+    [0.4, 'JPY', 0],
+    [-0.4, 'JPY', 0],
+    [12.55, 'JPY', 12],
+    [1.2345, 'KWD', 1.234],
+    [0.29, 'PLN', 0.29],
+    [1.999, 'PLN', 1.99],
+    [-1.999, 'PLN', -1.99],
+    [1500, 'KWD', 1500],
+    [12.5, 'PLN', 12.5],
+  ] as [number, Currency, number][])('fitMajor(%d, %s) = %d', (major, currency, fitted) => {
+    expect(fitMajor(major, currency)).toBe(fitted)
+  })
+
+  it('fits an amount so that its minor units are exactly what the currency shows', () => {
+    expect(toMinor(fitMajor(0.4, 'JPY'), 'JPY')).toBe(0)
+    expect(toMinor(fitMajor(12.55, 'JPY'), 'JPY')).toBe(12)
+    expect(fitMajor(Number.NaN, 'PLN')).toBeNaN()
   })
 
   it.each([

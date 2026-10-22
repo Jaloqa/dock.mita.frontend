@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { type Locale, type ThemePreference, themePreferences } from '~/shared/api/contract'
-import type { BaseCurrency } from '~/shared/money/currencies'
+import { BASE_CURRENCIES, type Currency, isBaseCurrency } from '~/shared/money/currencies'
 import type { MonthStart } from '~/shared/period/period'
-import { currencyOptions, monthStartOptions } from '../utils/options'
+import { monthStartOptions } from '../utils/options'
 
 const { t, locale, locales, setLocale } = useI18n()
 const { preference } = useColorMode()
 const { settings, isPending, isError, hasData, refetch, draft, saving, change } = useSettingsChange()
 
-const currencies = computed(() => currencyOptions(locale.value))
 const languages = computed(() => locales.value.map((item) => ({ value: item.code, label: item.name ?? item.code })))
 const monthStarts = computed(() =>
   monthStartOptions((day) => t('settings.region.monthStartDay', { day }), t('settings.region.lastWorkingDay')),
@@ -22,8 +21,8 @@ const shown = computed(() => ({
   theme: draft.value.theme ?? preference.value,
 }))
 
-function selectCurrency(baseCurrency: BaseCurrency) {
-  if (baseCurrency !== shown.value.baseCurrency) change({ baseCurrency })
+function selectCurrency(currency: Currency) {
+  if (isBaseCurrency(currency) && currency !== shown.value.baseCurrency) change({ baseCurrency: currency })
 }
 
 function selectLocale(code: Locale) {
@@ -54,19 +53,15 @@ function selectTheme(theme: ThemePreference) {
       <Skeleton v-for="index in 3" :key="index" height="4.25rem" border-radius="var(--radius-control)" />
     </div>
     <template v-else>
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid gap-3 sm:grid-cols-2">
         <FormRow id="settings-currency" :label="t('settings.region.baseCurrency')">
           <template #default="{ labelId }">
-            <Select
+            <CurrencySelect
               :model-value="shown.baseCurrency"
               input-id="settings-currency"
-              :options="currencies"
-              option-label="label"
-              option-value="value"
+              :offered="BASE_CURRENCIES"
               :disabled="saving"
-              :aria-labelledby="labelId"
-              class="min-h-11"
-              fluid
+              :label-id="labelId"
               @update:model-value="selectCurrency"
             />
           </template>
