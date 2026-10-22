@@ -1,10 +1,12 @@
 import { type Currency, convertMinor, roundRate } from '../app/shared/money/money'
 import type { Period } from '../app/shared/period/period'
 import type { MockState, RateRow, TransactionRow } from './db'
-import { rateOn } from './rates'
+import { ratesUnavailable } from './errors'
+import { freshRateOn, rateOn } from './rates'
 
 export type PriceInput = {
   date: string
+  today: string
   amount: number
   currency: Currency
   accountCurrency: Currency
@@ -15,19 +17,21 @@ export type PriceInput = {
 export type Price = Pick<TransactionRow, 'rate' | 'accountAmount' | 'baseAmount' | 'accountCurrency' | 'baseCurrency'>
 
 export function priceTransaction(rates: readonly RateRow[], input: PriceInput): Price {
+  const fresh = (from: Currency, to: Currency): number =>
+    freshRateOn(rates, input.date, input.today, from, to) ?? ratesUnavailable()
   const rate =
     input.currency === input.accountCurrency
       ? 1
       : input.rate !== undefined
         ? roundRate(input.rate)
-        : rateOn(rates, input.date, input.currency, input.accountCurrency)
+        : fresh(input.currency, input.accountCurrency)
   const accountAmount = convertMinor(input.amount, rate, input.currency, input.accountCurrency)
   const baseAmount =
     input.currency === input.baseCurrency
       ? input.amount
       : convertMinor(
           accountAmount,
-          rateOn(rates, input.date, input.accountCurrency, input.baseCurrency),
+          fresh(input.accountCurrency, input.baseCurrency),
           input.accountCurrency,
           input.baseCurrency,
         )

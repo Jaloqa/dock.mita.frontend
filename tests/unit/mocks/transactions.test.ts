@@ -8,7 +8,7 @@ import { createDb, type KeyValueStorage, STORAGE_KEY } from '../../../mocks/db'
 import { oneYearAhead } from '../../../mocks/handlers/transfers'
 import { rateOn } from '../../../mocks/rates'
 import { seedState } from '../../../mocks/seed'
-import { loggedInMockApi } from './session'
+import { loggedInMockApi, quoteRate } from './session'
 
 const today = todayIso()
 const failure = (promise: Promise<unknown>) => promise.catch((error: unknown) => error)
@@ -128,13 +128,77 @@ describe('transactions', () => {
 
   it('prices a JPY expense on a PLN account by the minor units of both currencies', async () => {
     const mock = api()
-    mock.db.state.rates.push({ date: today, from: 'JPY', to: 'PLN', value: 0.024764 })
+    quoteRate(mock, 'JPY', 0.024764, today)
     expect(await create(mock, { ...lidl, currency: 'JPY', amount: 1_500 })).toMatchObject({
       currency: 'JPY',
       amount: 1_500,
       rate: 0.024764,
       accountAmount: 3_715,
       baseAmount: 3_715,
+    })
+  })
+
+  it('prices a KWD expense with three fraction digits on a PLN account', async () => {
+    const mock = api()
+    quoteRate(mock, 'KWD', 12.6221, today)
+    expect(await create(mock, { ...lidl, currency: 'KWD', amount: 1_250 })).toMatchObject({
+      rate: 12.6221,
+      accountAmount: 1_578,
+      baseAmount: 1_578,
+    })
+  })
+
+  it('refuses an automatic conversion from a rate older than 30 days', async () => {
+    const mock = api()
+    quoteRate(mock, 'KWD', 12.6221, addDaysIso(today, -40))
+    expect(await failure(create(mock, { ...lidl, currency: 'KWD', amount: 1_250 }))).toMatchObject({
+      problem: { status: 503, code: 'rates.unavailable' },
+    })
+    expect(mock.db.state.transactions).toHaveLength(0)
+  })
+
+  it('accepts a rate exactly 30 days old and refuses one 31 days old', async () => {
+    const mock = api()
+    quoteRate(mock, 'KWD', 12.6221, addDaysIso(today, -30))
+    expect(await create(mock, { ...lidl, currency: 'KWD', amount: 1_250 })).toMatchObject({ accountAmount: 1_578 })
+    quoteRate(mock, 'KWD', 12.6221, addDaysIso(today, -31))
+    expect(await failure(create(mock, { ...lidl, currency: 'KWD', amount: 1_250 }))).toMatchObject({
+      problem: { status: 503 },
+    })
+  })
+
+  it('measures the age against the date of a past transaction', async () => {
+    const mock = api()
+    quoteRate(mock, 'KWD', 12.6221, addDaysIso(today, -40))
+    const created = await create(mock, { ...lidl, currency: 'KWD', amount: 1_250, date: addDaysIso(today, -35) })
+    expect(created).toMatchObject({ rate: 12.6221, accountAmount: 1_578 })
+  })
+
+  it('still converts with a manual rate when the stored rate is stale', async () => {
+    const mock = api()
+    quoteRate(mock, 'KWD', 12.6221, addDaysIso(today, -40))
+    expect(await create(mock, { ...lidl, currency: 'KWD', amount: 1_250, rate: 12.5 })).toMatchObject({
+      rate: 12.5,
+      accountAmount: 1_563,
+      baseAmount: 1_563,
+    })
+  })
+
+  it('refuses the account to base conversion from a stale rate even with a manual rate', async () => {
+    const mock = api()
+    const dinar = (await mock.handle({
+      method: 'POST',
+      path: '/v1/accounts',
+      body: { name: 'Dinar', type: 'cash', currency: 'KWD', openingBalance: 0 },
+    })) as AccountDto
+    quoteRate(mock, 'KWD', 12.6221, addDaysIso(today, -40))
+    const body = { ...lidl, accountId: dinar.id, currency: 'KWD', amount: 1_250 }
+    expect(await failure(create(mock, { ...body, rate: 2 }))).toMatchObject({
+      problem: { status: 503, code: 'rates.unavailable' },
+    })
+    expect(await create(mock, { ...body, currency: 'PLN', rate: 0.08 })).toMatchObject({
+      accountAmount: 1_000,
+      baseAmount: 1_250,
     })
   })
 
@@ -350,10 +414,8 @@ describe('transactions', () => {
 
   it('searches an amount written with the fraction digits of its currency', async () => {
     const mock = api()
-    mock.db.state.rates.push(
-      { date: today, from: 'JPY', to: 'PLN', value: 0.024764 },
-      { date: today, from: 'KWD', to: 'PLN', value: 12.6221 },
-    )
+    quoteRate(mock, 'JPY', 0.024764, today)
+    quoteRate(mock, 'KWD', 12.6221, today)
     await create(mock, { ...lidl, title: 'yen', currency: 'JPY', amount: 1_500 })
     await create(mock, { ...lidl, title: 'dinar', currency: 'KWD', amount: 12_500 })
     await create(mock, { ...lidl, title: 'zloty', amount: 1_250 })

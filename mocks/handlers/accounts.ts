@@ -1,5 +1,5 @@
 import { type AccountDto, type AccountType, accountTypes } from '../../app/shared/api/contract'
-import { type Currency, isCurrency } from '../../app/shared/money/currencies'
+import { AMOUNT_MINOR_MAX, type Currency, isCurrency } from '../../app/shared/money/currencies'
 import type { AccountRow, MockDb } from '../db'
 import { badRequest, notFound } from '../errors'
 import { linkedGoalCounts, unlinkAccount } from '../goals'
@@ -10,7 +10,6 @@ import type { MockRouter } from '../router'
 import { collectErrors, isMissing, objectBody } from '../validation'
 
 export const ACCOUNT_NAME_MAX = 40
-const MAX_AMOUNT = 100_000_000_000
 
 type AccountFields = Pick<AccountRow, 'name' | 'type' | 'currency' | 'openingBalance' | 'cardLast4' | 'archived'>
 type Usage = { balances: Map<string, number>; inUse: Set<string>; linked: Map<string, number> }
@@ -30,7 +29,7 @@ function validateAccount(body: unknown, existing?: { row: AccountRow; inUse: boo
   else if (!isCurrency(currency)) errors.add('currency', 'validation.invalidValue')
   else if (existing?.inUse && currency !== existing.row.currency) errors.add('currency', 'validation.currencyLocked')
   if (isMissing(openingBalance)) errors.add('openingBalance', 'validation.required')
-  else if (!Number.isSafeInteger(openingBalance) || Math.abs(openingBalance as number) > MAX_AMOUNT) {
+  else if (!Number.isSafeInteger(openingBalance) || Math.abs(openingBalance as number) > AMOUNT_MINOR_MAX) {
     errors.add('openingBalance', 'validation.invalidValue')
   }
   if (!isMissing(cardLast4) && (typeof cardLast4 !== 'string' || !/^\d{4}$/.test(cardLast4))) {

@@ -1,9 +1,10 @@
 import type { TransferDto } from '../../app/shared/api/contract'
+import { AMOUNT_MINOR_MAX } from '../../app/shared/money/currencies'
 import { isIsoDate, todayIso } from '../../app/shared/period/period'
 import type { AccountRow, MockDb, TransferRow } from '../db'
 import { paginate } from '../paginate'
 import type { MockRouter } from '../router'
-import { AMOUNT_MAX, checkAccount, transferRow } from '../transfers'
+import { checkAccount, transferRow } from '../transfers'
 import { collectErrors, isManualRate, isMissing, objectBody } from '../validation'
 
 export const TRANSFER_NOTE_MAX = 200
@@ -20,7 +21,7 @@ function createTransfer(db: MockDb, userId: string, body: unknown): TransferRow 
   const to = checkAccount(db.state, userId, toAccountId, 'toAccountId', errors)
   if (from && to && from.id === to.id) errors.add('toAccountId', 'validation.sameAccount')
   if (isMissing(fromAmount)) errors.add('fromAmount', 'validation.required')
-  else if (!Number.isSafeInteger(fromAmount) || (fromAmount as number) > AMOUNT_MAX) {
+  else if (!Number.isSafeInteger(fromAmount) || (fromAmount as number) > AMOUNT_MINOR_MAX) {
     errors.add('fromAmount', 'validation.invalidValue')
   } else if ((fromAmount as number) <= 0) errors.add('fromAmount', 'validation.positiveAmount')
   if (!isMissing(rate) && !isManualRate(rate)) errors.add('rate', 'validation.invalidValue')
@@ -30,6 +31,7 @@ function createTransfer(db: MockDb, userId: string, body: unknown): TransferRow 
   errors.throwIfAny()
   return transferRow(db.state, userId, {
     date: date as string,
+    today: todayIso(),
     from: from as AccountRow,
     to: to as AccountRow,
     fromAmount: fromAmount as number,

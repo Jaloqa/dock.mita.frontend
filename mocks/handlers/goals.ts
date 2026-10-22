@@ -1,10 +1,11 @@
 import type { GoalPage } from '../../app/shared/api/contract'
+import { AMOUNT_MINOR_MAX } from '../../app/shared/money/currencies'
 import { isIsoDate, isPeriodKey, todayIso } from '../../app/shared/period/period'
 import type { AccountRow, GoalContributionRow, GoalRow, MockDb } from '../db'
 import { notFound } from '../errors'
 import {
   addMonthsToKey,
-  amountIn,
+  freshAmountIn,
   GOAL_DEADLINE_MAX_MONTHS,
   goalsOf,
   goalView,
@@ -16,7 +17,7 @@ import { newId } from '../ids'
 import { paginate } from '../paginate'
 import type { MockRouter } from '../router'
 import { baseCurrencyOf } from '../transactions'
-import { AMOUNT_MAX, checkAccount, transferRow } from '../transfers'
+import { checkAccount, transferRow } from '../transfers'
 import { collectErrors, isManualRate, isMissing, objectBody } from '../validation'
 import { oneYearAhead } from './transfers'
 
@@ -27,8 +28,9 @@ type GoalFields = Pick<GoalRow, 'name' | 'target' | 'deadline' | 'accountId'>
 
 function checkAmount(value: unknown, field: string, errors: Errors): void {
   if (isMissing(value)) errors.add(field, 'validation.required')
-  else if (!Number.isSafeInteger(value) || (value as number) > AMOUNT_MAX) errors.add(field, 'validation.invalidValue')
-  else if ((value as number) <= 0) errors.add(field, 'validation.positiveAmount')
+  else if (!Number.isSafeInteger(value) || (value as number) > AMOUNT_MINOR_MAX) {
+    errors.add(field, 'validation.invalidValue')
+  } else if ((value as number) <= 0) errors.add(field, 'validation.positiveAmount')
 }
 
 function checkDeadline(value: unknown, today: string, errors: Errors, existing?: GoalRow): void {
@@ -119,12 +121,14 @@ function recordContribution(
   const source = from as AccountRow
   const transfer = transferRow(db.state, userId, {
     date: day,
+    today,
     from: source,
     to: linked,
     fromAmount: value,
     rate: typeof rate === 'number' ? rate : undefined,
     note: goal.name,
   })
+  const baseAmount = freshAmountIn(db.state, transfer.toAmount, linked.currency, base, day, today)
   db.state.transfers.push(transfer)
   return {
     id,
@@ -135,7 +139,7 @@ function recordContribution(
     currency: source.currency,
     fromAccountId: source.id,
     transferId: transfer.id,
-    baseAmount: amountIn(db.state, transfer.toAmount, linked.currency, base, day),
+    baseAmount,
     baseCurrency: base,
   }
 }

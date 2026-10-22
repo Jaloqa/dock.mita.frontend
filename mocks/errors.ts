@@ -15,6 +15,10 @@ export const unauthorized = (code: string): never => {
   throw new MockHttpError({ status: 401, title: 'Unauthorized', code })
 }
 
+export const ratesUnavailable = (): never => {
+  throw new MockHttpError({ status: 503, title: 'Service Unavailable', code: 'rates.unavailable' })
+}
+
 export const badRequest = (errors: Record<string, string[]>): never => {
   throw new MockHttpError({ status: 400, title: 'Validation failed', errors })
 }
