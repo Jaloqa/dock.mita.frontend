@@ -38,6 +38,12 @@
       "label": "Period",
       "range": "{from} – {to}"
     },
+    "currency": {
+      "pinned": "Your currencies",
+      "all": "All currencies",
+      "search": "Search by code or name",
+      "empty": "No currency found"
+    },
     "dateInputFormat": "mm/dd/yy",
     "monthInputFormat": "mm/yy",
     "primevue": {

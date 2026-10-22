@@ -38,6 +38,12 @@
       "label": "Период",
       "range": "{from} – {to}"
     },
+    "currency": {
+      "pinned": "Ваши валюты",
+      "all": "Все валюты",
+      "search": "Поиск по коду или названию",
+      "empty": "Валюта не найдена"
+    },
     "dateInputFormat": "dd.mm.yy",
     "monthInputFormat": "mm.yy",
     "primevue": {

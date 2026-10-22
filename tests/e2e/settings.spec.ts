@@ -67,7 +67,7 @@ test('shows every section with the data of the demo user', async ({ page, isMobi
     await expect(page.getByRole('heading', { level: 2, name, exact: true })).toBeVisible()
   }
   await expect(profile(page).getByLabel('Email', { exact: true })).toHaveValue('anna@demo.mita.app')
-  await expect(combobox(page, 'Base currency')).toHaveText('PLN — zł')
+  await expect(combobox(page, 'Base currency')).toHaveText('PLN — Polish Zloty')
   await expect(combobox(page, 'Language')).toHaveText('English')
   await expect(combobox(page, 'Start of the financial month')).toHaveText('Day 1')
   await expect(combobox(page, 'Theme')).toHaveText('System')
@@ -77,6 +77,21 @@ test('shows every section with the data of the demo user', async ({ page, isMobi
   if (!first || !second) throw new Error('The sections are not rendered')
   if (isMobile) expect(second.y).toBeGreaterThanOrEqual(first.y + first.height)
   else expect(second.x).toBeGreaterThanOrEqual(first.x + first.width)
+})
+
+test('offers only the four base currencies as the base currency', async ({ page }) => {
+  await openSettings(page)
+  const currency = combobox(page, 'Base currency')
+  await currency.click()
+  await expect(page.getByRole('listbox').getByRole('option')).toHaveText([
+    'PLN — Polish Zloty',
+    'EUR — Euro',
+    'USD — US Dollar',
+    'UAH — Ukrainian Hryvnia',
+  ])
+  await expect(page.getByRole('searchbox')).toHaveCount(0)
+  await currency.click()
+  await expect(currency).toHaveAttribute('aria-expanded', 'false')
 })
 
 test('validates the profile, maps server errors and saves it', async ({ page }) => {
@@ -269,7 +284,7 @@ test('switching the demo user shows only the data of that user', async ({ page, 
   await expect(demoUser).toBeFocused()
   await expect(nameField(page)).toHaveValue('Oleh Kravets')
   await expect(profile(page).getByLabel('Email', { exact: true })).toHaveValue('oleh@demo.mita.app')
-  await expect(combobox(page, 'Base currency')).toHaveText('UAH — ₴')
+  await expect(combobox(page, 'Base currency')).toHaveText('UAH — Ukrainian Hryvnia')
   await expect(combobox(page, 'Start of the financial month')).toHaveText('Day 10')
 
   await visitUserScreens(page, isMobile, 'oleh')
@@ -278,7 +293,7 @@ test('switching the demo user shows only the data of that user', async ({ page, 
   await choose(page, combobox(page, 'Demo user'), 'Anna Nowak')
   await expect(page.getByText('Switched to Anna Nowak')).toBeVisible()
   await expect(nameField(page)).toHaveValue('Anna Nowak')
-  await expect(combobox(page, 'Base currency')).toHaveText('PLN — zł')
+  await expect(combobox(page, 'Base currency')).toHaveText('PLN — Polish Zloty')
 
   await visitUserScreens(page, isMobile, 'anna')
   expect(await page.evaluate(() => Reflect.get(window, 'mitaSamePage'))).toBe(true)
@@ -330,9 +345,9 @@ test('a failed save shows an error and keeps the stored values', async ({ page }
     await expect(serverError).toHaveCount(0)
   }
   const currency = combobox(page, 'Base currency')
-  await choose(page, currency, 'EUR — €')
+  await choose(page, currency, 'EUR — Euro')
   await dismissServerError()
-  await expect(currency).toHaveText('PLN — zł')
+  await expect(currency).toHaveText('PLN — Polish Zloty')
 
   const language = combobox(page, 'Language')
   await language.click()
