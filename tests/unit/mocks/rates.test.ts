@@ -78,7 +78,7 @@ describe('GET /v1/rates', () => {
 
   it('rejects an invalid date or currency', async () => {
     const error = await api()
-      .handle({ method: 'GET', path: '/v1/rates', query: { date: '2026-13-01', from: 'GBP' } })
+      .handle({ method: 'GET', path: '/v1/rates', query: { date: '2026-13-01', from: 'XDR' } })
       .catch((e: unknown) => e)
     expect(error).toMatchObject({
       problem: { status: 400, errors: { date: ['validation.invalidValue'], from: ['validation.invalidValue'] } },

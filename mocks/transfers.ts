@@ -1,8 +1,8 @@
-import { convertMinor } from '../app/shared/money/money'
+import { convertMinor, roundRate } from '../app/shared/money/money'
 import type { AccountRow, MockState, TransferRow } from './db'
 import { badRequest } from './errors'
 import { newId } from './ids'
-import { rateOn, roundRate } from './rates'
+import { rateOn } from './rates'
 import { type collectErrors, isMissing } from './validation'
 
 export const AMOUNT_MAX = 100_000_000_000
@@ -42,7 +42,7 @@ export function transferRow(state: MockState, userId: string, draft: TransferDra
       : draft.rate !== undefined
         ? roundRate(draft.rate)
         : rateOn(state.rates, draft.date, draft.from.currency, draft.to.currency)
-  const toAmount = convertMinor(draft.fromAmount, rate)
+  const toAmount = convertMinor(draft.fromAmount, rate, draft.from.currency, draft.to.currency)
   if (toAmount <= 0) badRequest({ rate: ['validation.positiveAmount'] })
   return {
     id: newId('trf'),

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import type { AccountDto, Page, TransferDto } from '../../../app/shared/api/contract'
+import { MANUAL_RATE_MAX } from '../../../app/shared/money/currencies'
 import { convertMinor } from '../../../app/shared/money/money'
 import { addDaysIso, todayIso } from '../../../app/shared/period/period'
 import type { MockApi } from '../../../mocks/api'
@@ -82,8 +83,20 @@ describe('transfers', () => {
     const date = addDaysIso(today, -3)
     const body = { date, fromAccountId: 'acc_anna_card', toAccountId: 'acc_anna_eur', fromAmount: 100_000 }
     const rate = rateOn(mock.db.state.rates, date, 'PLN', 'EUR')
-    expect(await transfer(mock, body)).toMatchObject({ rate, toAmount: convertMinor(100_000, rate), note: null })
+    expect(await transfer(mock, body)).toMatchObject({
+      rate,
+      toAmount: convertMinor(100_000, rate, 'PLN', 'EUR'),
+      note: null,
+    })
     expect(await transfer(mock, { ...body, rate: 0.25 })).toMatchObject({ rate: 0.25, toAmount: 25_000 })
+  })
+
+  it('refuses a manual rate above the maximum', async () => {
+    const body = { date: today, fromAccountId: 'acc_anna_card', toAccountId: 'acc_anna_eur', fromAmount: 100 }
+    expect(await failure(transfer(api(), { ...body, rate: MANUAL_RATE_MAX + 1 }))).toMatchObject({
+      problem: { status: 400, errors: { rate: ['validation.invalidValue'] } },
+    })
+    expect(await transfer(api(), { ...body, rate: MANUAL_RATE_MAX })).toMatchObject({ rate: MANUAL_RATE_MAX })
   })
 
   it('rejects a cross-currency transfer whose converted amount rounds to zero', async () => {

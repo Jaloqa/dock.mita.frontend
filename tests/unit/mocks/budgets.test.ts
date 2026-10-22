@@ -259,13 +259,16 @@ describe('budgets', () => {
     const toEur = rateOn(mock.db.state.rates, current.from, 'PLN', 'EUR')
     const page = await list(mock, current.key)
     expect(page.currency).toBe('EUR')
-    expect(page.items[0]).toMatchObject({ limit: convertMinor(100_000, toEur), spent: convertMinor(40_000, toEur) })
+    expect(page.items[0]).toMatchObject({
+      limit: convertMinor(100_000, toEur, 'PLN', 'EUR'),
+      spent: convertMinor(40_000, toEur, 'PLN', 'EUR'),
+    })
     expect((await update(mock, budget.id, { categoryId: groceries, period: current.key, limit: 30_000 })).limit).toBe(
       30_000,
     )
     annaSettings(mock).baseCurrency = 'PLN'
     const toPln = rateOn(mock.db.state.rates, current.from, 'EUR', 'PLN')
-    expect((await list(mock, current.key)).items[0]?.limit).toBe(convertMinor(30_000, toPln))
+    expect((await list(mock, current.key)).items[0]?.limit).toBe(convertMinor(30_000, toPln, 'EUR', 'PLN'))
   })
 
   it('re-ranges the same period key when the month start changes', async () => {

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { useVuelidate } from '@vuelidate/core'
 import { type AccountDto, type AccountInput, accountTypes } from '~/shared/api/contract'
-import { currencies, fromMinor, toMinor } from '~/shared/money/money'
+import { BASE_CURRENCIES, currencyDigits } from '~/shared/money/currencies'
+import { fromMinor, toMinor } from '~/shared/money/money'
 import { useUserSettings } from '~/shared/user/useUserSettings'
 import { type AccountForm, accountRules } from '../schemas/accountSchema'
 
@@ -44,7 +45,7 @@ function reset() {
           name: account.name,
           type: account.type,
           currency: account.currency,
-          openingBalance: fromMinor(account.openingBalance),
+          openingBalance: fromMinor(account.openingBalance, account.currency),
           cardLast4: account.cardLast4 ?? '',
         }
       : { name: '', type: 'card', currency: baseCurrency.value, openingBalance: null, cardLast4: '' },
@@ -90,7 +91,7 @@ async function submit() {
     name: form.name.trim(),
     type: form.type,
     currency: form.currency,
-    openingBalance: toMinor(form.openingBalance ?? 0),
+    openingBalance: toMinor(form.openingBalance ?? 0, form.currency),
     cardLast4: form.type === 'card' && form.cardLast4 !== '' ? form.cardLast4 : null,
     archived: props.account?.archived ?? false,
   }
@@ -194,7 +195,7 @@ function confirmDelete() {
           <Select
             v-model="form.currency"
             input-id="account-currency"
-            :options="[...currencies]"
+            :options="[...BASE_CURRENCIES]"
             :disabled="currencyLocked"
             :invalid="invalid"
             :aria-labelledby="labelId"
@@ -211,8 +212,8 @@ function confirmDelete() {
             mode="currency"
             :currency="form.currency"
             :locale="locale"
-            :min-fraction-digits="2"
-            :max-fraction-digits="2"
+            :min-fraction-digits="currencyDigits(form.currency)"
+            :max-fraction-digits="currencyDigits(form.currency)"
             :invalid="invalid"
             :pt="{ pcInputText: { root: { 'aria-describedby': describedBy, 'aria-invalid': invalid || undefined } } }"
             fluid

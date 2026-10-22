@@ -1,6 +1,7 @@
 import { helpers, maxLength, required } from '@vuelidate/validators'
 import type { AccountType } from '../../../shared/api/contract'
-import type { Currency } from '../../../shared/money/money'
+import type { Currency } from '../../../shared/money/currencies'
+import { withinAmountLimit } from '../../../shared/money/money'
 
 export const ACCOUNT_NAME_MAX = 40
 
@@ -22,7 +23,7 @@ export const isCardLast4For =
   (value: unknown): boolean =>
     type() !== 'card' || isCardLast4(value)
 
-export const accountRules = (t: Translate, form: Pick<AccountForm, 'type'>) => {
+export const accountRules = (t: Translate, form: Pick<AccountForm, 'type' | 'currency'>) => {
   const requiredField = helpers.withMessage(() => t('validation.required'), required)
   return {
     name: {
@@ -31,7 +32,13 @@ export const accountRules = (t: Translate, form: Pick<AccountForm, 'type'>) => {
     },
     type: { required: requiredField },
     currency: { required: requiredField },
-    openingBalance: { required: requiredField },
+    openingBalance: {
+      required: requiredField,
+      max: helpers.withMessage(
+        () => t('validation.invalidValue'),
+        withinAmountLimit(() => form.currency),
+      ),
+    },
     cardLast4: {
       cardLast4: helpers.withMessage(
         () => t('validation.cardLast4'),

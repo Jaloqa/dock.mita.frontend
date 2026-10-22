@@ -5,6 +5,7 @@ import { useAccounts } from '~/shared/accounts/useAccounts'
 import { categoryKinds, type TransactionInput } from '~/shared/api/contract'
 import { categorySwatchClass } from '~/shared/categories/colors'
 import { useCategories } from '~/shared/categories/useCategories'
+import { currencyDigits } from '~/shared/money/currencies'
 import { toMinor } from '~/shared/money/money'
 import { addDaysIso, fromLocalDate, todayIso, toLocalDate } from '~/shared/period/period'
 import { type TransactionForm, transactionRules } from '../schemas/transactionSchema'
@@ -59,7 +60,10 @@ const categoriesFailed = computed(() => categoriesError.value && categories.valu
 const loadError = computed(() => accountsFailed.value || categoriesFailed.value)
 const noAccounts = computed(() => !loading.value && !loadError.value && activeAccounts.value.length === 0)
 
-const v$ = useVuelidate(transactionRules(t, { crossCurrency: () => false, maxDate: () => maxDate.value }), form)
+const v$ = useVuelidate(
+  transactionRules(t, { crossCurrency: () => false, maxDate: () => maxDate.value, currency: () => form.currency }),
+  form,
+)
 
 watch(
   categoryOptions,
@@ -125,7 +129,7 @@ async function submit() {
     date: fromLocalDate(form.date as Date),
     categoryId: form.categoryId as string,
     accountId: form.accountId as string,
-    amount: toMinor(form.amount ?? 0),
+    amount: toMinor(form.amount ?? 0, form.currency),
     currency: form.currency,
     ...(note ? { note } : {}),
   }
@@ -188,8 +192,8 @@ async function submit() {
             mode="currency"
             :currency="form.currency"
             :locale="locale"
-            :min-fraction-digits="2"
-            :max-fraction-digits="2"
+            :min-fraction-digits="currencyDigits(form.currency)"
+            :max-fraction-digits="currencyDigits(form.currency)"
             :min="0"
             :invalid="invalid"
             :pt="{ pcInputText: { root: { 'aria-describedby': describedBy, 'aria-invalid': invalid || undefined } } }"

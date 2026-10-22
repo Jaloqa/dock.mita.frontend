@@ -3,9 +3,18 @@ import { useVuelidate } from '@vuelidate/core'
 import { useAccounts } from '~/shared/accounts/useAccounts'
 import { type CategoryKind, categoryKinds } from '~/shared/api/contract'
 import { useCategories } from '~/shared/categories/useCategories'
+import { currencyDigits } from '~/shared/money/currencies'
 import { addDaysIso, fromLocalDate, toLocalDate } from '~/shared/period/period'
 import { quickAddRules } from '../schemas/transactionSchema'
-import { decimalSeparator, entryToMinor, formatEntry, isDigit, type KeypadKey, pressKey } from '../utils/keypad'
+import {
+  decimalSeparator,
+  entryToMinor,
+  fitEntry,
+  formatEntry,
+  isDigit,
+  type KeypadKey,
+  pressKey,
+} from '../utils/keypad'
 
 const emit = defineEmits<{ close: []; done: [] }>()
 const { t, d, locale } = useI18n()
@@ -30,10 +39,11 @@ const dateOpen = ref(false)
 const accountOpen = ref(false)
 const rootEl = ref<HTMLElement | null>(null)
 
-const amount = computed(() => entryToMinor(entry.value))
 const tiles = computed(() => categories.pickable(kind.value))
 const account = computed(() => accounts.activeAccounts.value.find((row) => row.id === accountId.value))
 const currency = computed(() => account.value?.currency)
+const digits = computed(() => (currency.value ? currencyDigits(currency.value) : 2))
+const amount = computed(() => entryToMinor(entry.value, digits.value))
 const separator = computed(() => decimalSeparator(locale.value))
 const amountText = computed(
   () => `${kind.value === 'expense' ? '−' : '+'}${formatEntry(entry.value, locale.value, currency.value)}`,
@@ -64,6 +74,10 @@ watch(
   { immediate: true },
 )
 
+watch(digits, (value) => {
+  entry.value = fitEntry(entry.value, value)
+})
+
 const isValidated = (field: Field): field is ValidatedField => field !== 'date'
 
 const errorsOf = (field: Field) => [
@@ -74,7 +88,7 @@ const errorsOf = (field: Field) => [
 const invalid = (field: Field) => errorsOf(field).length > 0
 
 function press(key: KeypadKey) {
-  entry.value = pressKey(entry.value, key)
+  entry.value = pressKey(entry.value, key, digits.value)
   server.clear('amount')
 }
 
@@ -280,7 +294,7 @@ async function save() {
           </p>
         </div>
       </div>
-      <QuickAddKeypad class="mt-auto" :decimal-separator="separator" @press="press" />
+      <QuickAddKeypad class="mt-auto" :decimal-separator="separator" :allow-decimal="digits > 0" @press="press" />
       <Button
         :label="t('shared.actions.save')"
         class="min-h-13 w-full text-[15px]"

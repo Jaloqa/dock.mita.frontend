@@ -5,7 +5,8 @@ import { useAccounts } from '~/shared/accounts/useAccounts'
 import { type CategoryKind, categoryKinds, type TransactionDto, type TransactionInput } from '~/shared/api/contract'
 import { categorySwatchClass } from '~/shared/categories/colors'
 import { useCategories } from '~/shared/categories/useCategories'
-import { convertMinor, currencies, fromMinor, toMinor } from '~/shared/money/money'
+import { BASE_CURRENCIES, currencyDigits } from '~/shared/money/currencies'
+import { convertMinor, fromMinor, toMinor } from '~/shared/money/money'
 import { addDaysIso, fromLocalDate, todayIso, toLocalDate } from '~/shared/period/period'
 import { useRates } from '~/shared/rates/useRates'
 import { type TransactionForm, transactionRules } from '../schemas/transactionSchema'
@@ -72,7 +73,11 @@ const noAccounts = computed(
 )
 
 const v$ = useVuelidate(
-  transactionRules(t, { crossCurrency: () => crossCurrency.value, maxDate: () => maxDate.value }),
+  transactionRules(t, {
+    crossCurrency: () => crossCurrency.value,
+    maxDate: () => maxDate.value,
+    currency: () => form.currency,
+  }),
   form,
 )
 
@@ -95,9 +100,8 @@ const accountAmountText = computed(() => {
   const target = account.value
   if (!crossCurrency.value || !target || form.amount === null || form.amount <= 0) return undefined
   if (form.rate === null || form.rate <= 0) return undefined
-  return t('transactions.dialog.accountAmount', {
-    amount: format(convertMinor(toMinor(form.amount), form.rate), target.currency),
-  })
+  const amount = convertMinor(toMinor(form.amount, form.currency), form.rate, form.currency, target.currency)
+  return t('transactions.dialog.accountAmount', { amount: format(amount, target.currency) })
 })
 
 watch(suggestedRate, (rate) => {
@@ -145,7 +149,7 @@ async function reset() {
     transaction
       ? {
           kind,
-          amount: fromMinor(transaction.amount),
+          amount: fromMinor(transaction.amount, transaction.currency),
           currency: transaction.currency,
           rate: transaction.rate,
           categoryId: transaction.categoryId,
@@ -242,7 +246,7 @@ async function submit() {
     title: form.title.trim(),
     categoryId: form.categoryId as string,
     accountId: form.accountId as string,
-    amount: toMinor(form.amount ?? 0),
+    amount: toMinor(form.amount ?? 0, form.currency),
     currency: form.currency,
     ...(crossCurrency.value && form.rate !== null ? { rate: form.rate } : {}),
     ...(note ? { note } : {}),
@@ -317,8 +321,8 @@ function confirmDelete() {
               mode="currency"
               :currency="form.currency"
               :locale="locale"
-              :min-fraction-digits="2"
-              :max-fraction-digits="2"
+              :min-fraction-digits="currencyDigits(form.currency)"
+              :max-fraction-digits="currencyDigits(form.currency)"
               :min="0"
               :invalid="invalid"
               :pt="{ pcInputText: { root: { 'aria-describedby': describedBy, 'aria-invalid': invalid || undefined } } }"
@@ -333,7 +337,7 @@ function confirmDelete() {
             <Select
               v-model="form.currency"
               input-id="transaction-currency"
-              :options="[...currencies]"
+              :options="[...BASE_CURRENCIES]"
               :invalid="invalid"
               :aria-labelledby="labelId"
               :pt="{ label: { 'aria-describedby': describedBy, 'aria-invalid': invalid || undefined } }"
@@ -372,7 +376,7 @@ function confirmDelete() {
             input-id="transaction-rate"
             :locale="locale"
             :min-fraction-digits="2"
-            :max-fraction-digits="6"
+            :max-fraction-digits="12"
             :min="0"
             :invalid="invalid"
             :pt="{ pcInputText: { root: { 'aria-describedby': describedBy, 'aria-invalid': invalid || undefined } } }"

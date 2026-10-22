@@ -17,7 +17,7 @@ import { paginate } from '../paginate'
 import type { MockRouter } from '../router'
 import { baseCurrencyOf } from '../transactions'
 import { AMOUNT_MAX, checkAccount, transferRow } from '../transfers'
-import { collectErrors, isMissing, objectBody } from '../validation'
+import { collectErrors, isManualRate, isMissing, objectBody } from '../validation'
 import { oneYearAhead } from './transfers'
 
 export const GOAL_NAME_MAX = 40
@@ -86,9 +86,7 @@ function recordContribution(
   else if (!isIsoDate(date)) errors.add('date', 'validation.invalidValue')
   else if (date > oneYearAhead(today)) errors.add('date', 'validation.dateTooFar')
   checkAmount(amount, 'amount', errors)
-  if (!isMissing(rate) && (typeof rate !== 'number' || !Number.isFinite(rate) || rate <= 0)) {
-    errors.add('rate', 'validation.invalidValue')
-  }
+  if (!isMissing(rate) && !isManualRate(rate)) errors.add('rate', 'validation.invalidValue')
   const linked =
     goal.accountId === null
       ? undefined

@@ -7,7 +7,7 @@ import {
   type TransactionSort,
   transactionSorts,
 } from '../../app/shared/api/contract'
-import type { Currency } from '../../app/shared/money/money'
+import { type Currency, currencyDigits, isCurrency } from '../../app/shared/money/currencies'
 import { isIsoDate, todayIso } from '../../app/shared/period/period'
 import { ownCategories } from '../categories'
 import type { AccountRow, CategoryRow, MockDb, MockState, TransactionRow } from '../db'
@@ -17,13 +17,13 @@ import { paginate } from '../paginate'
 import type { MockRouter } from '../router'
 import { parseTags, tagRefs, tagsError, upsertTags } from '../tags'
 import { baseAmountOf, baseCurrencyOf, priceTransaction, signed } from '../transactions'
-import { collectErrors, isCurrency, isMissing, objectBody } from '../validation'
+import { collectErrors, isManualRate, isMissing, objectBody } from '../validation'
 import { oneYearAhead } from './transfers'
 
 export const TRANSACTION_TITLE_MAX = 100
 export const TRANSACTION_NOTE_MAX = 200
 const MAX_AMOUNT = 100_000_000_000
-const AMOUNT_SEARCH = /^\d+(?:[.,]\d{0,2})?$/
+const AMOUNT_SEARCH = /^\d+(?:[.,]\d{0,3})?$/
 
 type Errors = ReturnType<typeof collectErrors>
 type Fields = Omit<TransactionRow, 'id' | 'userId' | 'tagIds'>
@@ -99,9 +99,7 @@ function validateTransaction(
   } else if ((amount as number) <= 0) errors.add('amount', 'validation.positiveAmount')
   if (isMissing(currency)) errors.add('currency', 'validation.required')
   else if (!isCurrency(currency)) errors.add('currency', 'validation.invalidValue')
-  if (!isMissing(rate) && (typeof rate !== 'number' || !Number.isFinite(rate) || rate <= 0)) {
-    errors.add('rate', 'validation.invalidValue')
-  }
+  if (!isMissing(rate) && !isManualRate(rate)) errors.add('rate', 'validation.invalidValue')
   const tagsProblem = tagsError(tags)
   if (tagsProblem !== undefined) errors.add('tags', tagsProblem)
   errors.throwIfAny()
@@ -161,6 +159,13 @@ function readFilters(query: Record<string, string>): Filters {
   }
 }
 
+function writtenAmount(amount: number, currency: Currency): string {
+  const digits = currencyDigits(currency)
+  if (digits === 0) return String(amount)
+  const unit = 10 ** digits
+  return `${Math.trunc(amount / unit)}.${String(amount % unit).padStart(digits, '0')}`
+}
+
 function matchesSearch(
   row: TransactionRow,
   search: string,
@@ -169,7 +174,7 @@ function matchesSearch(
 ): boolean {
   if ([row.title, row.note ?? '', categoryName, ...tagNames].some((text) => text.toLocaleLowerCase().includes(search)))
     return true
-  return AMOUNT_SEARCH.test(search) && (row.amount / 100).toFixed(2).startsWith(search.replace(',', '.'))
+  return AMOUNT_SEARCH.test(search) && writtenAmount(row.amount, row.currency).startsWith(search.replace(',', '.'))
 }
 
 const matches = (row: TransactionRow, filters: Filters, categoryName: string, tagNames: readonly string[]): boolean =>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { GoalDto } from '~/shared/api/contract'
+import { currencyDigits } from '~/shared/money/currencies'
 import { type Currency, fromMinor } from '~/shared/money/money'
 import { goalHint, savedShare } from '../utils/goalView'
 
@@ -19,13 +20,14 @@ const deadline = computed(() =>
 const saved = computed(() => format(props.goal.saved, props.currency))
 const target = computed(() => format(props.goal.target, props.currency))
 const wholeDigits = (minor: number) => {
-  const digits = minor % 100 === 0 ? 0 : 2
+  const fraction = currencyDigits(props.currency)
+  const digits = minor % 10 ** fraction === 0 ? 0 : fraction
   return { minimumFractionDigits: digits, maximumFractionDigits: digits }
 }
 const compactAmounts = computed(() =>
   t('goals.card.amounts', {
-    saved: n(fromMinor(props.goal.saved), wholeDigits(props.goal.saved)),
-    target: n(fromMinor(props.goal.target), {
+    saved: n(fromMinor(props.goal.saved, props.currency), wholeDigits(props.goal.saved)),
+    target: n(fromMinor(props.goal.target, props.currency), {
       key: 'currency',
       currency: props.currency,
       ...wholeDigits(props.goal.target),

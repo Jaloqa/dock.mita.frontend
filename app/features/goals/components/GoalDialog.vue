@@ -2,6 +2,7 @@
 import { useVuelidate } from '@vuelidate/core'
 import { useAccounts } from '~/shared/accounts/useAccounts'
 import type { GoalDto, GoalInput } from '~/shared/api/contract'
+import { currencyDigits } from '~/shared/money/currencies'
 import { type Currency, fromMinor, toMinor } from '~/shared/money/money'
 import { todayIso } from '~/shared/period/period'
 import { GOAL_DEADLINE_MAX_MONTHS, GOAL_TARGET_MAX, type GoalForm, goalRules } from '../schemas/goalSchema'
@@ -49,7 +50,7 @@ function reset() {
     goal
       ? {
           name: goal.name,
-          target: fromMinor(goal.target),
+          target: fromMinor(goal.target, props.currency),
           deadline: goal.deadline ? dateOfMonthKey(goal.deadline) : null,
           accountId: goal.accountId,
         }
@@ -101,7 +102,7 @@ async function submit() {
   }
   const input: GoalInput = {
     name: form.name.trim(),
-    target: toMinor(form.target ?? 0),
+    target: toMinor(form.target ?? 0, props.currency),
     deadline: form.deadline ? monthKeyOfDate(form.deadline) : null,
     accountId: form.accountId,
   }
@@ -169,8 +170,8 @@ function confirmDelete() {
             mode="currency"
             :currency="currency"
             :locale="locale"
-            :min-fraction-digits="2"
-            :max-fraction-digits="2"
+            :min-fraction-digits="currencyDigits(currency)"
+            :max-fraction-digits="currencyDigits(currency)"
             :max="GOAL_TARGET_MAX"
             :invalid="invalid"
             :pt="{ pcInputText: { root: { 'aria-describedby': describedBy, 'aria-invalid': invalid || undefined } } }"

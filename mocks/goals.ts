@@ -40,7 +40,7 @@ export function monthsBefore(iso: string, months: number): string {
 }
 
 export const amountIn = (state: MockState, amount: number, from: Currency, to: Currency, date: string): number =>
-  from === to ? amount : convertMinor(amount, rateOn(state.rates, date, from, to))
+  from === to ? amount : convertMinor(amount, rateOn(state.rates, date, from, to), from, to)
 
 export function rebaseGoal(state: MockState, row: GoalRow, base: Currency, today: string): void {
   if (row.currency === base) return

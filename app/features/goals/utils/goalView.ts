@@ -1,5 +1,5 @@
 import type { AccountDto, GoalDto } from '../../../shared/api/contract'
-import { convertMinor, toMinor } from '../../../shared/money/money'
+import { type Currency, convertMinor, toMinor } from '../../../shared/money/money'
 
 export type GoalHint = { key: string; amount: number | null }
 
@@ -26,7 +26,12 @@ export const linkableAccounts = (accounts: readonly AccountDto[], currentId: str
 export const contributionSources = (accounts: readonly AccountDto[], linkedId: string | null): AccountDto[] =>
   accounts.filter((account) => !account.archived && account.id !== linkedId)
 
-export function receivedAmount(amount: number | null, rate: number | null): number | undefined {
+export function receivedAmount(
+  amount: number | null,
+  rate: number | null,
+  from: Currency,
+  to: Currency,
+): number | undefined {
   if (amount === null || amount <= 0 || rate === null || rate <= 0) return undefined
-  return convertMinor(toMinor(amount), rate)
+  return convertMinor(toMinor(amount, from), rate, from, to)
 }

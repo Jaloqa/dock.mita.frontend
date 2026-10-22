@@ -13,5 +13,5 @@ export function toBaseAmount(
   rates: readonly RateDto[],
 ): number | undefined {
   const rate = rateFrom(rates, from, base)
-  return rate === undefined ? undefined : convertMinor(minor, rate)
+  return rate === undefined ? undefined : convertMinor(minor, rate, from, base)
 }

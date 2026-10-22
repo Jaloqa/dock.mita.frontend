@@ -1,4 +1,4 @@
-import type { Currency } from '../money/money'
+import type { BaseCurrency, Currency } from '../money/currencies'
 import type { MonthStart } from '../period/period'
 
 export type Locale = 'en' | 'pl' | 'ru' | 'uk'
@@ -27,7 +27,7 @@ export type LoginRequest = { email: string; password: string }
 export type DeleteAccountRequest = { password: string }
 
 export type SettingsDto = {
-  baseCurrency: Currency
+  baseCurrency: BaseCurrency
   locale: Locale
   monthStartDay: MonthStart
   theme: ThemePreference

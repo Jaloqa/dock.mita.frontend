@@ -76,7 +76,9 @@ export function demoTransfers(
   const currencyOf = (id: string) => accounts.find((account) => account.id === id)?.currency ?? 'PLN'
   return planned.map((plan, index) => {
     const date = addDaysIso(today, -plan.daysAgo)
-    const rate = rateOn(rates, date, currencyOf(plan.from), currencyOf(plan.to))
+    const from = currencyOf(plan.from)
+    const to = currencyOf(plan.to)
+    const rate = rateOn(rates, date, from, to)
     return {
       id: `trf_seed_${index + 1}`,
       userId: plan.userId,
@@ -84,7 +86,7 @@ export function demoTransfers(
       fromAccountId: plan.from,
       toAccountId: plan.to,
       fromAmount: plan.amount,
-      toAmount: convertMinor(plan.amount, rate),
+      toAmount: convertMinor(plan.amount, rate, from, to),
       rate,
       note: plan.note ?? null,
     }

@@ -1,15 +1,12 @@
 import { describe, expect, it } from 'bun:test'
-import {
-  CONTRIBUTION_AMOUNT_MAX,
-  contributionRules,
-  requiredWhen,
-} from '../../../../app/features/goals/schemas/contributionSchema'
+import { contributionRules, requiredWhen } from '../../../../app/features/goals/schemas/contributionSchema'
 import {
   GOAL_NAME_MAX,
   GOAL_TARGET_MAX,
   goalRules,
   isDeadlineAllowed,
 } from '../../../../app/features/goals/schemas/goalSchema'
+import { type Currency, MANUAL_RATE_MAX } from '../../../../app/shared/money/currencies'
 
 type Rule = { $validator: unknown; $message?: unknown }
 
@@ -59,7 +56,11 @@ describe('contribution form rules', () => {
   it('requires the source account only for a linked goal and a rate only across currencies', () => {
     let linked = false
     let crossCurrency = false
-    const rules = contributionRules((key) => key, { linked: () => linked, crossCurrency: () => crossCurrency })
+    const rules = contributionRules((key) => key, {
+      linked: () => linked,
+      crossCurrency: () => crossCurrency,
+      currency: () => 'PLN',
+    })
     expect(validate(rules.fromAccountId.required, null)).toBe(true)
     linked = true
     expect(validate(rules.fromAccountId.required, null)).toBe(false)
@@ -69,13 +70,27 @@ describe('contribution form rules', () => {
     expect(validate(rules.rate.required, null)).toBe(false)
     expect(validate(rules.rate.positive, 0)).toBe(false)
     expect(validate(rules.rate.positive, 4.27)).toBe(true)
+    expect(validate(rules.rate.max, MANUAL_RATE_MAX)).toBe(true)
+    expect(validate(rules.rate.max, MANUAL_RATE_MAX + 1)).toBe(false)
+    expect(message(rules.rate.max)).toBe('validation.invalidValue')
   })
 
-  it('requires a positive amount up to the maximum and a date', () => {
-    const rules = contributionRules((key) => key, { linked: () => false, crossCurrency: () => false })
+  it('requires a positive amount up to the minor unit limit of its currency and a date', () => {
+    let currency: Currency = 'PLN'
+    const rules = contributionRules((key) => key, {
+      linked: () => false,
+      crossCurrency: () => false,
+      currency: () => currency,
+    })
     expect(validate(rules.amount.required, null)).toBe(false)
     expect(validate(rules.amount.positive, 0)).toBe(false)
-    expect(validate(rules.amount.max, CONTRIBUTION_AMOUNT_MAX + 1)).toBe(false)
+    expect(validate(rules.amount.max, 1_000_000_000)).toBe(true)
+    expect(validate(rules.amount.max, 1_000_000_000.01)).toBe(false)
+    currency = 'JPY'
+    expect(validate(rules.amount.max, 100_000_000_000)).toBe(true)
+    currency = 'KWD'
+    expect(validate(rules.amount.max, 100_000_000.001)).toBe(false)
+    expect(message(rules.amount.max)).toBe('validation.invalidValue')
     expect(validate(rules.date.required, null)).toBe(false)
     expect(validate(rules.date.required, new Date(2026, 9, 16))).toBe(true)
     expect(message(rules.fromAccountId.required)).toBe('validation.required')

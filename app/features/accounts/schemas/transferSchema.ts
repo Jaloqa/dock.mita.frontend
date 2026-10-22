@@ -1,4 +1,6 @@
-import { helpers, maxLength, minValue, required, requiredIf } from '@vuelidate/validators'
+import { helpers, maxLength, required, requiredIf } from '@vuelidate/validators'
+import type { Currency } from '../../../shared/money/currencies'
+import { withinAmountLimit, withinRateLimit } from '../../../shared/money/money'
 
 export const TRANSFER_NOTE_MAX = 200
 
@@ -21,8 +23,13 @@ export const differentFrom =
 export const isPositiveOrEmpty = (value: unknown): boolean =>
   value === null || value === undefined || (typeof value === 'number' && value > 0)
 
-export const transferRules = (t: Translate, form: TransferForm, crossCurrency: () => boolean) => {
+export const transferRules = (
+  t: Translate,
+  form: TransferForm,
+  options: { crossCurrency: () => boolean; currency: () => Currency },
+) => {
   const requiredField = helpers.withMessage(() => t('validation.required'), required)
+  const invalidValue = () => t('validation.invalidValue')
   return {
     fromAccountId: { required: requiredField },
     toAccountId: {
@@ -34,12 +41,14 @@ export const transferRules = (t: Translate, form: TransferForm, crossCurrency: (
     },
     amount: {
       required: requiredField,
-      positive: helpers.withMessage(() => t('validation.positiveAmount'), minValue(0.01)),
+      positive: helpers.withMessage(() => t('validation.positiveAmount'), isPositiveOrEmpty),
+      max: helpers.withMessage(invalidValue, withinAmountLimit(options.currency)),
     },
     date: { required: requiredField },
     rate: {
-      required: helpers.withMessage(() => t('validation.required'), requiredIf(crossCurrency)),
+      required: helpers.withMessage(() => t('validation.required'), requiredIf(options.crossCurrency)),
       positive: helpers.withMessage(() => t('validation.positiveAmount'), isPositiveOrEmpty),
+      max: helpers.withMessage(invalidValue, withinRateLimit),
     },
     note: { maxLength: helpers.withMessage(() => t('validation.noteTooLong'), maxLength(TRANSFER_NOTE_MAX)) },
   }

@@ -1,7 +1,5 @@
-import type { Currency } from '../app/shared/money/money'
+import { type Currency, roundRate } from '../app/shared/money/money'
 import type { RateRow } from './db'
-
-export const roundRate = (value: number): number => Math.round(value * 1e6) / 1e6
 
 function plnValue(rows: readonly RateRow[], date: string, currency: Currency): number | undefined {
   if (currency === 'PLN') return 1

@@ -1,9 +1,9 @@
-import type { Currency } from '../../app/shared/money/money'
+import type { BaseCurrency } from '../../app/shared/money/currencies'
+import { roundRate } from '../../app/shared/money/money'
 import { addDaysIso } from '../../app/shared/period/period'
 import type { RateRow } from '../db'
-import { roundRate } from '../rates'
 
-type Quoted = Exclude<Currency, 'PLN'>
+type Quoted = Exclude<BaseCurrency, 'PLN'>
 
 const quoted: readonly Quoted[] = ['EUR', 'USD', 'UAH']
 const level: Record<Quoted, number> = { EUR: 4.27, USD: 3.93, UAH: 0.0952 }

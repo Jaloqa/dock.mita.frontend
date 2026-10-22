@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import type { AccountDto, CategoryDto, Page, TransactionDto, TransactionPage } from '../../../app/shared/api/contract'
+import { MANUAL_RATE_MAX } from '../../../app/shared/money/currencies'
 import { convertMinor } from '../../../app/shared/money/money'
 import { addDaysIso, todayIso } from '../../../app/shared/period/period'
 import type { MockApi } from '../../../mocks/api'
@@ -98,8 +99,8 @@ describe('transactions', () => {
       currency: 'EUR',
       amount: 5_000,
       rate,
-      accountAmount: convertMinor(5_000, rate),
-      baseAmount: convertMinor(5_000, rate),
+      accountAmount: convertMinor(5_000, rate, 'EUR', 'PLN'),
+      baseAmount: convertMinor(5_000, rate, 'EUR', 'PLN'),
     })
     expect(await create(mock, { ...body, rate: 4.5 })).toMatchObject({
       rate: 4.5,
@@ -117,8 +118,37 @@ describe('transactions', () => {
     const usdEur = rateOn(mock.db.state.rates, today, 'USD', 'EUR')
     const eurPln = rateOn(mock.db.state.rates, today, 'EUR', 'PLN')
     const created = await create(mock, { ...lidl, accountId: 'acc_anna_eur', currency: 'USD', amount: 10_000 })
-    const accountAmount = convertMinor(10_000, usdEur)
-    expect(created).toMatchObject({ rate: usdEur, accountAmount, baseAmount: convertMinor(accountAmount, eurPln) })
+    const accountAmount = convertMinor(10_000, usdEur, 'USD', 'EUR')
+    expect(created).toMatchObject({
+      rate: usdEur,
+      accountAmount,
+      baseAmount: convertMinor(accountAmount, eurPln, 'EUR', 'PLN'),
+    })
+  })
+
+  it('prices a JPY expense on a PLN account by the minor units of both currencies', async () => {
+    const mock = api()
+    mock.db.state.rates.push({ date: today, from: 'JPY', to: 'PLN', value: 0.024764 })
+    expect(await create(mock, { ...lidl, currency: 'JPY', amount: 1_500 })).toMatchObject({
+      currency: 'JPY',
+      amount: 1_500,
+      rate: 0.024764,
+      accountAmount: 3_715,
+      baseAmount: 3_715,
+    })
+  })
+
+  it('rounds a manual rate like the backend and refuses one above the maximum', async () => {
+    const mock = api()
+    const body = { ...lidl, currency: 'EUR', amount: 1_000 }
+    expect(await create(mock, { ...body, rate: 4.25634949 })).toMatchObject({ rate: 4.256349, accountAmount: 4_256 })
+    expect(await failure(create(mock, { ...body, rate: MANUAL_RATE_MAX + 1 }))).toMatchObject(
+      field('rate', 'validation.invalidValue'),
+    )
+    expect(await create(mock, { ...body, amount: 1, rate: MANUAL_RATE_MAX })).toMatchObject({
+      rate: MANUAL_RATE_MAX,
+      accountAmount: 1_000_000_000,
+    })
   })
 
   it('keeps stored amounts when rates change later', async () => {
@@ -139,7 +169,7 @@ describe('transactions', () => {
     if (!settings) throw new Error('seed has no settings for Anna')
     settings.baseCurrency = 'EUR'
     const page = await list(mock)
-    const expected = convertMinor(14_230, rateOn(mock.db.state.rates, today, 'PLN', 'EUR'))
+    const expected = convertMinor(14_230, rateOn(mock.db.state.rates, today, 'PLN', 'EUR'), 'PLN', 'EUR')
     expect(page).toMatchObject({ currency: 'EUR', sum: -expected })
     expect(page.items[0]?.baseAmount).toBe(expected)
   })
@@ -166,7 +196,7 @@ describe('transactions', () => {
           kind: 'transfer',
           date: '2026-02-30',
           amount: 0,
-          currency: 'GBP',
+          currency: 'XDR',
           rate: -1,
           title: 'x'.repeat(101),
           note: 'y'.repeat(201),
@@ -302,6 +332,7 @@ describe('transactions', () => {
     expect(await titles(mock, { search: 'kawiar' })).toEqual([''])
     expect(await titles(mock, { search: '24,6' })).toEqual(['Żabka'])
     expect(await titles(mock, { search: '7400' })).toEqual(['Pensja'])
+    expect(await titles(mock, { search: '24,600' })).toEqual([])
     expect(
       await failure(list(mock, { kind: 'transfer', from: 'yesterday', to: '2026-13-01', sort: 'title' })),
     ).toMatchObject({
@@ -315,6 +346,25 @@ describe('transactions', () => {
         },
       },
     })
+  })
+
+  it('searches an amount written with the fraction digits of its currency', async () => {
+    const mock = api()
+    mock.db.state.rates.push(
+      { date: today, from: 'JPY', to: 'PLN', value: 0.024764 },
+      { date: today, from: 'KWD', to: 'PLN', value: 12.6221 },
+    )
+    await create(mock, { ...lidl, title: 'yen', currency: 'JPY', amount: 1_500 })
+    await create(mock, { ...lidl, title: 'dinar', currency: 'KWD', amount: 12_500 })
+    await create(mock, { ...lidl, title: 'zloty', amount: 1_250 })
+    await create(mock, { ...lidl, title: 'big zloty', amount: 12_500 })
+    expect(await titles(mock, { search: '15' })).toEqual(['yen'])
+    expect(await titles(mock, { search: '1500' })).toEqual(['yen'])
+    expect(await titles(mock, { search: '1500.' })).toEqual([])
+    expect(await titles(mock, { search: '12.5' })).toEqual(['zloty', 'dinar'])
+    expect(await titles(mock, { search: '12,500' })).toEqual(['dinar'])
+    expect(await titles(mock, { search: '12.5000' })).toEqual([])
+    expect(await titles(mock, { search: '125.00' })).toEqual(['big zloty'])
   })
 
   it('sorts by date or by the amount in the base currency', async () => {

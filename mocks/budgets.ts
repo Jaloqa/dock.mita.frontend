@@ -19,7 +19,9 @@ export const monthStartOf = (state: MockState, userId: string): MonthStart =>
   state.settings.find((row) => row.userId === userId)?.monthStartDay ?? 1
 
 export const limitIn = (state: MockState, row: BudgetRow, base: Currency, period: Period): number =>
-  row.currency === base ? row.limit : convertMinor(row.limit, rateOn(state.rates, period.from, row.currency, base))
+  row.currency === base
+    ? row.limit
+    : convertMinor(row.limit, rateOn(state.rates, period.from, row.currency, base), row.currency, base)
 
 export function spentByCategory(
   state: MockState,

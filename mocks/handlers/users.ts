@@ -8,7 +8,7 @@ import {
   type UpdateMeRequest,
   type UserDto,
 } from '../../app/shared/api/contract'
-import { type Currency, currencies } from '../../app/shared/money/money'
+import { type BaseCurrency, isBaseCurrency } from '../../app/shared/money/currencies'
 import type { MonthStart } from '../../app/shared/period/period'
 import type { MockDb, SettingsRow } from '../db'
 import { badRequest, notFound } from '../errors'
@@ -37,7 +37,7 @@ function validateSettings(body: unknown): SettingsDto {
     if (input[field] === undefined || input[field] === null) errors[field] = ['validation.required']
     else if (!valid) errors[field] = ['validation.invalidValue']
   }
-  check('baseCurrency', currencies.includes(input.baseCurrency as Currency))
+  check('baseCurrency', isBaseCurrency(input.baseCurrency))
   check('locale', locales.includes(input.locale as Locale))
   check('monthStartDay', isMonthStart(input.monthStartDay))
   check('theme', themePreferences.includes(input.theme as ThemePreference))
@@ -45,7 +45,7 @@ function validateSettings(body: unknown): SettingsDto {
   if (Object.keys(errors).length > 0) badRequest(errors)
   const notifications = input.notifications as NotificationPrefs
   return {
-    baseCurrency: input.baseCurrency as Currency,
+    baseCurrency: input.baseCurrency as BaseCurrency,
     locale: input.locale as Locale,
     monthStartDay: input.monthStartDay as MonthStart,
     theme: input.theme as ThemePreference,

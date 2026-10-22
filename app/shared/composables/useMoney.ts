@@ -1,3 +1,4 @@
+import { currencyFormat } from '~/shared/money/format'
 import { type Currency, fromMinor } from '~/shared/money/money'
 
 export function useMoney() {
@@ -5,6 +6,10 @@ export function useMoney() {
 
   return {
     format: (minor: number, currency: Currency, options?: { signed?: boolean }) =>
-      n(fromMinor(minor), { key: 'currency', currency, signDisplay: options?.signed ? 'exceptZero' : 'auto' }),
+      n(fromMinor(minor, currency), {
+        key: 'currency',
+        ...currencyFormat(currency),
+        signDisplay: options?.signed ? 'exceptZero' : 'auto',
+      }),
   }
 }

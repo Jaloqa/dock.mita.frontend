@@ -2,11 +2,22 @@ import { describe, expect, it } from 'bun:test'
 import {
   currencyLabel,
   currencyOptions,
+  currencySymbol,
   MONTH_START_DAYS,
   monthStartOptions,
 } from '../../../../app/features/settings/utils/options'
+import { BASE_CURRENCIES } from '../../../../app/shared/money/currencies'
 
 describe('settings options', () => {
+  it('offers only the base currencies as the base currency', () => {
+    expect(currencyOptions('en').map((option) => option.value)).toEqual([...BASE_CURRENCIES])
+  })
+
+  it('finds the narrow symbol of any currency', () => {
+    expect(currencySymbol('JPY', 'en')).toBe('¥')
+    expect(currencySymbol('PLN', 'pl')).toBe('zł')
+  })
+
   it('labels currencies with their code and narrow symbol', () => {
     expect(currencyOptions('en')).toEqual([
       { value: 'PLN', label: 'PLN — zł' },

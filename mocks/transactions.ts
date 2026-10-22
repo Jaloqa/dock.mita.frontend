@@ -1,7 +1,7 @@
-import { type Currency, convertMinor } from '../app/shared/money/money'
+import { type Currency, convertMinor, roundRate } from '../app/shared/money/money'
 import type { Period } from '../app/shared/period/period'
 import type { MockState, RateRow, TransactionRow } from './db'
-import { rateOn, roundRate } from './rates'
+import { rateOn } from './rates'
 
 export type PriceInput = {
   date: string
@@ -21,11 +21,16 @@ export function priceTransaction(rates: readonly RateRow[], input: PriceInput): 
       : input.rate !== undefined
         ? roundRate(input.rate)
         : rateOn(rates, input.date, input.currency, input.accountCurrency)
-  const accountAmount = convertMinor(input.amount, rate)
+  const accountAmount = convertMinor(input.amount, rate, input.currency, input.accountCurrency)
   const baseAmount =
     input.currency === input.baseCurrency
       ? input.amount
-      : convertMinor(accountAmount, rateOn(rates, input.date, input.accountCurrency, input.baseCurrency))
+      : convertMinor(
+          accountAmount,
+          rateOn(rates, input.date, input.accountCurrency, input.baseCurrency),
+          input.accountCurrency,
+          input.baseCurrency,
+        )
   return {
     rate,
     accountAmount,
@@ -41,7 +46,12 @@ export const baseCurrencyOf = (state: MockState, userId: string): Currency =>
 export function baseAmountOf(state: MockState, row: TransactionRow, base: Currency): number {
   if (row.baseCurrency === base) return row.baseAmount
   if (row.currency === base) return row.amount
-  return convertMinor(row.accountAmount, rateOn(state.rates, row.date, row.accountCurrency, base))
+  return convertMinor(
+    row.accountAmount,
+    rateOn(state.rates, row.date, row.accountCurrency, base),
+    row.accountCurrency,
+    base,
+  )
 }
 
 export const signed = (row: Pick<TransactionRow, 'kind'>, amount: number): number =>
