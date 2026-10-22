@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" role="img" aria-label="Mita">
+  <style>
+  .ink {
+    stroke: #25282f;
+  }
+  .rose {
+    stroke: #c43f73;
+  }
+  @media (prefers-color-scheme: dark) {
+    .ink {
+      stroke: #eef0f3;
+    }
+    .rose {
+      stroke: #e8679a;
+    }
+  }
+  </style>
+  <path d="M14 9.1L34 14.7" class="ink" stroke-width="4.5" stroke-linecap="round" />
+  <path d="M13 20.1L35 26.3" class="ink" stroke-width="4.5" stroke-linecap="round" />
+  <path d="M10 31.1L38 38.9" class="rose" stroke-width="4.5" stroke-linecap="round" />
+</svg>
