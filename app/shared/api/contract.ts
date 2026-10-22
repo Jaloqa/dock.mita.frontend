@@ -267,7 +267,9 @@ export type OverviewTransactionDto = {
   kind: CategoryKind
   date: string
   title: string
+  categoryId: string
   categoryName: string
+  categoryColor: CategoryColor
   accountName: string
   amount: number
 }

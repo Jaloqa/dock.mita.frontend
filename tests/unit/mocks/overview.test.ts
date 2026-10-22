@@ -268,7 +268,9 @@ describe('overview', () => {
       kind: 'expense',
       date: today,
       title: 't8',
+      categoryId: expect.any(String),
       categoryName: 'Spożywcze',
+      categoryColor: expect.stringMatching(/^chart-[1-6]$/),
       accountName: 'Konto główne',
       amount: 8_000,
     })

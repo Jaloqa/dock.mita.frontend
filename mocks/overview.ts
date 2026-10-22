@@ -25,7 +25,7 @@ export type DateRange = Pick<Period, 'from' | 'to'>
 
 export type RangePair = { current: DateRange; previous: DateRange }
 
-type Categories = ReadonlyMap<string, Pick<CategoryRow, 'name' | 'system'>>
+type Categories = ReadonlyMap<string, Pick<CategoryRow, 'name' | 'color' | 'system'>>
 
 type KindTotal = { amount: number; count: number }
 
@@ -138,7 +138,9 @@ export function overviewOf(db: MockDb, userId: string, range: OverviewRange, tod
     kind: row.kind,
     date: row.date,
     title: row.title,
+    categoryId: row.categoryId,
     categoryName: categories.get(row.categoryId)?.name ?? '',
+    categoryColor: categories.get(row.categoryId)?.color ?? 'chart-5',
     accountName: accountNames.get(row.accountId) ?? '',
     amount: baseAmountOf(state, row, base),
   })

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { OverviewTransactionDto } from '~/shared/api/contract'
+import { categorySwatchClass } from '~/shared/categories/colors'
 import type { Currency } from '~/shared/money/money'
 import { dayLabelOf, initialOf } from '../utils/overviewView'
 
@@ -37,7 +38,14 @@ const metaOf = (item: OverviewTransactionDto) =>
       </span>
       <div class="flex min-w-0 flex-auto flex-col gap-0.5">
         <span class="truncate text-sm font-medium">{{ titleOf(item) }}</span>
-        <span class="truncate text-xs text-muted">{{ metaOf(item) }}</span>
+        <span class="flex min-w-0 items-center gap-1.5 text-xs text-muted">
+          <span
+            class="size-2 shrink-0 rounded-full"
+            :class="categorySwatchClass(item.categoryColor)"
+            aria-hidden="true"
+          />
+          <span class="truncate">{{ metaOf(item) }}</span>
+        </span>
       </div>
       <MoneyText
         class="text-sm"
