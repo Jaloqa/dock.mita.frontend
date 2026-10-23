@@ -13,6 +13,7 @@ export type DataChange =
   | 'goals'
   | 'goalContributions'
   | 'debts'
+  | 'groups'
 
 export const invalidationMap: Record<DataChange, readonly QueryKey[]> = {
   settings: [['overview'], ['budgets'], ['reports'], ['transactions'], ['accounts'], ['goals'], ['debts']],
@@ -27,6 +28,7 @@ export const invalidationMap: Record<DataChange, readonly QueryKey[]> = {
   goals: [['goals'], ['accounts'], ['overview']],
   goalContributions: [['goals'], ['accounts'], ['transfers'], ['overview']],
   debts: [['debts'], ['accounts'], ['overview']],
+  groups: [['groups']],
 }
 
 export async function invalidateAfter(queryClient: QueryClient, change: DataChange): Promise<void> {

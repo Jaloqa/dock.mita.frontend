@@ -681,6 +681,10 @@
       "label": "Narzędzia"
     },
     "entries": {
+      "groups": {
+        "title": "Grupy",
+        "description": "Wspólne wydatki ze znajomymi i kto komu jest winien"
+      },
       "debts": {
         "title": "Długi",
         "description": "Pieniądze pożyczone innym lub od innych oraz to, ile zostało do spłaty"
@@ -774,6 +778,52 @@
       "deleted": "Dług usunięty",
       "repaid": "Spłata zapisana",
       "repaymentDeleted": "Spłata usunięta"
+    }
+  },
+  "groups": {
+    "title": "Grupy",
+    "page": {
+      "title": "Grupa"
+    },
+    "list": {
+      "label": "Grupy"
+    },
+    "actions": {
+      "add": "Nowa grupa",
+      "addFirst": "Utwórz grupę",
+      "delete": "Usuń grupę"
+    },
+    "card": {
+      "members": "{count} uczestnik | {count} uczestnicy | {count} uczestników",
+      "spent": "Wydano"
+    },
+    "empty": {
+      "title": "Nie ma jeszcze grup"
+    },
+    "notFound": {
+      "title": "Ta grupa już nie istnieje.",
+      "back": "Wszystkie grupy"
+    },
+    "dialog": {
+      "createTitle": "Nowa grupa",
+      "editTitle": "Edycja grupy",
+      "name": "Nazwa",
+      "currency": "Waluta główna",
+      "currencyHint": "Sumy i salda są pokazywane w tej walucie.",
+      "currencyLocked": "Waluty głównej nie można zmienić, gdy grupa ma wpisy.",
+      "members": "Uczestnicy",
+      "member": "Uczestnik {number}",
+      "addMember": "Dodaj uczestnika",
+      "removeMember": "Usuń uczestnika {number}"
+    },
+    "confirm": {
+      "deleteTitle": "Usunąć grupę?",
+      "deleteMessage": "„{name}”, jej wydatki, spłaty i historia zostaną usunięte bezpowrotnie."
+    },
+    "toast": {
+      "created": "Grupa utworzona",
+      "updated": "Grupa zaktualizowana",
+      "deleted": "Grupa usunięta"
     }
   },
   "auth": {

@@ -681,6 +681,10 @@
       "label": "Tools"
     },
     "entries": {
+      "groups": {
+        "title": "Groups",
+        "description": "Shared expenses with friends and who owes whom"
+      },
       "debts": {
         "title": "Debts",
         "description": "Money you lent or borrowed, and what is left to repay"
@@ -774,6 +778,52 @@
       "deleted": "Debt deleted",
       "repaid": "Repayment saved",
       "repaymentDeleted": "Repayment deleted"
+    }
+  },
+  "groups": {
+    "title": "Groups",
+    "page": {
+      "title": "Group"
+    },
+    "list": {
+      "label": "Groups"
+    },
+    "actions": {
+      "add": "New group",
+      "addFirst": "Create a group",
+      "delete": "Delete group"
+    },
+    "card": {
+      "members": "{count} member | {count} members",
+      "spent": "Spent"
+    },
+    "empty": {
+      "title": "No groups yet"
+    },
+    "notFound": {
+      "title": "This group no longer exists.",
+      "back": "All groups"
+    },
+    "dialog": {
+      "createTitle": "New group",
+      "editTitle": "Edit group",
+      "name": "Name",
+      "currency": "Main currency",
+      "currencyHint": "Totals and balances are shown in this currency.",
+      "currencyLocked": "The main currency cannot change once the group has entries.",
+      "members": "Members",
+      "member": "Member {number}",
+      "addMember": "Add member",
+      "removeMember": "Remove member {number}"
+    },
+    "confirm": {
+      "deleteTitle": "Delete the group?",
+      "deleteMessage": "“{name}”, its expenses, repayments and history will be deleted for good."
+    },
+    "toast": {
+      "created": "Group created",
+      "updated": "Group updated",
+      "deleted": "Group deleted"
     }
   },
   "auth": {

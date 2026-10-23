@@ -7,6 +7,8 @@ export type IconName =
   | 'reports'
   | 'tools'
   | 'debts'
+  | 'groups'
+  | 'history'
   | 'settings'
   | 'plus'
   | 'calendar'
