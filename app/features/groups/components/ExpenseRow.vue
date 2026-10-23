@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import type { GroupDto, GroupExpenseDto } from '~/shared/api/contract'
-import { actorName, categoryLabel, memberName, splitSummary } from '../utils/groupView'
+import { actorName, categoryLabel, expenseTitle, memberName, splitSummary } from '../utils/groupView'
 
-const props = defineProps<{ group: GroupDto; expense: GroupExpenseDto }>()
-const emit = defineEmits<{ edit: [] }>()
+const props = defineProps<{ group: GroupDto; expense: GroupExpenseDto; restoring?: boolean }>()
+const emit = defineEmits<{ edit: []; history: []; restore: [] }>()
 const { t, d } = useI18n()
 const { format } = useMoney()
 
 const titleId = computed(() => `expense-${props.expense.id}-title`)
 const category = computed(() => categoryLabel(t, props.group, props.expense.categoryId))
-const title = computed(() => props.expense.description ?? category.value)
+const title = computed(() => expenseTitle(t, props.group, props.expense))
 const date = computed(() =>
   d(new Date(`${props.expense.date}T00:00:00Z`), { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }),
 )
@@ -21,9 +21,13 @@ const converted = computed(() =>
 )
 const split = computed(() => splitSummary(t, props.group, props.expense))
 const addedBy = computed(() => t('groups.expense.addedBy', { name: actorName(props.expense.createdBy) }))
-const editedBy = computed(() =>
-  props.expense.updatedBy ? t('groups.expense.editedBy', { name: actorName(props.expense.updatedBy) }) : undefined,
-)
+const changedBy = computed(() => {
+  const { updatedBy, deleted } = props.expense
+  if (!updatedBy) return undefined
+  return deleted
+    ? t('groups.history.actions.deleted', { name: actorName(updatedBy) })
+    : t('groups.expense.editedBy', { name: actorName(updatedBy) })
+})
 </script>
 
 <template>
@@ -40,16 +44,27 @@ const editedBy = computed(() =>
         <MoneyText :amount="expense.amount" :currency="expense.currency" tone="plain" class="text-sm" />
         <span v-if="converted" class="font-mono text-xs whitespace-nowrap text-muted">{{ converted }}</span>
       </div>
-      <Button
-        v-if="!expense.deleted"
-        severity="secondary"
-        text
-        class="-my-1.5 -mr-2 size-11 shrink-0"
-        :aria-label="t('groups.expense.edit', { title })"
-        @click="emit('edit')"
-      >
-        <AppIcon name="edit" />
-      </Button>
+      <div class="-my-1.5 -mr-2 flex shrink-0">
+        <Button
+          severity="secondary"
+          text
+          class="size-11"
+          :aria-label="t('groups.history.title', { title })"
+          @click="emit('history')"
+        >
+          <AppIcon name="history" />
+        </Button>
+        <Button
+          v-if="!expense.deleted"
+          severity="secondary"
+          text
+          class="size-11"
+          :aria-label="t('groups.expense.edit', { title })"
+          @click="emit('edit')"
+        >
+          <AppIcon name="edit" />
+        </Button>
+      </div>
     </div>
     <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
       <span>{{ category }}</span>
@@ -68,8 +83,21 @@ const editedBy = computed(() =>
         </li>
       </ul>
     </div>
-    <p class="m-0 text-xs text-muted">
-      {{ addedBy }}<template v-if="editedBy"> · {{ editedBy }}</template>
-    </p>
+    <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+      <p class="m-0 text-xs text-muted">
+        {{ addedBy }}<template v-if="changedBy"> · {{ changedBy }}</template>
+      </p>
+      <Button
+        v-if="expense.deleted"
+        :label="t('groups.history.restore')"
+        :aria-label="t('groups.history.restoreNamed', { title })"
+        :data-restore="expense.id"
+        severity="secondary"
+        outlined
+        class="min-h-11"
+        :disabled="restoring"
+        @click="emit('restore')"
+      />
+    </div>
   </article>
 </template>

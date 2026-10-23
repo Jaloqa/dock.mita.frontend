@@ -811,7 +811,7 @@
       "list": "Учасники",
       "empty": "Учасників поки немає.",
       "rename": "Перейменувати: {name}",
-      "renameField": "Ім’я учасника {name}",
+      "renameField": "Ім'я учасника {name}",
       "remove": "Прибрати: {name}",
       "inUse": "Є записи, тому можна лише перейменувати.",
       "newMember": "Новий учасник",
@@ -883,7 +883,7 @@
       "addCategory": "Додати",
       "tags": "Теги",
       "tagsPlaceholder": "Введіть, щоб додати тег",
-      "createTag": "+ “{name}”",
+      "createTag": "+ «{name}»",
       "removeTag": "Видалити тег {name}",
       "description": "Опис",
       "rate": "Курс обміну ({from} → {to})",
@@ -912,7 +912,8 @@
       "toast": {
         "created": "Витрату додано",
         "updated": "Витрату змінено",
-        "deleted": "Витрату видалено"
+        "deleted": "Витрату видалено",
+        "restored": "Витрату відновлено"
       }
     },
     "hints": {
@@ -925,13 +926,14 @@
       "members": "Баланс кожного учасника",
       "getsBack": "до отримання",
       "owes": "до сплати",
-      "settled": "у розрахунку",
+      "settled": "розраховано",
       "transfers": "Пропоновані перекази",
-      "pays": "{from} платить: {to}",
+      "pays": "{from} → {to}",
       "record": "Записати",
       "recordNamed": "Записати повернення: {from} → {to}",
       "settledUp": "Усі розрахувалися.",
-      "empty": "Учасників поки немає."
+      "empty": "Учасників поки немає.",
+      "viewFailed": "Не вдалося перерахувати баланси в {currency}. Їх показано в {main}."
     },
     "repayments": {
       "title": "Повернення",
@@ -968,7 +970,44 @@
       "toast": {
         "created": "Повернення збережено",
         "updated": "Повернення змінено",
-        "deleted": "Повернення видалено"
+        "deleted": "Повернення видалено",
+        "restored": "Повернення відновлено"
+      }
+    },
+    "history": {
+      "title": "Історія: {title}",
+      "events": "Зміни",
+      "actions": {
+        "created": "Додав(ла): {name}",
+        "updated": "Змінив(ла): {name}",
+        "deleted": "Видалив(ла): {name}",
+        "restored": "Відновив(ла): {name}"
+      },
+      "when": "{date}, {time}",
+      "change": "{label}: {before} → {after}",
+      "noChanges": "Видимих змін немає.",
+      "none": "немає",
+      "manualRate": "{rate} (власний)",
+      "showMore": "Показати ще",
+      "restore": "Відновити",
+      "restoreNamed": "Відновити: {title}",
+      "fields": {
+        "payer": "Хто заплатив",
+        "amount": "Сума",
+        "date": "Дата",
+        "category": "Категорія",
+        "tags": "Теги",
+        "description": "Опис",
+        "rate": "Курс обміну",
+        "split": "Розподіл",
+        "from": "Від кого",
+        "to": "Кому",
+        "note": "Нотатка"
+      },
+      "split": {
+        "everyone": "Порівну між усіма",
+        "some": "Порівну: {names}",
+        "exact": "Точні суми: {shares}"
       }
     }
   },

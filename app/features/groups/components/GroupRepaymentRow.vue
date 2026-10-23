@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import type { GroupDto, GroupRepaymentDto } from '~/shared/api/contract'
-import { actorName, memberName } from '../utils/groupView'
+import { actorName, memberName, repaymentTitle } from '../utils/groupView'
 
-const props = defineProps<{ group: GroupDto; repayment: GroupRepaymentDto }>()
-const emit = defineEmits<{ edit: [] }>()
+const props = defineProps<{ group: GroupDto; repayment: GroupRepaymentDto; restoring?: boolean }>()
+const emit = defineEmits<{ edit: []; history: []; restore: [] }>()
 const { t, d } = useI18n()
 const { format } = useMoney()
 
 const titleId = computed(() => `group-repayment-${props.repayment.id}-title`)
 const from = computed(() => memberName(props.group, props.repayment.fromMemberId))
 const to = computed(() => memberName(props.group, props.repayment.toMemberId))
-const title = computed(() => t('groups.repayment.title', { from: from.value, to: to.value }))
+const title = computed(() => repaymentTitle(t, props.group, props.repayment))
 const date = computed(() =>
   d(new Date(`${props.repayment.date}T00:00:00Z`), {
     day: 'numeric',
@@ -25,11 +25,13 @@ const converted = computed(() =>
     : t('groups.repayment.groupAmount', { amount: format(props.repayment.groupAmount, props.group.currency) }),
 )
 const addedBy = computed(() => t('groups.repayment.addedBy', { name: actorName(props.repayment.createdBy) }))
-const editedBy = computed(() =>
-  props.repayment.updatedBy
-    ? t('groups.repayment.editedBy', { name: actorName(props.repayment.updatedBy) })
-    : undefined,
-)
+const changedBy = computed(() => {
+  const { updatedBy, deleted } = props.repayment
+  if (!updatedBy) return undefined
+  return deleted
+    ? t('groups.history.actions.deleted', { name: actorName(updatedBy) })
+    : t('groups.repayment.editedBy', { name: actorName(updatedBy) })
+})
 </script>
 
 <template>
@@ -46,20 +48,44 @@ const editedBy = computed(() =>
         <MoneyText :amount="repayment.amount" :currency="repayment.currency" tone="plain" class="text-sm" />
         <span v-if="converted" class="font-mono text-xs whitespace-nowrap text-muted">{{ converted }}</span>
       </div>
-      <Button
-        v-if="!repayment.deleted"
-        severity="secondary"
-        text
-        class="-my-1.5 -mr-2 size-11 shrink-0"
-        :aria-label="t('groups.repayment.edit', { from, to })"
-        @click="emit('edit')"
-      >
-        <AppIcon name="edit" />
-      </Button>
+      <div class="-my-1.5 -mr-2 flex shrink-0">
+        <Button
+          severity="secondary"
+          text
+          class="size-11"
+          :aria-label="t('groups.history.title', { title })"
+          @click="emit('history')"
+        >
+          <AppIcon name="history" />
+        </Button>
+        <Button
+          v-if="!repayment.deleted"
+          severity="secondary"
+          text
+          class="size-11"
+          :aria-label="t('groups.repayment.edit', { from, to })"
+          @click="emit('edit')"
+        >
+          <AppIcon name="edit" />
+        </Button>
+      </div>
     </div>
     <p v-if="repayment.note" class="m-0 text-xs break-words text-muted">{{ repayment.note }}</p>
-    <p class="m-0 text-xs text-muted">
-      {{ addedBy }}<template v-if="editedBy"> · {{ editedBy }}</template>
-    </p>
+    <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+      <p class="m-0 text-xs text-muted">
+        {{ addedBy }}<template v-if="changedBy"> · {{ changedBy }}</template>
+      </p>
+      <Button
+        v-if="repayment.deleted"
+        :label="t('groups.history.restore')"
+        :aria-label="t('groups.history.restoreNamed', { title })"
+        :data-restore="repayment.id"
+        severity="secondary"
+        outlined
+        class="min-h-11"
+        :disabled="restoring"
+        @click="emit('restore')"
+      />
+    </div>
   </article>
 </template>

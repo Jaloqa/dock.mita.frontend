@@ -11,4 +11,6 @@ export const groupKeys = {
   expenses: (scope: GroupScope, deleted: boolean) => [...scoped(scope), 'expenses', deleted] as const,
   repayments: (scope: GroupScope, deleted: boolean) => [...scoped(scope), 'repayments', deleted] as const,
   balances: (scope: GroupScope, currency: Currency) => [...scoped(scope), 'balances', currency] as const,
+  history: (scope: GroupScope, kind: 'expenses' | 'repayments', entryId: string) =>
+    [...scoped(scope), 'history', kind, entryId] as const,
 } as const

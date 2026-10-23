@@ -883,7 +883,7 @@
       "addCategory": "Добавить",
       "tags": "Теги",
       "tagsPlaceholder": "Введите, чтобы добавить тег",
-      "createTag": "+ “{name}”",
+      "createTag": "+ «{name}»",
       "removeTag": "Удалить тег {name}",
       "description": "Описание",
       "rate": "Курс ({from} → {to})",
@@ -912,7 +912,8 @@
       "toast": {
         "created": "Расход добавлен",
         "updated": "Расход изменён",
-        "deleted": "Расход удалён"
+        "deleted": "Расход удалён",
+        "restored": "Расход восстановлен"
       }
     },
     "hints": {
@@ -927,11 +928,12 @@
       "owes": "к оплате",
       "settled": "в расчёте",
       "transfers": "Предлагаемые переводы",
-      "pays": "{from} платит: {to}",
+      "pays": "{from} → {to}",
       "record": "Записать",
       "recordNamed": "Записать возврат: {from} → {to}",
       "settledUp": "Все рассчитались.",
-      "empty": "Участников пока нет."
+      "empty": "Участников пока нет.",
+      "viewFailed": "Не удалось пересчитать балансы в {currency}. Они показаны в {main}."
     },
     "repayments": {
       "title": "Возвраты",
@@ -968,7 +970,44 @@
       "toast": {
         "created": "Возврат сохранён",
         "updated": "Возврат изменён",
-        "deleted": "Возврат удалён"
+        "deleted": "Возврат удалён",
+        "restored": "Возврат восстановлен"
+      }
+    },
+    "history": {
+      "title": "История: {title}",
+      "events": "Изменения",
+      "actions": {
+        "created": "Добавил(а): {name}",
+        "updated": "Изменил(а): {name}",
+        "deleted": "Удалил(а): {name}",
+        "restored": "Восстановил(а): {name}"
+      },
+      "when": "{date}, {time}",
+      "change": "{label}: {before} → {after}",
+      "noChanges": "Видимых изменений нет.",
+      "none": "нет",
+      "manualRate": "{rate} (свой)",
+      "showMore": "Показать ещё",
+      "restore": "Восстановить",
+      "restoreNamed": "Восстановить: {title}",
+      "fields": {
+        "payer": "Кто заплатил",
+        "amount": "Сумма",
+        "date": "Дата",
+        "category": "Категория",
+        "tags": "Теги",
+        "description": "Описание",
+        "rate": "Курс",
+        "split": "Разделение",
+        "from": "От кого",
+        "to": "Кому",
+        "note": "Заметка"
+      },
+      "split": {
+        "everyone": "Поровну между всеми",
+        "some": "Поровну: {names}",
+        "exact": "Точные суммы: {shares}"
       }
     }
   },

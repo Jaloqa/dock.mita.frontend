@@ -883,7 +883,7 @@
       "addCategory": "Dodaj",
       "tags": "Tagi",
       "tagsPlaceholder": "Wpisz, aby dodać tag",
-      "createTag": "+ “{name}”",
+      "createTag": "+ „{name}”",
       "removeTag": "Usuń tag {name}",
       "description": "Opis",
       "rate": "Kurs wymiany ({from} → {to})",
@@ -912,7 +912,8 @@
       "toast": {
         "created": "Wydatek dodany",
         "updated": "Wydatek zaktualizowany",
-        "deleted": "Wydatek usunięty"
+        "deleted": "Wydatek usunięty",
+        "restored": "Wydatek przywrócony"
       }
     },
     "hints": {
@@ -927,11 +928,12 @@
       "owes": "do oddania",
       "settled": "rozliczone",
       "transfers": "Proponowane przelewy",
-      "pays": "{from} płaci osobie: {to}",
+      "pays": "{from} → {to}",
       "record": "Zapisz",
       "recordNamed": "Zapisz spłatę: {from} → {to}",
       "settledUp": "Wszyscy są rozliczeni.",
-      "empty": "Nie ma jeszcze uczestników."
+      "empty": "Nie ma jeszcze uczestników.",
+      "viewFailed": "Nie udało się przeliczyć sald na {currency}. Pokazujemy je w {main}."
     },
     "repayments": {
       "title": "Spłaty",
@@ -968,7 +970,44 @@
       "toast": {
         "created": "Spłata zapisana",
         "updated": "Spłata zaktualizowana",
-        "deleted": "Spłata usunięta"
+        "deleted": "Spłata usunięta",
+        "restored": "Spłata przywrócona"
+      }
+    },
+    "history": {
+      "title": "Historia: {title}",
+      "events": "Zmiany",
+      "actions": {
+        "created": "Dodał(a): {name}",
+        "updated": "Zmienił(a): {name}",
+        "deleted": "Usunął(-ęła): {name}",
+        "restored": "Przywrócił(a): {name}"
+      },
+      "when": "{date}, {time}",
+      "change": "{label}: {before} → {after}",
+      "noChanges": "Brak widocznych zmian.",
+      "none": "brak",
+      "manualRate": "{rate} (własny)",
+      "showMore": "Pokaż więcej",
+      "restore": "Przywróć",
+      "restoreNamed": "Przywróć: {title}",
+      "fields": {
+        "payer": "Kto zapłacił",
+        "amount": "Kwota",
+        "date": "Data",
+        "category": "Kategoria",
+        "tags": "Tagi",
+        "description": "Opis",
+        "rate": "Kurs wymiany",
+        "split": "Podział",
+        "from": "Od kogo",
+        "to": "Do kogo",
+        "note": "Notatka"
+      },
+      "split": {
+        "everyone": "Po równo między wszystkich",
+        "some": "Po równo: {names}",
+        "exact": "Dokładne kwoty: {shares}"
       }
     }
   },

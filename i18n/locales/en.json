@@ -912,7 +912,8 @@
       "toast": {
         "created": "Expense added",
         "updated": "Expense updated",
-        "deleted": "Expense deleted"
+        "deleted": "Expense deleted",
+        "restored": "Expense restored"
       }
     },
     "hints": {
@@ -931,7 +932,8 @@
       "record": "Record",
       "recordNamed": "Record that {from} paid {to}",
       "settledUp": "Everyone is settled up.",
-      "empty": "No members yet."
+      "empty": "No members yet.",
+      "viewFailed": "The balances could not be converted into {currency}. They are shown in {main}."
     },
     "repayments": {
       "title": "Repayments",
@@ -968,7 +970,44 @@
       "toast": {
         "created": "Repayment saved",
         "updated": "Repayment updated",
-        "deleted": "Repayment deleted"
+        "deleted": "Repayment deleted",
+        "restored": "Repayment restored"
+      }
+    },
+    "history": {
+      "title": "History of {title}",
+      "events": "Changes",
+      "actions": {
+        "created": "Added by {name}",
+        "updated": "Edited by {name}",
+        "deleted": "Deleted by {name}",
+        "restored": "Restored by {name}"
+      },
+      "when": "{date}, {time}",
+      "change": "{label}: {before} → {after}",
+      "noChanges": "No visible changes.",
+      "none": "none",
+      "manualRate": "{rate} (manual)",
+      "showMore": "Show more",
+      "restore": "Restore",
+      "restoreNamed": "Restore {title}",
+      "fields": {
+        "payer": "Paid by",
+        "amount": "Amount",
+        "date": "Date",
+        "category": "Category",
+        "tags": "Tags",
+        "description": "Description",
+        "rate": "Exchange rate",
+        "split": "Split",
+        "from": "From",
+        "to": "To",
+        "note": "Note"
+      },
+      "split": {
+        "everyone": "Equally between everyone",
+        "some": "Equally: {names}",
+        "exact": "Exact amounts: {shares}"
       }
     }
   },

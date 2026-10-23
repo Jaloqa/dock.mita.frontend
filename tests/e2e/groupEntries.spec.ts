@@ -88,6 +88,23 @@ const typeInto = async (field: Locator, text: string) => {
   await field.pressSequentially(text)
 }
 
+const historyButton = (scope: Locator, title: string) =>
+  scope.getByRole('button', { name: `History of ${title}`, exact: true })
+const restoreButton = (scope: Locator, title: string) =>
+  scope.getByRole('button', { name: `Restore ${title}`, exact: true })
+const historyDialog = (page: Page, title: string) =>
+  page.getByRole('dialog', { name: `History of ${title}`, exact: true })
+const historyEvents = (dialog: Locator) =>
+  dialog.getByRole('list', { name: 'Changes', exact: true }).locator(':scope > li')
+const view = (scope: Locator, name: 'Active' | 'Deleted') => scope.getByRole('button', { name, exact: true })
+
+const openHistory = async (page: Page, scope: Locator, title: string) => {
+  await historyButton(scope, title).click()
+  const dialog = historyDialog(page, title)
+  await expect(dialog.getByRole('button', { name: 'Close', exact: true })).toBeFocused()
+  return dialog
+}
+
 test('lists the expenses newest first', async ({ page }) => {
   await openAlbania(page)
   await expect(expenses(page).getByRole('heading', { level: 2, name: 'Expenses', exact: true })).toBeVisible()
@@ -306,6 +323,22 @@ test('suggests the tags used in the group', async ({ page }) => {
     'dinner',
     'late',
   ])
+})
+
+test('refuses an eleventh tag', async ({ page }) => {
+  const dialog = await openNewExpense(page)
+  await choosePayer(page, dialog, 'Kasia')
+  await amountField(dialog).pressSequentially('8')
+  const tags = dialog.getByRole('combobox', { name: 'Tags', exact: true })
+  for (let index = 1; index <= 11; index += 1) {
+    await tags.fill(`limit${index}`)
+    await tags.press('Enter')
+    await expect(dialog.getByRole('button', { name: `Remove tag limit${index}`, exact: true })).toBeVisible()
+  }
+  await expect(page.locator('[data-pc-section="overlay"]')).toHaveCount(0)
+  await saveButton(dialog).click()
+  await expect(dialog.getByText('Use at most 10 tags.')).toBeVisible()
+  await expect(dialog).toBeVisible()
 })
 
 test('edits an expense', async ({ page }) => {
@@ -699,7 +732,8 @@ test('deletes a repayment', async ({ page }) => {
   await expect(repaymentRows(page)).toHaveCount(1)
   const kasia = repaymentRow(page, 'Kasia → Anna')
   await expect(kasia).toContainText('€20.00')
-  await expect(kasia).toContainText('Edited by Anna Nowak')
+  await expect(kasia).toContainText('Deleted by Anna Nowak')
+  await expect(kasia).not.toContainText('Edited by')
   await expect(repayments(page).getByRole('button', { name: /^Edit / })).toHaveCount(0)
   await repayments(page).getByRole('button', { name: 'Active', exact: true }).click()
   await expect(repaymentRows(page)).toHaveCount(0)
@@ -849,10 +883,193 @@ test('/pl/tools/groups/grp_albania shows the balances and repayments in Polish',
   await expect(anna).toContainText('+42,32')
   const transfers = salda.getByRole('list', { name: 'Proponowane przelewy', exact: true }).getByRole('listitem')
   await expect(transfers).toHaveCount(3)
-  await expect(transfers.first()).toContainText('Max płaci osobie: Anna')
+  await expect(transfers.first()).toContainText('Max → Anna')
   await expect(salda.getByRole('combobox', { name: 'Pokaż w', exact: true })).toBeVisible()
   const region = page.getByRole('region', { name: 'Spłaty', exact: true })
   await expect(region.getByRole('article', { name: 'Kasia → Anna', exact: true })).toContainText('Dodał(a): Anna Nowak')
   await page.getByRole('button', { name: 'Zapisz spłatę', exact: true }).click()
   await expect(page.getByRole('dialog', { name: 'Nowa spłata', exact: true })).toBeVisible()
+})
+
+test('shows the history of an edited expense', async ({ page }) => {
+  await openAlbania(page)
+  const dinner = row(page, 'Dinner')
+  const button = historyButton(dinner, 'Dinner')
+  const box = await button.boundingBox()
+  expect(box?.height).toBeGreaterThanOrEqual(44)
+  expect(box?.width).toBeGreaterThanOrEqual(44)
+
+  const dialog = await openHistory(page, dinner, 'Dinner')
+  const events = historyEvents(dialog)
+  await expect(events).toHaveCount(2)
+  await expect(events.nth(0)).toContainText('Edited by Anna Nowak')
+  await expect(events.nth(0)).toContainText('Amount: €100.00 → €120.00')
+  await expect(events.nth(0).locator('time')).toHaveText(/\d{4}, \d{2}:\d{2}/)
+  await expect(events.nth(1)).toContainText('Added by Anna Nowak')
+  await expect(events.nth(1)).not.toContainText('→')
+  await dialog.getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(dialog).toBeHidden()
+  await expect(button).toBeFocused()
+})
+
+test('lists every field that an edit changed', async ({ page }) => {
+  const edit = await openEdit(page, 'Dinner')
+  await choosePayer(page, edit, 'Olya')
+  await typeInto(amountField(edit), '100')
+  await edit.getByLabel('Description', { exact: true }).fill('Birthday dinner')
+  await edit.getByLabel('Kasia', { exact: true }).uncheck()
+  await saveButton(edit).click()
+  await expect(page.getByText('Expense updated')).toBeVisible()
+
+  const dialog = await openHistory(page, row(page, 'Birthday dinner'), 'Birthday dinner')
+  const events = historyEvents(dialog)
+  await expect(events).toHaveCount(3)
+  await expect(events.nth(0).getByRole('listitem')).toHaveText([
+    'Paid by: Anna → Olya',
+    'Amount: €120.00 → €100.00',
+    'Description: Dinner → Birthday dinner',
+    'Split: Equally between everyone → Equally: Anna, Olya, Max',
+  ])
+  await expect(events.nth(1).getByRole('listitem')).toHaveText(['Amount: €100.00 → €120.00'])
+  await expect(events.nth(2).getByRole('listitem')).toHaveCount(0)
+})
+
+test('shows the history of an edited repayment', async ({ page }) => {
+  const edit = await openRepaymentEdit(page, 'Kasia → Anna', 'Edit repayment from Kasia to Anna')
+  await typeInto(amountField(edit), '25')
+  await edit.getByLabel('Note', { exact: true }).fill('Cash')
+  await saveButton(edit).click()
+  await expect(page.getByText('Repayment updated')).toBeVisible()
+
+  const dialog = await openHistory(page, repaymentRow(page, 'Kasia → Anna'), 'Kasia → Anna')
+  const events = historyEvents(dialog)
+  await expect(events).toHaveCount(2)
+  await expect(events.nth(0)).toContainText('Edited by Anna Nowak')
+  await expect(events.nth(0).getByRole('listitem')).toHaveText(['Amount: €20.00 → €25.00', 'Note: none → Cash'])
+  await expect(events.nth(1)).toContainText('Added by Anna Nowak')
+})
+
+test('shows more events of the history on demand', async ({ page }) => {
+  await page.goto('/tools/groups')
+  await expect(page.getByRole('list', { name: 'Groups', exact: true }).getByRole('link')).toHaveCount(1)
+  await page.evaluate(() => {
+    const key = 'mita-mock-db-v1'
+    const state = JSON.parse(localStorage.getItem(key) ?? '{}')
+    const events = state.groupEvents.filter((event: { entryId: string }) => event.entryId === 'gex_dinner')
+    const latest = events[events.length - 1]
+    for (let number = 1; number <= 100; number += 1) {
+      state.groupEvents.push({
+        ...latest,
+        id: `gevt_bulk_${number}`,
+        state: { ...latest.state, description: `Dinner ${number}` },
+      })
+    }
+    localStorage.setItem(key, JSON.stringify(state))
+  })
+  await page.goto('/tools/groups/grp_albania')
+  await expect(rows(page)).toHaveCount(3)
+  const dialog = await openHistory(page, row(page, 'Dinner'), 'Dinner')
+  const events = historyEvents(dialog)
+  await expect(events).toHaveCount(100)
+  await expect(events.nth(0).getByRole('listitem')).toHaveText(['Description: Dinner 99 → Dinner 100'])
+  await expect(events.nth(99).getByRole('listitem')).toHaveCount(0)
+  const more = dialog.getByRole('button', { name: 'Show more', exact: true })
+  await more.click()
+  await expect(events).toHaveCount(102)
+  await expect(events.nth(99).getByRole('listitem')).toHaveText(['Description: Dinner → Dinner 1'])
+  await expect(more).toHaveCount(0)
+})
+
+test('restores a deleted expense', async ({ page }) => {
+  await openAlbaniaWithBalances(page)
+  await view(expenses(page), 'Deleted').click()
+  const taxi = row(page, 'Taxi')
+  await expect(taxi).toContainText('Deleted by Anna Nowak')
+  await expect(taxi).not.toContainText('Edited by')
+  await expect(historyButton(taxi, 'Taxi')).toBeVisible()
+  const restore = restoreButton(taxi, 'Taxi')
+  await expect(restore).toHaveText('Restore')
+  expect((await restore.boundingBox())?.height).toBeGreaterThanOrEqual(44)
+  await expect(total(page)).toContainText('€190.70')
+  await restore.click()
+
+  await expect(page.getByText('Expense restored')).toBeVisible()
+  await expect(expenses(page).getByRole('heading', { name: 'No deleted expenses', exact: true })).toBeVisible()
+  await expect(page.locator(':focus')).toHaveAccessibleName('Deleted')
+  await view(expenses(page), 'Active').click()
+  await expect(titles(page)).toHaveText(['Taxi', 'Boat trip', 'Groceries', 'Dinner'])
+  await expect(row(page, 'Taxi')).toContainText('Edited by Anna Nowak')
+  await expect(restoreButton(expenses(page), 'Taxi')).toHaveCount(0)
+  await expect(total(page)).toContainText('€205.70')
+  await expect(balanceRow(page, 'Kasia')).toContainText('-€6.42')
+
+  const dialog = await openHistory(page, row(page, 'Taxi'), 'Taxi')
+  const events = historyEvents(dialog)
+  await expect(events).toHaveCount(3)
+  await expect(events.nth(0)).toContainText('Restored by Anna Nowak')
+  await expect(events.nth(1)).toContainText('Deleted by Anna Nowak')
+  await expect(events.nth(2)).toContainText('Added by Anna Nowak')
+  await expect(events.getByRole('listitem')).toHaveCount(0)
+})
+
+test('keeps the focus in the deleted list while restoring', async ({ page }) => {
+  const edit = await openEdit(page, 'Boat trip')
+  await edit.getByRole('button', { name: 'Delete', exact: true }).click()
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Delete', exact: true }).click()
+  await expect(page.getByText('Expense deleted')).toBeVisible()
+
+  await view(expenses(page), 'Deleted').click()
+  await expect(titles(page)).toHaveText(['Taxi', 'Boat trip'])
+  await restoreButton(row(page, 'Taxi'), 'Taxi').click()
+  await expect(page.getByText('Expense restored')).toBeVisible()
+  await expect(titles(page)).toHaveText(['Boat trip'])
+  await expect(page.locator(':focus')).toHaveAccessibleName('Restore Boat trip')
+
+  await restoreButton(row(page, 'Boat trip'), 'Boat trip').click()
+  await expect(expenses(page).getByRole('heading', { name: 'No deleted expenses', exact: true })).toBeVisible()
+  await expect(page.locator(':focus')).toHaveAccessibleName('Deleted')
+  await view(expenses(page), 'Active').click()
+  await expect(titles(page)).toHaveText(['Taxi', 'Boat trip', 'Groceries', 'Dinner'])
+  await expect(total(page)).toContainText('€205.70')
+})
+
+test('restores a deleted repayment', async ({ page }) => {
+  const edit = await openRepaymentEdit(page, 'Kasia → Anna', 'Edit repayment from Kasia to Anna')
+  await edit.getByRole('button', { name: 'Delete', exact: true }).click()
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Delete', exact: true }).click()
+  await expect(page.getByText('Repayment deleted')).toBeVisible()
+  await expect(balanceRow(page, 'Kasia')).toContainText('-€37.67')
+
+  await view(repayments(page), 'Deleted').click()
+  const deleted = repaymentRow(page, 'Kasia → Anna')
+  await expect(deleted).toContainText('Deleted by Anna Nowak')
+  await expect(historyButton(deleted, 'Kasia → Anna')).toBeVisible()
+  await restoreButton(deleted, 'Kasia → Anna').click()
+
+  await expect(page.getByText('Repayment restored')).toBeVisible()
+  await expect(repayments(page).getByRole('heading', { name: 'No deleted repayments', exact: true })).toBeVisible()
+  await expect(page.locator(':focus')).toHaveAccessibleName('Deleted')
+  await expect(balanceRow(page, 'Kasia')).toContainText('-€17.67')
+  await view(repayments(page), 'Active').click()
+  await expect(repaymentRows(page)).toHaveCount(1)
+  await expect(repaymentRow(page, 'Kasia → Anna')).toContainText('€20.00')
+
+  const dialog = await openHistory(page, repaymentRow(page, 'Kasia → Anna'), 'Kasia → Anna')
+  const events = historyEvents(dialog)
+  await expect(events).toHaveCount(3)
+  await expect(events.nth(0)).toContainText('Restored by Anna Nowak')
+  await expect(events.nth(1)).toContainText('Deleted by Anna Nowak')
+  await expect(events.nth(2)).toContainText('Added by Anna Nowak')
+})
+
+test('/pl/tools/groups/grp_albania shows the history in Polish', async ({ page }) => {
+  await page.goto('/pl/tools/groups/grp_albania')
+  const region = page.getByRole('region', { name: 'Wydatki', exact: true })
+  await region.getByRole('button', { name: 'Historia: Dinner', exact: true }).click()
+  const dialog = page.getByRole('dialog', { name: 'Historia: Dinner', exact: true })
+  const events = dialog.getByRole('list', { name: 'Zmiany', exact: true }).locator(':scope > li')
+  await expect(events).toHaveCount(2)
+  await expect(events.nth(0)).toContainText('Zmienił(a): Anna Nowak')
+  await expect(events.nth(0).getByRole('listitem')).toHaveText(/^Kwota: .*100,00.* → .*120,00/)
+  await expect(events.nth(1)).toContainText('Dodał(a): Anna Nowak')
 })
