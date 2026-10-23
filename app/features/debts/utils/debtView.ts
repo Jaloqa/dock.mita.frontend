@@ -4,6 +4,13 @@ import { type Currency, convertMinor, toMinor } from '../../../shared/money/mone
 export const repaidShare = (debt: Pick<DebtDto, 'amount' | 'repaid'>): number =>
   debt.amount > 0 ? Math.min(Math.max(debt.repaid / debt.amount, 0), 1) : 0
 
+export type GroupDebtKind = 'getsBack' | 'owes' | 'settled'
+
+export function groupDebtKind(balance: number): GroupDebtKind {
+  if (balance > 0) return 'getsBack'
+  return balance < 0 ? 'owes' : 'settled'
+}
+
 export function convertedPreview(
   amount: number | null,
   rate: number | null,

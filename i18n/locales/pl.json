@@ -716,6 +716,12 @@
       "open": "Otwarte",
       "settled": "Spłacone"
     },
+    "groups": {
+      "title": "Grupy",
+      "getsBack": "Do odzyskania",
+      "owes": "Do oddania",
+      "settled": "Rozliczone"
+    },
     "card": {
       "lent": "Do odzyskania",
       "borrowed": "Do oddania",

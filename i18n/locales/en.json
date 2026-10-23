@@ -716,6 +716,12 @@
       "open": "Open",
       "settled": "Settled"
     },
+    "groups": {
+      "title": "Groups",
+      "getsBack": "You get back",
+      "owes": "You owe",
+      "settled": "Settled"
+    },
     "card": {
       "lent": "Owed to me",
       "borrowed": "I owe",

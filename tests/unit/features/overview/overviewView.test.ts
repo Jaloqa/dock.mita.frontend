@@ -65,8 +65,9 @@ describe('overview view helpers', () => {
     expect(balanceWithDebts(-2_000, { owedToMe: 10_000, owedByMe: 0, open: 1, overdue: 0, groups: 0 })).toBe(8_000)
   })
 
-  it('counts debts as open while at least one is open', () => {
+  it('counts debts as open while at least one is open or a linked group has a balance', () => {
     expect(hasOpenDebts({ owedToMe: 0, owedByMe: 100, open: 1, overdue: 0, groups: 0 })).toBe(true)
+    expect(hasOpenDebts({ owedToMe: 100, owedByMe: 0, open: 0, overdue: 0, groups: 1 })).toBe(true)
     expect(hasOpenDebts({ owedToMe: 0, owedByMe: 0, open: 0, overdue: 0, groups: 0 })).toBe(false)
   })
 
@@ -78,6 +79,8 @@ describe('overview view helpers', () => {
     expect(shownBalance({ balance, debts: open }, false)).toEqual({ amount: 1_000_000, withDebts: false })
     expect(shownBalance({ balance, debts: none }, true)).toEqual({ amount: 1_000_000, withDebts: false })
     expect(shownBalance({ balance, debts: none }, false)).toEqual({ amount: 1_000_000, withDebts: false })
+    const groupsOnly = { owedToMe: 4_232, owedByMe: 0, open: 0, overdue: 0, groups: 1 }
+    expect(shownBalance({ balance, debts: groupsOnly }, true)).toEqual({ amount: 1_004_232, withDebts: true })
   })
 
   it('takes the first letter of a title', () => {

@@ -30,7 +30,7 @@ export const usedShare = (spent: number, limit: number): number => (limit > 0 ? 
 
 export const balanceWithDebts = (amount: number, debts: DebtSummary): number => amount + debts.owedToMe - debts.owedByMe
 
-export const hasOpenDebts = (debts: DebtSummary): boolean => debts.open > 0
+export const hasOpenDebts = (debts: DebtSummary): boolean => debts.open > 0 || debts.groups > 0
 
 export function shownBalance(
   overview: Pick<OverviewDto, 'balance' | 'debts'>,
