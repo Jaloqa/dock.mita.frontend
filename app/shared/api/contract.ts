@@ -231,6 +231,74 @@ export type GoalPage = Page<GoalDto> & { currency: Currency; summary: GoalSummar
 
 export type GoalContributionInput = { amount: number; date: string; fromAccountId?: string; rate?: number }
 
+export const COUNTERPARTY_MAX = 40
+
+export const DEBT_NOTE_MAX = 200
+
+export type DebtDirection = 'lent' | 'borrowed'
+
+export const debtDirections: readonly DebtDirection[] = ['lent', 'borrowed']
+
+export type DebtStatus = 'open' | 'settled'
+
+export const debtStatuses: readonly DebtStatus[] = ['open', 'settled']
+
+export type DebtDto = {
+  id: string
+  direction: DebtDirection
+  counterparty: string
+  amount: number
+  currency: Currency
+  repaid: number
+  remaining: number
+  status: DebtStatus
+  overdue: boolean
+  date: string
+  dueDate: string | null
+  accountId: string | null
+  accountAmount: number | null
+  rate: number | null
+  note: string | null
+  repayments: number
+}
+
+export type DebtInput = {
+  direction: DebtDirection
+  counterparty: string
+  amount: number
+  currency: Currency
+  date: string
+  dueDate?: string | null
+  accountId?: string | null
+  rate?: number
+  note?: string | null
+}
+
+export type DebtSummary = { owedToMe: number; owedByMe: number; open: number; overdue: number }
+
+export type DebtPage = Page<DebtDto> & { currency: Currency; summary: DebtSummary }
+
+export type DebtRepaymentDto = {
+  id: string
+  date: string
+  amount: number
+  currency: Currency
+  rate: number
+  debtAmount: number
+  accountId: string | null
+  accountAmount: number | null
+  note: string | null
+}
+
+export type DebtRepaymentInput = {
+  date: string
+  amount: number
+  currency: Currency
+  rate?: number
+  accountId?: string | null
+  note?: string | null
+}
+
 export type OverviewRange = 'week' | 'month' | 'year'
 
 export const overviewRanges: readonly OverviewRange[] = ['week', 'month', 'year']
@@ -284,6 +352,7 @@ export type OverviewDto = {
   previousTo: string
   currency: Currency
   balance: { amount: number; accounts: number }
+  debts: DebtSummary
   income: OverviewTotal
   expense: OverviewTotal
   averageExpense: number | null

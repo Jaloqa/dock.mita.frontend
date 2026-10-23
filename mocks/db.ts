@@ -1,6 +1,8 @@
 import type {
   AccountDto,
   CategoryDto,
+  DebtDto,
+  DebtRepaymentDto,
   RateDto,
   SettingsDto,
   TransactionDto,
@@ -64,10 +66,17 @@ export type GoalContributionRow = {
   baseCurrency: Currency
 }
 
+export type DebtRow = Omit<DebtDto, 'remaining' | 'status' | 'overdue' | 'repayments'> & {
+  userId: string
+  createdAt: string
+}
+
+export type DebtRepaymentRow = DebtRepaymentDto & { userId: string; debtId: string; createdAt: string }
+
 export type CredentialRow = { userId: string; password: string }
 
 export type MockState = {
-  version: 2
+  version: 3
   activeUserId: string | null
   simulateErrors: boolean
   users: UserRow[]
@@ -82,6 +91,8 @@ export type MockState = {
   budgets: BudgetRow[]
   goals: GoalRow[]
   goalContributions: GoalContributionRow[]
+  debts: DebtRow[]
+  debtRepayments: DebtRepaymentRow[]
 }
 
 export type KeyValueStorage = Pick<Storage, 'getItem' | 'setItem'>
@@ -94,7 +105,7 @@ const isState = (value: unknown, seed: MockState): value is MockState => {
   if (typeof value !== 'object' || value === null) return false
   const state = value as Record<string, unknown>
   return (
-    state.version === 2 &&
+    state.version === 3 &&
     Object.entries(seed).every(([key, seedValue]) => {
       if (key === 'activeUserId') return state[key] === null || typeof state[key] === 'string'
       return Array.isArray(seedValue) ? Array.isArray(state[key]) : typeof state[key] === typeof seedValue

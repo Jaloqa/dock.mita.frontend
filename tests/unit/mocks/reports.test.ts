@@ -18,7 +18,15 @@ const failure = (promise: Promise<unknown>) => promise.catch((error: unknown) =>
 
 const api = (): MockApi => {
   const mock = loggedInMockApi()
-  Object.assign(mock.db.state, { transactions: [], transfers: [], budgets: [], goals: [], goalContributions: [] })
+  Object.assign(mock.db.state, {
+    transactions: [],
+    transfers: [],
+    budgets: [],
+    goals: [],
+    goalContributions: [],
+    debts: [],
+    debtRepayments: [],
+  })
   return mock
 }
 
@@ -239,6 +247,37 @@ describe('report', () => {
       ],
     })
     expect(structure.items.reduce((sum, item) => sum + Math.round(item.percent * 10), 0)).toBe(1000)
+  })
+
+  it('ignores debts and repayments in the totals, the structure and the transaction flag', async () => {
+    const mock = api()
+    const debt = (await mock.handle({
+      method: 'POST',
+      path: '/v1/debts',
+      body: {
+        direction: 'lent',
+        counterparty: 'Max',
+        amount: 50_000,
+        currency: 'PLN',
+        date: today,
+        accountId: 'acc_anna_card',
+      },
+    })) as { id: string }
+    await mock.handle({
+      method: 'POST',
+      path: `/v1/debts/${debt.id}/repayments`,
+      body: { date: today, amount: 20_000, currency: 'PLN', accountId: 'acc_anna_card' },
+    })
+    const result = await report(mock)
+    expect(result).toMatchObject({
+      totals: { income: 0, expense: 0 },
+      averageIncome: 0,
+      averageExpense: 0,
+      savingsRate: null,
+      structure: { total: 0, items: [] },
+      hasTransactions: false,
+    })
+    expect(result.periods.every((row) => row.income === 0 && row.expense === 0)).toBe(true)
   })
 
   it('returns an empty report for a user without transactions', async () => {

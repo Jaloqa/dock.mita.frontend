@@ -727,6 +727,10 @@
     "emailTaken": "Ten adres e-mail jest już używany.",
     "passwordTooShort": "Użyj co najmniej 10 znaków.",
     "passwordTooLong": "Użyj najwyżej 128 znaków.",
-    "invalidPassword": "Nieprawidłowe hasło."
+    "invalidPassword": "Nieprawidłowe hasło.",
+    "dueBeforeDate": "Termin spłaty nie może być wcześniejszy niż data długu.",
+    "exceedsRemaining": "Spłata jest wyższa niż kwota, która pozostała do oddania.",
+    "belowRepaid": "Kwota nie może być niższa niż już spłacona.",
+    "debtCurrencyLocked": "Waluty nie można zmienić, gdy dług ma spłaty."
   }
 }
