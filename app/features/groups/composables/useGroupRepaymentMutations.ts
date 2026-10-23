@@ -18,6 +18,7 @@ export function useGroupRepaymentMutations() {
       onSuccess,
     }),
     remove: useMutation({ mutationFn: (id: string) => api().deleteRepayment(id), onSuccess }),
+    restore: useMutation({ mutationFn: (id: string) => api().restoreRepayment(id), onSuccess }),
     isMissing: (error: unknown) => isApiError(error) && error.status === 404,
     refresh: onSuccess,
   }

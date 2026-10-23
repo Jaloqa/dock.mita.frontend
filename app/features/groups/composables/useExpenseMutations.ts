@@ -18,6 +18,7 @@ export function useExpenseMutations() {
       onSuccess,
     }),
     remove: useMutation({ mutationFn: (id: string) => api().deleteExpense(id), onSuccess }),
+    restore: useMutation({ mutationFn: (id: string) => api().restoreExpense(id), onSuccess }),
     isMissing: (error: unknown) => isApiError(error) && error.status === 404,
     refresh: onSuccess,
   }

@@ -1,10 +1,13 @@
 import type { ApiClient } from '~/shared/api/client'
 import type {
   GroupBalancesDto,
+  GroupEntryEvent,
   GroupExpenseDto,
   GroupExpenseInput,
+  GroupExpenseState,
   GroupRepaymentDto,
   GroupRepaymentInput,
+  GroupRepaymentState,
   Page,
 } from '~/shared/api/contract'
 import type { Currency } from '~/shared/money/currencies'
@@ -26,11 +29,23 @@ export const entriesApi = (api: ApiClient, scope: GroupScope) => ({
   createExpense: (body: GroupExpenseInput) => api.post<GroupExpenseDto>(expensesPath(scope), body),
   updateExpense: (id: string, body: GroupExpenseInput) => api.put<GroupExpenseDto>(expensePath(scope, id), body),
   deleteExpense: (id: string) => api.delete(expensePath(scope, id)),
+  restoreExpense: (id: string) => api.post<GroupExpenseDto>(`${expensePath(scope, id)}/restore`),
+  expenseHistory: (id: string, page: number) =>
+    api.get<Page<GroupEntryEvent<GroupExpenseState>>>(`${expensePath(scope, id)}/history`, {
+      page,
+      pageSize: ENTRIES_PAGE_SIZE,
+    }),
   repayments: (deleted: boolean, page: number) =>
     api.get<Page<GroupRepaymentDto>>(repaymentsPath(scope), { deleted, page, pageSize: ENTRIES_PAGE_SIZE }),
   createRepayment: (body: GroupRepaymentInput) => api.post<GroupRepaymentDto>(repaymentsPath(scope), body),
   updateRepayment: (id: string, body: GroupRepaymentInput) =>
     api.put<GroupRepaymentDto>(repaymentPath(scope, id), body),
   deleteRepayment: (id: string) => api.delete(repaymentPath(scope, id)),
+  restoreRepayment: (id: string) => api.post<GroupRepaymentDto>(`${repaymentPath(scope, id)}/restore`),
+  repaymentHistory: (id: string, page: number) =>
+    api.get<Page<GroupEntryEvent<GroupRepaymentState>>>(`${repaymentPath(scope, id)}/history`, {
+      page,
+      pageSize: ENTRIES_PAGE_SIZE,
+    }),
   balances: (currency: Currency) => api.get<GroupBalancesDto>(`${scopePath(scope)}/balances`, { currency }),
 })

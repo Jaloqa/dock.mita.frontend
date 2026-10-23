@@ -3,7 +3,9 @@ import {
   actorName,
   categoryLabel,
   entryAccess,
+  expenseTitle,
   memberName,
+  repaymentTitle,
   splitSummary,
 } from '../../../../app/features/groups/utils/groupView'
 import { type GroupDto, type GroupExpenseDto, standardGroupCategories } from '../../../../app/shared/api/contract'
@@ -53,6 +55,18 @@ describe('group view', () => {
   it('names the actor of a change', () => {
     expect(actorName({ kind: 'owner', memberId: null, name: 'Anna Nowak' })).toBe('Anna Nowak')
     expect(actorName({ kind: 'member', memberId: 'gmb_olya', name: 'Olya' })).toBe('Olya')
+  })
+
+  it('titles an expense by its description, else by its category', () => {
+    expect(expenseTitle(t, group, { description: 'Dinner', categoryId: 'cafes' })).toBe('Dinner')
+    expect(expenseTitle(t, group, { description: null, categoryId: 'cafes' })).toBe('groups.categories.cafes')
+    expect(expenseTitle(t, group, { description: null, categoryId: 'gcat_beach' })).toBe('Beach')
+  })
+
+  it('titles a repayment by its members', () => {
+    expect(repaymentTitle(t, group, { fromMemberId: 'gmb_kasia', toMemberId: 'gmb_anna' })).toBe(
+      'groups.repayment.title(Kasia;Anna)',
+    )
   })
 
   it('summarises the splits of the seeded expenses', () => {

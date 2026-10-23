@@ -1,24 +1,58 @@
 <script setup lang="ts">
 import type { GroupDto, GroupRepaymentDto } from '~/shared/api/contract'
+import { repaymentTitle } from '../utils/groupView'
 
 type RepaymentView = 'active' | 'deleted'
 
-defineProps<{ group: GroupDto; canRecord: boolean; hintId?: string }>()
+const props = defineProps<{ group: GroupDto; canRecord: boolean; hintId?: string }>()
 const emit = defineEmits<{ record: []; edit: [repayment: GroupRepaymentDto] }>()
 const { t } = useI18n()
+const notify = useNotify()
+const { restore, isMissing, refresh } = useGroupRepaymentMutations()
 
 const TITLE_ID = 'group-repayments-title'
 const views: readonly RepaymentView[] = ['active', 'deleted']
 
+const root = ref<HTMLElement | null>(null)
 const view = ref<RepaymentView>('active')
 const showsDeleted = computed(() => view.value === 'deleted')
 const { items, hasMore, loadMore, isPending, isLoadingMore, isError, refetch } = useGroupRepayments(showsDeleted)
+const historyOpen = ref(false)
+const historyTarget = ref<{ id: string; title: string }>()
 
 const viewOptions = computed(() => views.map((value) => ({ value, label: t(`groups.repayments.${value}`) })))
+
+function openHistory(repayment: GroupRepaymentDto) {
+  historyTarget.value = { id: repayment.id, title: repaymentTitle(t, props.group, repayment) }
+  historyOpen.value = true
+}
+
+async function focusAfterRestore(neighbourId: string | undefined) {
+  await nextTick()
+  const neighbour = neighbourId ? root.value?.querySelector<HTMLElement>(`[data-restore="${neighbourId}"]`) : null
+  const target = neighbour ?? root.value?.querySelector<HTMLElement>('[aria-pressed="true"]')
+  target?.focus()
+}
+
+function restoreRepayment(repayment: GroupRepaymentDto) {
+  if (restore.isPending.value) return
+  const index = items.value.findIndex((item) => item.id === repayment.id)
+  const neighbour = items.value[index + 1] ?? items.value[index - 1]
+  restore.mutate(repayment.id, {
+    onSuccess: () => {
+      notify.success(t('groups.repayment.toast.restored'))
+      focusAfterRestore(neighbour?.id)
+    },
+    onError: (error) => {
+      notify.error(error)
+      if (isMissing(error)) refresh()
+    },
+  })
+}
 </script>
 
 <template>
-  <section :aria-labelledby="TITLE_ID" class="flex flex-col gap-4">
+  <section ref="root" :aria-labelledby="TITLE_ID" class="flex flex-col gap-4">
     <div class="flex flex-wrap items-center justify-between gap-3">
       <h2 :id="TITLE_ID" class="m-0 text-base font-semibold">{{ t('groups.repayments.title') }}</h2>
       <SelectButton
@@ -54,7 +88,10 @@ const viewOptions = computed(() => views.map((value) => ({ value, label: t(`grou
         :key="repayment.id"
         :group="group"
         :repayment="repayment"
+        :restoring="restore.isPending.value"
         @edit="emit('edit', repayment)"
+        @history="openHistory(repayment)"
+        @restore="restoreRepayment(repayment)"
       />
       <Button
         v-if="hasMore"
@@ -65,5 +102,12 @@ const viewOptions = computed(() => views.map((value) => ({ value, label: t(`grou
         @click="loadMore()"
       />
     </div>
+    <EntryHistoryDialog
+      v-model:visible="historyOpen"
+      :group="group"
+      kind="repayments"
+      :entry-id="historyTarget?.id"
+      :title="historyTarget?.title ?? ''"
+    />
   </section>
 </template>
