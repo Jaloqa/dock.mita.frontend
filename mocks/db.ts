@@ -87,7 +87,15 @@ export type GroupRow = {
   shareToken: string | null
 }
 
-export type GroupMemberRow = { id: string; groupId: string; name: string; position: number }
+export type GroupMemberRow = {
+  id: string
+  groupId: string
+  name: string
+  position: number
+  userId: string | null
+  invitedEmail: string | null
+  invitedAt: string | null
+}
 
 export type GroupCategoryRow = { id: string; groupId: string; name: string; createdAt: string }
 
@@ -112,7 +120,7 @@ export type GroupEventRow = {
 export type CredentialRow = { userId: string; password: string }
 
 export type MockState = {
-  version: 5
+  version: 6
   activeUserId: string | null
   simulateErrors: boolean
   users: UserRow[]
@@ -147,7 +155,7 @@ const isState = (value: unknown, seed: MockState): value is MockState => {
   if (typeof value !== 'object' || value === null) return false
   const state = value as Record<string, unknown>
   return (
-    state.version === 5 &&
+    state.version === 6 &&
     Object.entries(seed).every(([key, seedValue]) => {
       if (key === 'activeUserId') return state[key] === null || typeof state[key] === 'string'
       return Array.isArray(seedValue) ? Array.isArray(state[key]) : typeof state[key] === typeof seedValue

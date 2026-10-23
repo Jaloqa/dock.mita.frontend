@@ -274,9 +274,11 @@ export type DebtInput = {
   note?: string | null
 }
 
-export type DebtSummary = { owedToMe: number; owedByMe: number; open: number; overdue: number }
+export type DebtSummary = { owedToMe: number; owedByMe: number; open: number; overdue: number; groups: number }
 
 export type DebtPage = Page<DebtDto> & { currency: Currency; summary: DebtSummary }
+
+export type GroupDebtDto = { groupId: string; name: string; currency: Currency; balance: number }
 
 export type DebtRepaymentDto = {
   id: string
@@ -327,9 +329,25 @@ export const standardGroupCategories = [
 
 export type StandardGroupCategory = (typeof standardGroupCategories)[number]
 
-export type GroupSummaryDto = { id: string; name: string; currency: Currency; members: number; total: number }
+export type GroupRole = 'owner' | 'member' | 'link'
 
-export type GroupMemberDto = { id: string; name: string; inUse: boolean }
+export type GroupSummaryDto = {
+  id: string
+  name: string
+  currency: Currency
+  members: number
+  total: number
+  role: 'owner' | 'member'
+}
+
+export type GroupMemberDto = {
+  id: string
+  name: string
+  inUse: boolean
+  linked: boolean
+  linkedName: string | null
+  invitedEmail: string | null
+}
 
 export type GroupCategoryDto = { id: string; standard: boolean; name: string | null }
 
@@ -342,6 +360,8 @@ export type GroupDto = {
   members: GroupMemberDto[]
   categories: GroupCategoryDto[]
   shareToken: string | null
+  role: GroupRole
+  myMemberId: string | null
 }
 
 export type GroupInput = { name: string; currency: Currency; members: string[] }
@@ -349,6 +369,17 @@ export type GroupInput = { name: string; currency: Currency; members: string[] }
 export type GroupUpdateInput = { name: string; currency: Currency }
 
 export type GroupNameInput = { name: string }
+
+export type GroupInviteInput = { email: string }
+
+export type GroupInviteDto = {
+  memberId: string
+  groupId: string
+  groupName: string
+  memberName: string
+  ownerName: string
+  invitedAt: string
+}
 
 export type GroupActorKind = 'owner' | 'member'
 

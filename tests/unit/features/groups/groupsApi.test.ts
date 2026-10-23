@@ -66,6 +66,8 @@ describe('groups api', () => {
       members: [],
       categories: [],
       shareToken: 'albania-2026-demo-link-0123456789abcdefghij',
+      role: 'owner',
+      myMemberId: null,
     }
     const api = groupsApi(
       createApiClient(async (request) => {

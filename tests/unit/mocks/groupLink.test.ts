@@ -34,6 +34,8 @@ const owner: GroupActorDto = { kind: 'owner', memberId: null, name: 'Anna Nowak'
 
 const actingMember = (memberId: string, name: string): GroupActorDto => ({ kind: 'member', memberId, name })
 
+const linkView = (group: GroupDto): GroupDto => ({ ...group, shareToken: null, role: 'link', myMemberId: null })
+
 const problemOf = async (promise: Promise<unknown>) => {
   const error = await promise.catch((failure: unknown) => failure)
   expect(error).toBeInstanceOf(MockHttpError)
@@ -327,7 +329,7 @@ describe('group link reads', () => {
 
     expect(ownerGroup.shareToken).toBe(token)
     expect(linkGroup.shareToken).toBeNull()
-    expect(linkGroup).toEqual({ ...ownerGroup, shareToken: null })
+    expect(linkGroup).toEqual(linkView(ownerGroup))
     expect(linkAnswers).toEqual(ownerAnswers)
     expect((linkAnswers[0] as Page<GroupExpenseDto>).items).toHaveLength(2)
     expect((linkAnswers[1] as Page<GroupExpenseDto>).items).toHaveLength(1)
@@ -458,13 +460,13 @@ describe('group link reads', () => {
     const { group, token } = await sharedTrip(mock)
     const ownerView = await getGroup(mock, group.id)
 
-    expect(await linkGet(mock, token)).toEqual({ ...ownerView, shareToken: null })
+    expect(await linkGet(mock, token)).toEqual(linkView(ownerView))
     signIn(mock, 'usr_oleh')
-    expect(await linkGet(mock, token)).toEqual({ ...ownerView, shareToken: null })
+    expect(await linkGet(mock, token)).toEqual(linkView(ownerView))
     await notFound(ownerGet(mock, group.id))
     await notFound(linkGet(mock, 'A'.repeat(SHARE_TOKEN_LENGTH)))
     signOut(mock)
-    expect(await linkGet(mock, token)).toEqual({ ...ownerView, shareToken: null })
+    expect(await linkGet(mock, token)).toEqual(linkView(ownerView))
   })
 
   it('opens the demo group through its seeded link without a session', async () => {

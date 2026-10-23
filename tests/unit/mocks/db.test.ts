@@ -58,13 +58,13 @@ describe('mock db', () => {
   })
 
   it('falls back to the seed when stored data has another version', () => {
-    expect(createDb(memoryStorage(JSON.stringify({ version: 0 })), seedState).state.version).toBe(5)
+    expect(createDb(memoryStorage(JSON.stringify({ version: 0 })), seedState).state.version).toBe(6)
   })
 
   it('reseeds a stored state of version 1 so every currency gets rates', () => {
     const stored = JSON.stringify({ ...seedState(), version: 1, rates: [], simulateErrors: true })
     const { state } = createDb(memoryStorage(stored), seedState)
-    expect(state.version).toBe(5)
+    expect(state.version).toBe(6)
     expect(state.simulateErrors).toBe(false)
     expect(state.rates.some((row) => row.from === 'KWD')).toBe(true)
   })
@@ -73,7 +73,7 @@ describe('mock db', () => {
     const { debts: _debts, debtRepayments: _repayments, ...before } = seedState()
     const stored = JSON.stringify({ ...before, version: 2, simulateErrors: true })
     const { state } = createDb(memoryStorage(stored), seedState)
-    expect(state.version).toBe(5)
+    expect(state.version).toBe(6)
     expect(state.simulateErrors).toBe(false)
     expect(state.debts.map((row) => row.counterparty)).toEqual(['Max', 'Mama', 'Kasia', 'Tomek', 'Андрій'])
     expect(state.debtRepayments).toHaveLength(3)
@@ -96,7 +96,7 @@ describe('mock db', () => {
     } = seedState()
     const stored = JSON.stringify({ ...before, version: 3, simulateErrors: true })
     const { state } = createDb(memoryStorage(stored), seedState)
-    expect(state.version).toBe(5)
+    expect(state.version).toBe(6)
     expect(state.simulateErrors).toBe(false)
     expect(state.groups).toHaveLength(seedState().groups.length)
     expect(state.groupEvents).toHaveLength(seedState().groupEvents.length)
@@ -116,10 +116,11 @@ describe('mock db', () => {
       groups: before.groups.map(({ shareToken: _shareToken, ...row }) => row),
     })
     const { state } = createDb(memoryStorage(stored), seedState)
-    expect(state.version).toBe(5)
+    expect(state.version).toBe(6)
     expect(state.simulateErrors).toBe(false)
     expect(state.groups.map((row) => [row.id, row.shareToken])).toEqual([
       ['grp_albania', 'albania-2026-demo-link-0123456789abcdefghij'],
+      ['grp_krakow', null],
     ])
   })
 
@@ -128,7 +129,30 @@ describe('mock db', () => {
     expect(createDb(memoryStorage(stored), seedState).state.simulateErrors).toBe(false)
   })
 
-  it('falls back to the seed when a stored state of version 5 has no groups', () => {
+  it('reseeds a stored state of version 5 so the demo gets the linked group and its members get link fields', () => {
+    const before = seedState()
+    const stored = JSON.stringify({
+      ...before,
+      version: 5,
+      simulateErrors: true,
+      groups: before.groups.filter((row) => row.id === 'grp_albania'),
+      groupMembers: before.groupMembers
+        .filter((row) => row.groupId === 'grp_albania')
+        .map(({ userId: _userId, invitedEmail: _email, invitedAt: _at, ...row }) => row),
+    })
+    const { state } = createDb(memoryStorage(stored), seedState)
+    expect(state.version).toBe(6)
+    expect(state.simulateErrors).toBe(false)
+    expect(state.groups.map((row) => row.id)).toEqual(['grp_albania', 'grp_krakow'])
+    expect(state.groupMembers.every((row) => row.userId !== undefined && row.invitedEmail !== undefined)).toBe(true)
+  })
+
+  it('reseeds a stored state of version 5 even when it carries every key', () => {
+    const stored = JSON.stringify({ ...seedState(), version: 5, simulateErrors: true })
+    expect(createDb(memoryStorage(stored), seedState).state.simulateErrors).toBe(false)
+  })
+
+  it('falls back to the seed when a stored state of the current version has no groups', () => {
     const { groups: _groups, ...older } = seedState()
     const stored = JSON.stringify({ ...older, simulateErrors: true })
     const { state } = createDb(memoryStorage(stored), seedState)
@@ -136,7 +160,7 @@ describe('mock db', () => {
     expect(Array.isArray(state.groups)).toBe(true)
   })
 
-  it('falls back to the seed when a stored state of version 5 has no debts', () => {
+  it('falls back to the seed when a stored state of the current version has no debts', () => {
     const { debts: _debts, ...older } = seedState()
     const stored = JSON.stringify({ ...older, simulateErrors: true })
     const { state } = createDb(memoryStorage(stored), seedState)

@@ -520,7 +520,7 @@ describe('listing debts', () => {
     expect(open.items.map((item) => item.overdue)).toEqual([true, false, false])
     expect(open.items[0]?.direction).toBe('borrowed')
     expect(open.items[2]).toMatchObject({ dueDate: null, currency: 'EUR' })
-    expect(open.summary).toEqual({ owedToMe: 61_500, owedByMe: 150_000, open: 3, overdue: 1 })
+    expect(open.summary).toEqual({ owedToMe: 61_500, owedByMe: 150_000, open: 3, overdue: 1, groups: 0 })
 
     const closed = await list(mock, { status: 'settled' })
     expect(closed.total).toBe(1)
@@ -533,7 +533,7 @@ describe('listing debts', () => {
       overdue: false,
       repayments: 1,
     })
-    expect(closed.summary).toEqual({ owedToMe: 61_500, owedByMe: 150_000, open: 3, overdue: 1 })
+    expect(closed.summary).toEqual({ owedToMe: 61_500, owedByMe: 150_000, open: 3, overdue: 1, groups: 0 })
   })
 
   it('breaks due date ties by date, then by creation, and puts undated debts last', async () => {
@@ -573,7 +573,7 @@ describe('listing debts', () => {
     const page = await list(mock, { page: '2', pageSize: '2' })
     expect(page).toMatchObject({ total: 3, page: 2, pageSize: 2 })
     expect(page.items).toHaveLength(1)
-    expect(page.summary).toEqual({ owedToMe: 3_000, owedByMe: 0, open: 3, overdue: 0 })
+    expect(page.summary).toEqual({ owedToMe: 3_000, owedByMe: 0, open: 3, overdue: 0, groups: 0 })
   })
 
   it('converts the remaining amount of each currency once, not debt by debt', async () => {
@@ -587,7 +587,7 @@ describe('listing debts', () => {
     const mock = api()
     const debt = await create(mock, { amount: 50_000 })
     await repay(mock, debt.id, { amount: 20_000 })
-    expect((await list(mock)).summary).toEqual({ owedToMe: 30_000, owedByMe: 0, open: 1, overdue: 0 })
+    expect((await list(mock)).summary).toEqual({ owedToMe: 30_000, owedByMe: 0, open: 1, overdue: 0, groups: 0 })
   })
 
   it('does not count a debt due today as overdue', async () => {
@@ -612,7 +612,7 @@ describe('listing debts', () => {
     await unavailable(list(mock))
     await unavailable(list(mock, { status: 'settled' }))
     await repay(mock, debt.id, { amount: 5_000, currency: 'KWD', rate: 1 })
-    expect((await list(mock)).summary).toEqual({ owedToMe: 0, owedByMe: 0, open: 0, overdue: 0 })
+    expect((await list(mock)).summary).toEqual({ owedToMe: 0, owedByMe: 0, open: 0, overdue: 0, groups: 0 })
   })
 
   it('values the summary at the latest stored rate whatever its age', async () => {
@@ -623,20 +623,21 @@ describe('listing debts', () => {
   })
 
   it('returns zeros without debts', async () => {
-    expect((await list(api())).summary).toEqual({ owedToMe: 0, owedByMe: 0, open: 0, overdue: 0 })
+    expect((await list(api())).summary).toEqual({ owedToMe: 0, owedByMe: 0, open: 0, overdue: 0, groups: 0 })
   })
 
   it('isolates users', async () => {
     const mock = api()
+    quoteRate(mock, 'UAH', 0.1, today)
     const account = await addAccount(mock, 'PLN', 10_000)
     await create(mock, { amount: 3_000, accountId: account })
     await create(mock, { direction: 'borrowed', amount: 1_000 })
-    expect((await list(mock)).summary).toEqual({ owedToMe: 3_000, owedByMe: 1_000, open: 2, overdue: 0 })
+    expect((await list(mock)).summary).toEqual({ owedToMe: 3_000, owedByMe: 1_000, open: 2, overdue: 0, groups: 0 })
     mock.db.state.activeUserId = 'usr_oleh'
     for (const status of ['open', 'settled']) {
       const page = await list(mock, { status })
       expect(page).toMatchObject({ total: 0, items: [], currency: 'UAH' })
-      expect(page.summary).toEqual({ owedToMe: 0, owedByMe: 0, open: 0, overdue: 0 })
+      expect(page.summary).toEqual({ owedToMe: 200_000, owedByMe: 0, open: 0, overdue: 0, groups: 1 })
     }
   })
 })
@@ -896,7 +897,7 @@ describe('repayments', () => {
     await removeRepayment(mock, debt.id, row.id)
     const open = await list(mock)
     expect(open.items.map((item) => item.id)).toEqual([debt.id])
-    expect(open.summary).toEqual({ owedToMe: 0, owedByMe: 8_000, open: 1, overdue: 0 })
+    expect(open.summary).toEqual({ owedToMe: 0, owedByMe: 8_000, open: 1, overdue: 0, groups: 0 })
   })
 
   it('answers 404 for the repayments of an unknown or foreign debt and changes nothing', async () => {

@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'bun:test'
 import {
+  type DebtPage,
   type GroupBalancesDto,
+  type GroupDebtDto,
   type GroupDto,
   type GroupEntryEvent,
   type GroupExpenseDto,
   type GroupExpenseState,
+  type GroupInviteDto,
   type GroupRepaymentDto,
   type GroupRepaymentState,
   type GroupSummaryDto,
@@ -28,10 +31,12 @@ const owner = { kind: 'owner', memberId: null, name: 'Anna Nowak' }
 
 const path = (suffix = '') => `/v1/groups/grp_albania${suffix}`
 
+const unlinked = { userId: null, invitedEmail: null, invitedAt: null }
+
 describe('seeded groups', () => {
   it.each(seedDays)('seeds Albania 2026 with its members and the unused Beach category on %s', (today) => {
     const rows = demoGroups(today)
-    expect(rows.groups).toEqual([
+    expect(rows.groups.filter((row) => row.id === 'grp_albania')).toEqual([
       {
         id: 'grp_albania',
         userId: 'usr_anna',
@@ -41,11 +46,11 @@ describe('seeded groups', () => {
         shareToken: 'albania-2026-demo-link-0123456789abcdefghij',
       },
     ])
-    expect(rows.groupMembers).toEqual([
-      { id: anna, groupId: 'grp_albania', name: 'Anna', position: 0 },
-      { id: olya, groupId: 'grp_albania', name: 'Olya', position: 1 },
-      { id: max, groupId: 'grp_albania', name: 'Max', position: 2 },
-      { id: kasia, groupId: 'grp_albania', name: 'Kasia', position: 3 },
+    expect(rows.groupMembers.filter((row) => row.groupId === 'grp_albania')).toEqual([
+      { id: anna, groupId: 'grp_albania', name: 'Anna', position: 0, ...unlinked },
+      { id: olya, groupId: 'grp_albania', name: 'Olya', position: 1, ...unlinked },
+      { id: max, groupId: 'grp_albania', name: 'Max', position: 2, ...unlinked },
+      { id: kasia, groupId: 'grp_albania', name: 'Kasia', position: 3, ...unlinked },
     ])
     expect(rows.groupCategories).toEqual([
       {
@@ -58,8 +63,69 @@ describe('seeded groups', () => {
     expect(rows.groupExpenses.every((row) => row.categoryId !== 'gcat_beach')).toBe(true)
   })
 
+  it.each(seedDays)('seeds Kraków for Oleh with himself linked, Anna invited and no share link on %s', (today) => {
+    const rows = demoGroups(today)
+    const albania = rows.groups.find((row) => row.id === 'grp_albania')
+    expect(rows.groups.map((row) => row.id)).toEqual(['grp_albania', 'grp_krakow'])
+    expect(rows.groups[1]).toEqual({
+      id: 'grp_krakow',
+      userId: 'usr_oleh',
+      name: 'Kraków',
+      currency: 'PLN',
+      createdAt: expect.stringMatching(ISO_MILLISECONDS),
+      shareToken: null,
+    })
+    expect((rows.groups[1]?.createdAt ?? '') > (albania?.createdAt ?? '')).toBe(true)
+    expect(rows.groupMembers.filter((row) => row.groupId === 'grp_krakow')).toEqual([
+      { id: 'gmb_oleh', groupId: 'grp_krakow', name: 'Oleh', position: 0, ...unlinked, userId: 'usr_oleh' },
+      {
+        id: 'gmb_k_anna',
+        groupId: 'grp_krakow',
+        name: 'Anna',
+        position: 1,
+        userId: null,
+        invitedEmail: 'anna@demo.mita.app',
+        invitedAt: expect.stringMatching(ISO_MILLISECONDS),
+      },
+      { id: 'gmb_taras', groupId: 'grp_krakow', name: 'Taras', position: 2, ...unlinked },
+    ])
+    const [pierogi] = rows.groupExpenses.filter((row) => row.groupId === 'grp_krakow')
+    expect(rows.groupExpenses.filter((row) => row.groupId === 'grp_krakow')).toHaveLength(1)
+    expect(pierogi).toMatchObject({
+      id: 'gex_pierogi',
+      payerId: 'gmb_oleh',
+      amount: 30_000,
+      currency: 'PLN',
+      date: addDaysIso(today, -5),
+      categoryId: 'cafes',
+      tags: [],
+      description: 'Pierogi',
+      rate: 1,
+      rateManual: false,
+      groupAmount: 30_000,
+      split: 'equal',
+      deleted: false,
+    })
+    expect(pierogi?.shares.map((share) => [share.memberId, share.amount, share.groupAmount])).toEqual([
+      ['gmb_oleh', 10_000, 10_000],
+      ['gmb_k_anna', 10_000, 10_000],
+      ['gmb_taras', 10_000, 10_000],
+    ])
+    expect(rows.groupRepayments.filter((row) => row.groupId === 'grp_krakow')).toEqual([])
+    expect(rows.groupCategories.filter((row) => row.groupId === 'grp_krakow')).toEqual([])
+    const events = rows.groupEvents.filter((event) => event.groupId === 'grp_krakow')
+    expect(events.map((event) => [event.entryId, event.action, event.actorUserId, event.actorMemberId])).toEqual([
+      ['gex_pierogi', 'created', 'usr_oleh', null],
+    ])
+    expect(events[0]?.at).toMatch(ISO_MILLISECONDS)
+    expect((events[0]?.at ?? '') >= (rows.groups[1]?.createdAt ?? '')).toBe(true)
+    expect(events[0]?.state).toEqual(
+      expect.objectContaining({ payerId: 'gmb_oleh', amount: 30_000, description: 'Pierogi' }),
+    )
+  })
+
   it.each(seedDays)('seeds the designed expenses on %s', (today) => {
-    const { groupExpenses } = demoGroups(today)
+    const groupExpenses = demoGroups(today).groupExpenses.filter((row) => row.groupId === 'grp_albania')
     expect(
       groupExpenses.map(
         ({
@@ -213,7 +279,10 @@ describe('seeded groups', () => {
   })
 
   it.each(seedDays)('records every change by the owner and keeps the last state equal to the row on %s', (today) => {
-    const { groupExpenses, groupRepayments, groupEvents } = demoGroups(today)
+    const rows = demoGroups(today)
+    const groupExpenses = rows.groupExpenses
+    const groupRepayments = rows.groupRepayments
+    const groupEvents = rows.groupEvents.filter((event) => event.groupId === 'grp_albania')
     const actionsOf = (entryId: string) =>
       groupEvents.filter((event) => event.entryId === entryId).map((event) => event.action)
     expect(actionsOf('gex_dinner')).toEqual(['created', 'updated'])
@@ -222,7 +291,7 @@ describe('seeded groups', () => {
     expect(actionsOf('gex_taxi')).toEqual(['created', 'deleted'])
     expect(actionsOf('gpay_kasia_anna')).toEqual(['created'])
     expect(groupEvents).toHaveLength(7)
-    expect(new Set(groupEvents.map((event) => event.id)).size).toBe(groupEvents.length)
+    expect(new Set(rows.groupEvents.map((event) => event.id)).size).toBe(rows.groupEvents.length)
     for (const event of groupEvents) {
       expect(event.groupId).toBe('grp_albania')
       expect(event.actorUserId).toBe('usr_anna')
@@ -239,12 +308,12 @@ describe('seeded groups', () => {
     ])
     expect(dinner[0]?.at < (dinner[1]?.at ?? '')).toBe(true)
     for (const row of groupExpenses) {
-      const last = groupEvents.filter((event) => event.entryId === row.id).at(-1)
+      const last = rows.groupEvents.filter((event) => event.entryId === row.id).at(-1)
       const { id: _id, deleted: _deleted, groupId: _groupId, createdAt: _createdAt, ...state } = row
       expect(last?.state).toEqual(state)
     }
     for (const row of groupRepayments) {
-      const last = groupEvents.filter((event) => event.entryId === row.id).at(-1)
+      const last = rows.groupEvents.filter((event) => event.entryId === row.id).at(-1)
       const { id: _id, deleted: _deleted, groupId: _groupId, createdAt: _createdAt, ...state } = row
       expect(last?.state).toEqual(state)
     }
@@ -269,7 +338,7 @@ describe('seeded groups', () => {
   it.each(seedDays)('puts the demo group into the seed state on %s', (today) => {
     const state = seedState(today)
     const rows = demoGroups(today)
-    expect(state.version).toBe(5)
+    expect(state.version).toBe(6)
     expect(state.groups).toEqual(rows.groups)
     expect(state.groupMembers).toEqual(rows.groupMembers)
     expect(state.groupCategories).toEqual(rows.groupCategories)
@@ -282,7 +351,7 @@ describe('seeded groups', () => {
     const mock = loggedInMockApi()
     const list = (await mock.handle({ method: 'GET', path: '/v1/groups' })) as Page<GroupSummaryDto>
     expect(list.items).toEqual([
-      { id: 'grp_albania', name: 'Albania 2026', currency: 'EUR', members: 4, total: 19_070 },
+      { id: 'grp_albania', name: 'Albania 2026', currency: 'EUR', members: 4, total: 19_070, role: 'owner' },
     ])
     expect(list.total).toBe(1)
 
@@ -293,12 +362,15 @@ describe('seeded groups', () => {
       currencyLocked: true,
       total: 19_070,
       shareToken: 'albania-2026-demo-link-0123456789abcdefghij',
+      role: 'owner',
+      myMemberId: null,
     })
+    const details = { linked: false, linkedName: null, invitedEmail: null }
     expect(group.members).toEqual([
-      { id: anna, name: 'Anna', inUse: true },
-      { id: olya, name: 'Olya', inUse: true },
-      { id: max, name: 'Max', inUse: true },
-      { id: kasia, name: 'Kasia', inUse: true },
+      { id: anna, name: 'Anna', inUse: true, ...details },
+      { id: olya, name: 'Olya', inUse: true, ...details },
+      { id: max, name: 'Max', inUse: true, ...details },
+      { id: kasia, name: 'Kasia', inUse: true, ...details },
     ])
     expect(group.categories).toEqual([
       ...standardGroupCategories.map((id) => ({ id, standard: true, name: null })),
@@ -423,11 +495,94 @@ describe('seeded groups', () => {
     expect(history.items.map((event) => event.action)).toEqual(['restored', 'deleted', 'created'])
   })
 
-  it('shows Oleh no group at all', async () => {
+  it('serves Kraków to Oleh as the owner who is linked to himself, with the invitation of Anna', async () => {
     const mock = loggedInMockApi('usr_oleh')
 
     const list = (await mock.handle({ method: 'GET', path: '/v1/groups' })) as Page<GroupSummaryDto>
-    expect(list).toMatchObject({ items: [], total: 0 })
+    expect(list.items).toEqual([
+      { id: 'grp_krakow', name: 'Kraków', currency: 'PLN', members: 3, total: 30_000, role: 'owner' },
+    ])
+    const group = (await mock.handle({ method: 'GET', path: '/v1/groups/grp_krakow' })) as GroupDto
+    expect(group).toMatchObject({
+      name: 'Kraków',
+      currency: 'PLN',
+      total: 30_000,
+      shareToken: null,
+      role: 'owner',
+      myMemberId: 'gmb_oleh',
+    })
+    expect(group.members).toEqual([
+      { id: 'gmb_oleh', name: 'Oleh', inUse: true, linked: true, linkedName: 'Oleh Kravets', invitedEmail: null },
+      {
+        id: 'gmb_k_anna',
+        name: 'Anna',
+        inUse: true,
+        linked: false,
+        linkedName: null,
+        invitedEmail: 'anna@demo.mita.app',
+      },
+      { id: 'gmb_taras', name: 'Taras', inUse: true, linked: false, linkedName: null, invitedEmail: null },
+    ])
+    const balances = (await mock.handle({ method: 'GET', path: '/v1/groups/grp_krakow/balances' })) as GroupBalancesDto
+    expect(balances.members.map((member) => member.balance)).toEqual([20_000, -10_000, -10_000])
+    const lines = (await mock.handle({ method: 'GET', path: '/v1/debts/groups' })) as Page<GroupDebtDto>
+    expect(lines.items).toEqual([{ groupId: 'grp_krakow', name: 'Kraków', currency: 'PLN', balance: 20_000 }])
+    const summary = ((await mock.handle({ method: 'GET', path: '/v1/debts' })) as DebtPage).summary
+    expect(summary.groups).toBe(1)
+  })
+
+  it('offers Anna the invitation to Kraków and adds the group to her debts once she accepts', async () => {
+    const mock = loggedInMockApi()
+    const before = ((await mock.handle({ method: 'GET', path: '/v1/debts' })) as DebtPage).summary
+    expect(before.groups).toBe(0)
+
+    const invites = (await mock.handle({ method: 'GET', path: '/v1/group-invites' })) as Page<GroupInviteDto>
+    expect(invites.items).toEqual([
+      {
+        memberId: 'gmb_k_anna',
+        groupId: 'grp_krakow',
+        groupName: 'Kraków',
+        memberName: 'Anna',
+        ownerName: 'Oleh Kravets',
+        invitedAt: expect.stringMatching(ISO_MILLISECONDS),
+      },
+    ])
+    expect(((await mock.handle({ method: 'GET', path: '/v1/debts/groups' })) as Page<GroupDebtDto>).items).toEqual([])
+
+    const accepted = (await mock.handle({
+      method: 'POST',
+      path: '/v1/group-invites/gmb_k_anna/accept',
+    })) as GroupSummaryDto
+    expect(accepted).toEqual({
+      id: 'grp_krakow',
+      name: 'Kraków',
+      currency: 'PLN',
+      members: 3,
+      total: 30_000,
+      role: 'member',
+    })
+
+    const lines = (await mock.handle({ method: 'GET', path: '/v1/debts/groups' })) as Page<GroupDebtDto>
+    expect(lines.items).toEqual([{ groupId: 'grp_krakow', name: 'Kraków', currency: 'PLN', balance: -10_000 }])
+    const after = ((await mock.handle({ method: 'GET', path: '/v1/debts' })) as DebtPage).summary
+    expect(after).toEqual({ ...before, owedByMe: before.owedByMe + 10_000, groups: 1 })
+    const list = (await mock.handle({ method: 'GET', path: '/v1/groups' })) as Page<GroupSummaryDto>
+    expect(list.items.map((item) => [item.name, item.role])).toEqual([
+      ['Kraków', 'member'],
+      ['Albania 2026', 'owner'],
+    ])
+    const krakow = (await mock.handle({ method: 'GET', path: '/v1/groups/grp_krakow' })) as GroupDto
+    expect(krakow).toMatchObject({ role: 'member', myMemberId: 'gmb_k_anna', shareToken: null })
+    expect(krakow.members.map((member) => [member.linked, member.linkedName, member.invitedEmail])).toEqual([
+      [true, null, null],
+      [true, null, null],
+      [false, null, null],
+    ])
+  })
+
+  it('shows Oleh nothing of Albania', async () => {
+    const mock = loggedInMockApi('usr_oleh')
+
     for (const request of [
       { method: 'GET', path: path() },
       { method: 'GET', path: path('/balances') },

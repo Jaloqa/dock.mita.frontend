@@ -16,6 +16,8 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export type ErrorCollector = ReturnType<typeof collectErrors>
 
+export const isEmailAddress = (address: string): boolean => address.length <= EMAIL_MAX && EMAIL_PATTERN.test(address)
+
 export function checkName(errors: ErrorCollector, name: unknown): void {
   if (isMissing(name)) errors.add('name', 'validation.required')
   else if (typeof name !== 'string') errors.add('name', 'validation.invalidValue')
@@ -27,7 +29,7 @@ export function checkEmail(errors: ErrorCollector, email: unknown, isTaken: (add
   else if (typeof email !== 'string') errors.add('email', 'validation.invalidValue')
   else {
     const address = email.trim()
-    if (address.length > EMAIL_MAX || !EMAIL_PATTERN.test(address)) errors.add('email', 'validation.invalidEmail')
+    if (!isEmailAddress(address)) errors.add('email', 'validation.invalidEmail')
     else if (isTaken(address)) errors.add('email', 'validation.emailTaken')
   }
 }
