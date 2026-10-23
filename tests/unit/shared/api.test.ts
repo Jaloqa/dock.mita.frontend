@@ -50,6 +50,43 @@ describe('createApiClient', () => {
       { method: 'DELETE', path: '/v1/me', body: { password: 'secret' } },
     ])
   })
+
+  it('hands optional request headers to the transport', async () => {
+    const seen: ApiRequest[] = []
+    const client = createApiClient(async (request) => {
+      seen.push(request)
+      return { ok: true }
+    })
+    const options = { headers: { 'X-Group-Member': 'mbr_1' } }
+    await client.get('/v1/items', { page: 2 }, options)
+    await client.get('/v1/items', undefined, options)
+    await client.post('/v1/items', { name: 'a' }, options)
+    await client.post('/v1/items', undefined, options)
+    await client.put('/v1/items/1', { name: 'b' }, options)
+    await client.delete('/v1/items/1', undefined, options)
+    await client.delete('/v1/me', { password: 'secret' }, options)
+    expect(seen).toEqual([
+      { method: 'GET', path: '/v1/items', query: { page: 2 }, headers: options.headers },
+      { method: 'GET', path: '/v1/items', headers: options.headers },
+      { method: 'POST', path: '/v1/items', body: { name: 'a' }, headers: options.headers },
+      { method: 'POST', path: '/v1/items', headers: options.headers },
+      { method: 'PUT', path: '/v1/items/1', body: { name: 'b' }, headers: options.headers },
+      { method: 'DELETE', path: '/v1/items/1', headers: options.headers },
+      { method: 'DELETE', path: '/v1/me', body: { password: 'secret' }, headers: options.headers },
+    ])
+  })
+
+  it('leaves the headers out of the request when the options carry none', async () => {
+    const seen: ApiRequest[] = []
+    const client = createApiClient(async (request) => {
+      seen.push(request)
+      return { ok: true }
+    })
+    await client.get('/v1/items', undefined, {})
+    await client.post('/v1/items', undefined, {})
+    await client.delete('/v1/items/1', undefined, {})
+    for (const request of seen) expect('headers' in request).toBe(false)
+  })
 })
 
 describe('createHttpTransport', () => {
@@ -77,6 +114,26 @@ describe('createHttpTransport', () => {
         credentials: 'include',
       },
     ])
+  })
+
+  it('sends the headers of the request next to its own and keeps its own on a clash', async () => {
+    const calls: Parameters<Fetcher>[] = []
+    const fetcher: Fetcher = async (...args) => {
+      calls.push(args)
+      return {}
+    }
+    const transport = createHttpTransport(fetcher, {
+      baseUrl: '',
+      locale: () => 'pl',
+      xsrfToken: () => 'tok',
+      onSessionExpired: () => {},
+    })
+    await transport({
+      method: 'POST',
+      path: '/v1/shared/groups/token/expenses',
+      headers: { 'X-Group-Member': 'mbr_1', 'Accept-Language': 'de', 'X-XSRF-TOKEN': 'forged' },
+    })
+    expect(calls[0]?.[1].headers).toEqual({ 'X-Group-Member': 'mbr_1', 'Accept-Language': 'pl', 'X-XSRF-TOKEN': 'tok' })
   })
 
   it('turns fetch errors with ProblemDetails into ApiError', async () => {

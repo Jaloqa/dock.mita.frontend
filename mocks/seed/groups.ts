@@ -35,6 +35,7 @@ type PlannedRepayment = {
 const GROUP_ID = 'grp_albania'
 const OWNER_ID = 'usr_anna'
 const GROUP_CURRENCY: Currency = 'EUR'
+const SHARE_TOKEN = 'albania-2026-demo-link-0123456789abcdefghij'
 
 const [anna, olya, max, kasia] = ['gmb_anna', 'gmb_olya', 'gmb_max', 'gmb_kasia'] as const
 const everyone = [anna, olya, max, kasia]
@@ -196,6 +197,7 @@ export function demoGroups(today: string): DemoGroups {
         name: 'Albania 2026',
         currency: GROUP_CURRENCY,
         createdAt: when(12, '10:00:00'),
+        shareToken: SHARE_TOKEN,
       },
     ],
     groupMembers: members.map(([id, name], position) => ({ id, groupId: GROUP_ID, name, position })),

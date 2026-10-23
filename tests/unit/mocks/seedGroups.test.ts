@@ -38,6 +38,7 @@ describe('seeded groups', () => {
         name: 'Albania 2026',
         currency: 'EUR',
         createdAt: expect.stringMatching(ISO_MILLISECONDS),
+        shareToken: 'albania-2026-demo-link-0123456789abcdefghij',
       },
     ])
     expect(rows.groupMembers).toEqual([
@@ -268,7 +269,7 @@ describe('seeded groups', () => {
   it.each(seedDays)('puts the demo group into the seed state on %s', (today) => {
     const state = seedState(today)
     const rows = demoGroups(today)
-    expect(state.version).toBe(4)
+    expect(state.version).toBe(5)
     expect(state.groups).toEqual(rows.groups)
     expect(state.groupMembers).toEqual(rows.groupMembers)
     expect(state.groupCategories).toEqual(rows.groupCategories)
@@ -286,7 +287,13 @@ describe('seeded groups', () => {
     expect(list.total).toBe(1)
 
     const group = (await mock.handle({ method: 'GET', path: path() })) as GroupDto
-    expect(group).toMatchObject({ name: 'Albania 2026', currency: 'EUR', currencyLocked: true, total: 19_070 })
+    expect(group).toMatchObject({
+      name: 'Albania 2026',
+      currency: 'EUR',
+      currencyLocked: true,
+      total: 19_070,
+      shareToken: 'albania-2026-demo-link-0123456789abcdefghij',
+    })
     expect(group.members).toEqual([
       { id: anna, name: 'Anna', inUse: true },
       { id: olya, name: 'Olya', inUse: true },

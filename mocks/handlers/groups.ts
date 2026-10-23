@@ -11,17 +11,22 @@ import type { GroupCategoryRow, GroupMemberRow, GroupRow, MockDb } from '../db'
 import { badRequest, notFound } from '../errors'
 import {
   GROUP_PAGE,
+  type GroupScope,
   groupSummaries,
   groupView,
   hasEntries,
   isStandardCategory,
   memberInUse,
   membersOf,
+  newShareToken,
+  onGroup,
+  openGroup,
+  openGroupForWrite,
   ownGroup,
 } from '../groups'
 import { newId } from '../ids'
 import { paginate } from '../paginate'
-import type { MockRouter } from '../router'
+import type { MockContext, MockRouter } from '../router'
 import { starterSet } from '../seed/categories'
 import { CONTROL } from '../tags'
 import { collectErrors, type ErrorCollector, isMissing, objectBody } from '../validation'
@@ -93,6 +98,23 @@ const memberOf = (db: MockDb, group: GroupRow, memberId: string | undefined): Gr
 const nameTaken = (rows: readonly { name: string }[], name: string): boolean =>
   rows.some((row) => nameKey(row.name) === nameKey(name))
 
+const getGroup = ({ db }: MockContext, scope: GroupScope) =>
+  groupView(db.state, openGroup(db.state, scope), scope.kind === 'owner')
+
+function addCategory({ db, body }: MockContext, scope: GroupScope): GroupCategoryDto {
+  const name = validateName(body)
+  const { group } = openGroupForWrite(db.state, scope)
+  const own = db.state.groupCategories.filter((row) => row.groupId === group.id)
+  if (nameTaken(own, name) || standardNames.has(nameKey(name))) {
+    badRequest({ name: ['validation.categoryNameTaken'] })
+  }
+  if (own.length >= GROUP_CATEGORIES_MAX) badRequest({ name: ['validation.tooManyCategories'] })
+  const row: GroupCategoryRow = { id: newId('gcat'), groupId: group.id, name, createdAt: new Date().toISOString() }
+  db.state.groupCategories.push(row)
+  db.save()
+  return { id: row.id, standard: false, name: row.name }
+}
+
 export function registerGroupHandlers(router: MockRouter) {
   router.on('GET', '/v1/groups', ({ db, userId, query }) =>
     paginate(groupSummaries(db.state, userId), query, GROUP_PAGE),
@@ -100,18 +122,22 @@ export function registerGroupHandlers(router: MockRouter) {
 
   router.on('POST', '/v1/groups', ({ db, userId, body }) => {
     const { members, ...fields } = validateNewGroup(body)
-    const group: GroupRow = { id: newId('grp'), userId, ...fields, createdAt: new Date().toISOString() }
+    const group: GroupRow = {
+      id: newId('grp'),
+      userId,
+      ...fields,
+      createdAt: new Date().toISOString(),
+      shareToken: null,
+    }
     db.state.groups.push(group)
     db.state.groupMembers.push(
       ...members.map((name, position) => ({ id: newId('mbr'), groupId: group.id, name, position })),
     )
     db.save()
-    return groupView(db.state, group)
+    return groupView(db.state, group, true)
   })
 
-  router.on('GET', '/v1/groups/:id', ({ db, userId, params }) =>
-    groupView(db.state, ownGroup(db.state, userId, params.id)),
-  )
+  onGroup(router, 'GET', '', getGroup)
 
   router.on('PUT', '/v1/groups/:id', ({ db, userId, params, body }) => {
     const fields = validateGroup(body)
@@ -121,7 +147,19 @@ export function registerGroupHandlers(router: MockRouter) {
     }
     Object.assign(group, fields)
     db.save()
-    return groupView(db.state, group)
+    return groupView(db.state, group, true)
+  })
+
+  router.on('POST', '/v1/groups/:id/share', ({ db, userId, params }) => {
+    const group = ownGroup(db.state, userId, params.id)
+    group.shareToken = newShareToken()
+    db.save()
+    return groupView(db.state, group, true)
+  })
+
+  router.on('DELETE', '/v1/groups/:id/share', ({ db, userId, params }) => {
+    ownGroup(db.state, userId, params.id).shareToken = null
+    db.save()
   })
 
   router.on('DELETE', '/v1/groups/:id', ({ db, userId, params }) => {
@@ -169,17 +207,5 @@ export function registerGroupHandlers(router: MockRouter) {
     db.save()
   })
 
-  router.on('POST', '/v1/groups/:id/categories', ({ db, userId, params, body }): GroupCategoryDto => {
-    const name = validateName(body)
-    const group = ownGroup(db.state, userId, params.id)
-    const own = db.state.groupCategories.filter((row) => row.groupId === group.id)
-    if (nameTaken(own, name) || standardNames.has(nameKey(name))) {
-      badRequest({ name: ['validation.categoryNameTaken'] })
-    }
-    if (own.length >= GROUP_CATEGORIES_MAX) badRequest({ name: ['validation.tooManyCategories'] })
-    const row: GroupCategoryRow = { id: newId('gcat'), groupId: group.id, name, createdAt: new Date().toISOString() }
-    db.state.groupCategories.push(row)
-    db.save()
-    return { id: row.id, standard: false, name: row.name }
-  })
+  onGroup(router, 'POST', '/categories', addCategory)
 }

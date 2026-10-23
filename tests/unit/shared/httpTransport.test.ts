@@ -64,6 +64,51 @@ describe('http transport xsrf header', () => {
   })
 })
 
+describe('http transport request headers', () => {
+  it.each(['GET', 'POST', 'PUT', 'DELETE'] as const)('sends the headers of a %s request', async (method) => {
+    const { transport, calls } = setup(() => ({}))
+    await transport({ method, path: '/v1/items', headers: { 'X-Group-Member': 'mbr_1' } })
+    expect(calls[0]?.headers['X-Group-Member']).toBe('mbr_1')
+    expect(calls[0]?.headers['Accept-Language']).toBe('en')
+  })
+
+  it('keeps the X-XSRF-TOKEN of the transport next to the headers of the request', async () => {
+    const { transport, calls } = setup(() => ({}))
+    await transport({ method: 'POST', path: '/v1/items', headers: { 'X-Group-Member': 'mbr_1' } })
+    expect(calls[0]?.headers).toEqual({ 'Accept-Language': 'en', 'X-Group-Member': 'mbr_1', 'X-XSRF-TOKEN': 'tok' })
+  })
+
+  it('lets its own Accept-Language and X-XSRF-TOKEN win over the same headers of the request', async () => {
+    const { transport, calls } = setup(() => ({}))
+    await transport({
+      method: 'DELETE',
+      path: '/v1/items',
+      headers: { 'Accept-Language': 'de', 'X-XSRF-TOKEN': 'forged', 'X-Group-Member': 'mbr_1' },
+    })
+    expect(calls[0]?.headers).toEqual({ 'Accept-Language': 'en', 'X-Group-Member': 'mbr_1', 'X-XSRF-TOKEN': 'tok' })
+  })
+
+  it('sends no other header when the request has none', async () => {
+    const { transport, calls } = setup(() => ({}))
+    await transport({ method: 'GET', path: '/v1/items' })
+    await transport({ method: 'POST', path: '/v1/items' })
+    expect(calls[0]?.headers).toEqual({ 'Accept-Language': 'en' })
+    expect(calls[1]?.headers).toEqual({ 'Accept-Language': 'en', 'X-XSRF-TOKEN': 'tok' })
+  })
+
+  it('sends the headers again on the request retried after a refresh', async () => {
+    const { transport, calls } = setup((_call, index) => {
+      if (index === 0) throw unauthorized()
+      return {}
+    })
+    await transport({ method: 'POST', path: '/v1/items', headers: { 'X-Group-Member': 'mbr_1' } })
+    expect(calls.map((c) => c.url)).toEqual(['/v1/items', '/v1/auth/refresh', '/v1/items'])
+    expect(calls[0]?.headers['X-Group-Member']).toBe('mbr_1')
+    expect(calls[1]?.headers['X-Group-Member']).toBeUndefined()
+    expect(calls[2]?.headers['X-Group-Member']).toBe('mbr_1')
+  })
+})
+
 describe('http transport refresh', () => {
   it('refreshes on 401 and retries the request once', async () => {
     const { transport, calls } = setup((call, index) => {

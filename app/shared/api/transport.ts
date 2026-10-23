@@ -7,6 +7,7 @@ export type ApiRequest = {
   path: string
   query?: Record<string, QueryValue>
   body?: unknown
+  headers?: Record<string, string>
 }
 
 export type Transport = (request: ApiRequest) => Promise<unknown>

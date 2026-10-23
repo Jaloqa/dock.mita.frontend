@@ -1,4 +1,5 @@
 import {
+  GROUP_MEMBER_HEADER,
   type GroupActorDto,
   type GroupBalancesDto,
   type GroupDto,
@@ -14,6 +15,7 @@ import {
   type StandardGroupCategory,
   standardGroupCategories,
 } from '../app/shared/api/contract'
+import type { HttpMethod } from '../app/shared/api/transport'
 import { allocateMinor, type Currency, convertMinor, roundRate, sumMinor } from '../app/shared/money/money'
 import type {
   GroupEventRow,
@@ -24,12 +26,23 @@ import type {
   MockState,
   RateRow,
 } from './db'
-import { notFound, ratesUnavailable } from './errors'
+import { forbidden, notFound, ratesUnavailable } from './errors'
 import { newId } from './ids'
 import { freshRateOn, rateOn } from './rates'
+import type { MockContext, MockRouter } from './router'
 import type { ErrorCollector } from './validation'
 
 export const GROUP_PAGE = { defaultPageSize: 100, maxPageSize: 100 }
+
+const SHARE_TOKEN_BYTES = 32
+
+export type GroupScope =
+  | { kind: 'owner'; userId: string; groupId: string | undefined }
+  | { kind: 'link'; token: string | undefined; member: string | undefined }
+
+export type EventActor = Pick<GroupEventRow, 'actorUserId' | 'actorMemberId'>
+
+type GroupHandler = (context: MockContext, scope: GroupScope) => unknown
 
 export type EntryPriceInput = {
   date: string
@@ -47,11 +60,55 @@ type OpenBalance = { memberId: string; balance: number }
 export const isStandardCategory = (value: string): value is StandardGroupCategory =>
   standardGroupCategories.includes(value as StandardGroupCategory)
 
-export const findGroup = (state: MockState, userId: string, id: string | undefined): GroupRow | undefined =>
+const findGroup = (state: MockState, userId: string, id: string | undefined): GroupRow | undefined =>
   state.groups.find((row) => row.id === id && row.userId === userId)
 
 export const ownGroup = (state: MockState, userId: string, id: string | undefined): GroupRow =>
   findGroup(state, userId, id) ?? notFound()
+
+export const newShareToken = (): string =>
+  btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(SHARE_TOKEN_BYTES))))
+    .replaceAll('+', '-')
+    .replaceAll('/', '_')
+    .replaceAll('=', '')
+
+export const findScopedGroup = (state: MockState, scope: GroupScope): GroupRow | undefined =>
+  scope.kind === 'owner'
+    ? findGroup(state, scope.userId, scope.groupId)
+    : state.groups.find((row) => row.shareToken === scope.token)
+
+export const openGroup = (state: MockState, scope: GroupScope): GroupRow => findScopedGroup(state, scope) ?? notFound()
+
+export function openGroupForWrite(state: MockState, scope: GroupScope): { group: GroupRow; actor: EventActor } {
+  const group = openGroup(state, scope)
+  if (scope.kind === 'owner') return { group, actor: { actorUserId: scope.userId, actorMemberId: null } }
+  const member =
+    state.groupMembers.find((row) => row.id === scope.member && row.groupId === group.id) ??
+    forbidden('group.memberRequired')
+  return { group, actor: { actorUserId: null, actorMemberId: member.id } }
+}
+
+const ownerScope = ({ userId, params }: MockContext): GroupScope => ({
+  kind: 'owner',
+  userId,
+  groupId: params.id,
+})
+
+// The token is checked before the body, as on the backend, so a bad token answers 404 whatever the request holds.
+function linkScope({ db, params, headers }: MockContext): GroupScope {
+  const scope: GroupScope = { kind: 'link', token: params.token, member: headers[GROUP_MEMBER_HEADER.toLowerCase()] }
+  openGroup(db.state, scope)
+  return scope
+}
+
+export function onLinkGroup(router: MockRouter, method: HttpMethod, suffix: string, handler: GroupHandler): void {
+  router.on(method, `/v1/shared/groups/:token${suffix}`, (context) => handler(context, linkScope(context)))
+}
+
+export function onGroup(router: MockRouter, method: HttpMethod, suffix: string, handler: GroupHandler): void {
+  router.on(method, `/v1/groups/:id${suffix}`, (context) => handler(context, ownerScope(context)))
+  onLinkGroup(router, method, suffix, handler)
+}
 
 export const membersOf = (state: MockState, groupId: string): GroupMemberRow[] =>
   state.groupMembers.filter((row) => row.groupId === groupId).sort((a, b) => a.position - b.position)
@@ -71,7 +128,7 @@ const stateNames = (entryState: GroupEventRow['state'], memberId: string): boole
 export const memberInUse = (state: MockState, memberId: string): boolean =>
   state.groupEvents.some((row) => row.actorMemberId === memberId || stateNames(row.state, memberId))
 
-export function groupView(state: MockState, row: GroupRow): GroupDto {
+export function groupView(state: MockState, row: GroupRow, includeShareToken: boolean): GroupDto {
   return {
     id: row.id,
     name: row.name,
@@ -89,6 +146,7 @@ export function groupView(state: MockState, row: GroupRow): GroupDto {
         .filter((category) => category.groupId === row.id)
         .map((category) => ({ id: category.id, standard: false, name: category.name })),
     ],
+    shareToken: includeShareToken ? row.shareToken : null,
   }
 }
 
@@ -306,7 +364,7 @@ export function appendEvent(
   entryId: string,
   action: GroupEntryAction,
   entryState: GroupEventRow['state'],
-  actorUserId: string,
+  actor: EventActor,
 ): void {
   state.groupEvents.push({
     id: newId('gevt'),
@@ -315,8 +373,7 @@ export function appendEvent(
     entryId,
     action,
     at: new Date().toISOString(),
-    actorUserId,
-    actorMemberId: null,
+    ...actor,
     state: entryState,
   })
 }

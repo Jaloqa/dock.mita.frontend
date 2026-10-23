@@ -78,7 +78,14 @@ export type DebtRow = Omit<DebtDto, 'remaining' | 'status' | 'overdue' | 'repaym
 
 export type DebtRepaymentRow = DebtRepaymentDto & { userId: string; debtId: string; createdAt: string }
 
-export type GroupRow = { id: string; userId: string; name: string; currency: Currency; createdAt: string }
+export type GroupRow = {
+  id: string
+  userId: string
+  name: string
+  currency: Currency
+  createdAt: string
+  shareToken: string | null
+}
 
 export type GroupMemberRow = { id: string; groupId: string; name: string; position: number }
 
@@ -105,7 +112,7 @@ export type GroupEventRow = {
 export type CredentialRow = { userId: string; password: string }
 
 export type MockState = {
-  version: 4
+  version: 5
   activeUserId: string | null
   simulateErrors: boolean
   users: UserRow[]
@@ -140,7 +147,7 @@ const isState = (value: unknown, seed: MockState): value is MockState => {
   if (typeof value !== 'object' || value === null) return false
   const state = value as Record<string, unknown>
   return (
-    state.version === 4 &&
+    state.version === 5 &&
     Object.entries(seed).every(([key, seedValue]) => {
       if (key === 'activeUserId') return state[key] === null || typeof state[key] === 'string'
       return Array.isArray(seedValue) ? Array.isArray(state[key]) : typeof state[key] === typeof seedValue

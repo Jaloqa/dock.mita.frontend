@@ -15,22 +15,25 @@ import { checkConverted } from '../debts'
 import { notFound } from '../errors'
 import {
   appendEvent,
+  type EventActor,
   equalShares,
   exactShares,
   expensesOf,
   expenseView,
-  findGroup,
+  findScopedGroup,
   GROUP_PAGE,
+  type GroupScope,
   historyOf,
   isStandardCategory,
   membersOf,
-  ownGroup,
+  onGroup,
+  openGroupForWrite,
   priceEntry,
   readDeleted,
 } from '../groups'
 import { newId } from '../ids'
 import { paginate } from '../paginate'
-import type { MockRouter } from '../router'
+import type { MockContext, MockRouter } from '../router'
 import { CONTROL, parseTags, tagsError } from '../tags'
 import { collectErrors, type ErrorCollector, isMissing, objectBody } from '../validation'
 import { checkAmount, checkCurrency, checkDate, checkRate } from './debts'
@@ -207,72 +210,78 @@ const expenseState = (row: GroupExpenseRow): GroupExpenseState => ({
 const groupExpense = (state: MockState, group: GroupRow, id: string | undefined, deleted: boolean): GroupExpenseRow =>
   state.groupExpenses.find((row) => row.id === id && row.groupId === group.id && row.deleted === deleted) ?? notFound()
 
-function record(db: MockDb, group: GroupRow, row: GroupExpenseRow, action: GroupEntryAction, userId: string): void {
-  appendEvent(db.state, group, 'expense', row.id, action, expenseState(row), userId)
+function record(db: MockDb, group: GroupRow, row: GroupExpenseRow, action: GroupEntryAction, actor: EventActor): void {
+  appendEvent(db.state, group, 'expense', row.id, action, expenseState(row), actor)
   db.save()
 }
 
+function listExpenses({ db, query }: MockContext, scope: GroupScope) {
+  const errors = collectErrors()
+  const deleted = readDeleted(query.deleted, errors)
+  const group = findScopedGroup(db.state, scope)
+  const page = paginate(group ? expensesOf(db.state, group.id, deleted) : [], query, GROUP_PAGE, errors)
+  if (!group) notFound()
+  return page
+}
+
+function createExpense({ db, body }: MockContext, scope: GroupScope) {
+  const today = todayIso()
+  const input = validateExpense(body, today)
+  const { group, actor } = openGroupForWrite(db.state, scope)
+  const row: GroupExpenseRow = {
+    id: newId('gexp'),
+    ...prepareExpense(db.state, group, input, today),
+    deleted: false,
+    groupId: group.id,
+    createdAt: new Date().toISOString(),
+  }
+  db.state.groupExpenses.push(row)
+  record(db, group, row, 'created', actor)
+  return expenseView(db.state, row)
+}
+
+function updateExpense({ db, params, body }: MockContext, scope: GroupScope) {
+  const today = todayIso()
+  const input = validateExpense(body, today)
+  const { group, actor } = openGroupForWrite(db.state, scope)
+  const row = groupExpense(db.state, group, params.expenseId, false)
+  Object.assign(row, prepareExpense(db.state, group, input, today))
+  record(db, group, row, 'updated', actor)
+  return expenseView(db.state, row)
+}
+
+function deleteExpense({ db, params }: MockContext, scope: GroupScope) {
+  const { group, actor } = openGroupForWrite(db.state, scope)
+  const row = groupExpense(db.state, group, params.expenseId, false)
+  row.deleted = true
+  record(db, group, row, 'deleted', actor)
+}
+
+function restoreExpense({ db, params }: MockContext, scope: GroupScope) {
+  const { group, actor } = openGroupForWrite(db.state, scope)
+  const row = groupExpense(db.state, group, params.expenseId, true)
+  row.deleted = false
+  record(db, group, row, 'restored', actor)
+  return expenseView(db.state, row)
+}
+
+function expenseHistory({ db, params, query }: MockContext, scope: GroupScope) {
+  const group = findScopedGroup(db.state, scope)
+  const expense = group && db.state.groupExpenses.find((row) => row.id === params.expenseId && row.groupId === group.id)
+  const page = paginate(
+    group && expense ? historyOf<GroupExpenseState>(db.state, group, 'expense', expense.id) : [],
+    query,
+    GROUP_PAGE,
+  )
+  if (!expense) notFound()
+  return page
+}
+
 export function registerGroupExpenseHandlers(router: MockRouter) {
-  router.on('GET', '/v1/groups/:id/expenses', ({ db, userId, params, query }) => {
-    const errors = collectErrors()
-    const deleted = readDeleted(query.deleted, errors)
-    const group = findGroup(db.state, userId, params.id)
-    const page = paginate(group ? expensesOf(db.state, group.id, deleted) : [], query, GROUP_PAGE, errors)
-    if (!group) notFound()
-    return page
-  })
-
-  router.on('POST', '/v1/groups/:id/expenses', ({ db, userId, params, body }) => {
-    const today = todayIso()
-    const input = validateExpense(body, today)
-    const group = ownGroup(db.state, userId, params.id)
-    const row: GroupExpenseRow = {
-      id: newId('gexp'),
-      ...prepareExpense(db.state, group, input, today),
-      deleted: false,
-      groupId: group.id,
-      createdAt: new Date().toISOString(),
-    }
-    db.state.groupExpenses.push(row)
-    record(db, group, row, 'created', userId)
-    return expenseView(db.state, row)
-  })
-
-  router.on('PUT', '/v1/groups/:id/expenses/:expenseId', ({ db, userId, params, body }) => {
-    const today = todayIso()
-    const input = validateExpense(body, today)
-    const group = ownGroup(db.state, userId, params.id)
-    const row = groupExpense(db.state, group, params.expenseId, false)
-    Object.assign(row, prepareExpense(db.state, group, input, today))
-    record(db, group, row, 'updated', userId)
-    return expenseView(db.state, row)
-  })
-
-  router.on('DELETE', '/v1/groups/:id/expenses/:expenseId', ({ db, userId, params }) => {
-    const group = ownGroup(db.state, userId, params.id)
-    const row = groupExpense(db.state, group, params.expenseId, false)
-    row.deleted = true
-    record(db, group, row, 'deleted', userId)
-  })
-
-  router.on('POST', '/v1/groups/:id/expenses/:expenseId/restore', ({ db, userId, params }) => {
-    const group = ownGroup(db.state, userId, params.id)
-    const row = groupExpense(db.state, group, params.expenseId, true)
-    row.deleted = false
-    record(db, group, row, 'restored', userId)
-    return expenseView(db.state, row)
-  })
-
-  router.on('GET', '/v1/groups/:id/expenses/:expenseId/history', ({ db, userId, params, query }) => {
-    const group = findGroup(db.state, userId, params.id)
-    const expense =
-      group && db.state.groupExpenses.find((row) => row.id === params.expenseId && row.groupId === group.id)
-    const page = paginate(
-      group && expense ? historyOf<GroupExpenseState>(db.state, group, 'expense', expense.id) : [],
-      query,
-      GROUP_PAGE,
-    )
-    if (!expense) notFound()
-    return page
-  })
+  onGroup(router, 'GET', '/expenses', listExpenses)
+  onGroup(router, 'POST', '/expenses', createExpense)
+  onGroup(router, 'PUT', '/expenses/:expenseId', updateExpense)
+  onGroup(router, 'DELETE', '/expenses/:expenseId', deleteExpense)
+  onGroup(router, 'POST', '/expenses/:expenseId/restore', restoreExpense)
+  onGroup(router, 'GET', '/expenses/:expenseId/history', expenseHistory)
 }

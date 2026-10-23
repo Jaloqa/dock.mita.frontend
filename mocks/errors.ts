@@ -15,6 +15,10 @@ export const unauthorized = (code: string): never => {
   throw new MockHttpError({ status: 401, title: 'Unauthorized', code })
 }
 
+export const forbidden = (code: string): never => {
+  throw new MockHttpError({ status: 403, title: 'Forbidden', code })
+}
+
 export const ratesUnavailable = (): never => {
   throw new MockHttpError({ status: 503, title: 'Service Unavailable', code: 'rates.unavailable' })
 }

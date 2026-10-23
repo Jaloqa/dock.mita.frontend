@@ -59,7 +59,7 @@ const ISO_MILLISECONDS = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/
 
 const owner = { kind: 'owner', memberId: null, name: 'Anna Nowak' }
 
-const groupKeys = ['categories', 'currency', 'currencyLocked', 'id', 'members', 'name', 'total']
+const groupKeys = ['categories', 'currency', 'currencyLocked', 'id', 'members', 'name', 'shareToken', 'total']
 
 const stateKeys = [
   'amount',
@@ -137,7 +137,13 @@ describe('groups', () => {
     const group = await createGroup(mock, { name: '  Albania 2026 ', members: ['Anna', ' Olya ', 'Max'] })
     expect(Object.keys(group).sort()).toEqual(groupKeys)
     expect(group.id).toStartWith('grp_')
-    expect(group).toMatchObject({ name: 'Albania 2026', currency: 'EUR', currencyLocked: false, total: 0 })
+    expect(group).toMatchObject({
+      name: 'Albania 2026',
+      currency: 'EUR',
+      currencyLocked: false,
+      total: 0,
+      shareToken: null,
+    })
     expect(group.members.map((member) => [member.name, member.inUse])).toEqual([
       ['Anna', false],
       ['Olya', false],

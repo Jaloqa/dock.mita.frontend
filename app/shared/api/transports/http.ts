@@ -60,7 +60,7 @@ export function createHttpTransport(
   const canRefresh = options.refresh ?? true
   const sleep = options.sleep ?? wait
   const send = async (request: ApiRequest) => {
-    const headers: Record<string, string> = { 'Accept-Language': options.locale() }
+    const headers: Record<string, string> = { ...request.headers, 'Accept-Language': options.locale() }
     if (XSRF_METHODS.has(request.method)) {
       const token = options.xsrfToken()
       if (token) headers['X-XSRF-TOKEN'] = token

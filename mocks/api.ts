@@ -17,6 +17,9 @@ const stringQuery = (query: ApiRequest['query']): Record<string, string> =>
       .map(([key, value]) => [key, String(value)]),
   )
 
+const lowerCasedNames = (headers: ApiRequest['headers']): Record<string, string> =>
+  Object.fromEntries(Object.entries(headers ?? {}).map(([name, value]) => [name.toLowerCase(), value]))
+
 export function createMockApi(options: {
   storage?: KeyValueStorage
   random?: () => number
@@ -38,7 +41,7 @@ export function createMockApi(options: {
       }
       const match = router.match(request.method, request.path) ?? notFound()
       const sessionUserId = db.state.activeUserId ?? undefined
-      const open = isDemo || request.path.startsWith('/v1/auth/')
+      const open = isDemo || request.path.startsWith('/v1/auth/') || request.path.startsWith('/v1/shared/')
       if (sessionUserId === undefined && !open) unauthorized('auth.sessionExpired')
       const result = match.handler({
         db,
@@ -46,6 +49,7 @@ export function createMockApi(options: {
         params: match.params,
         query: stringQuery(request.query),
         body: request.body === undefined ? undefined : overTheWire(request.body),
+        headers: lowerCasedNames(request.headers),
       })
       return result === undefined ? undefined : overTheWire(result)
     },
