@@ -2,6 +2,7 @@ import { helpers, maxLength, required, requiredIf } from '@vuelidate/validators'
 import { type CategoryKind, TAG_NAME_MAX, TAGS_PER_TRANSACTION_MAX } from '../../../shared/api/contract'
 import { AMOUNT_MINOR_MAX, type Currency } from '../../../shared/money/currencies'
 import { withinAmountLimit, withinRateLimit } from '../../../shared/money/money'
+import { isPositiveOrEmpty, notAfter } from '../../../shared/utils/validation'
 
 export const TRANSACTION_TITLE_MAX = 100
 export const TRANSACTION_NOTE_MAX = 200
@@ -21,16 +22,8 @@ export type TransactionForm = {
 
 type Translate = (key: string) => string
 
-export const isPositiveOrEmpty = (value: unknown): boolean =>
-  value === null || value === undefined || (typeof value === 'number' && value > 0)
-
 export const isPositiveMinor = (value: unknown): boolean =>
   typeof value === 'number' && Number.isInteger(value) && value > 0
-
-export const notAfter =
-  (limit: () => Date) =>
-  (value: unknown): boolean =>
-    !(value instanceof Date) || value.getTime() <= limit().getTime()
 
 export const transactionRules = (
   t: Translate,

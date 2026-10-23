@@ -8,11 +8,11 @@ import {
 } from '../../../../app/features/accounts/schemas/accountSchema'
 import {
   differentFrom,
-  isPositiveOrEmpty,
   type TransferForm,
   transferRules,
 } from '../../../../app/features/accounts/schemas/transferSchema'
 import { MANUAL_RATE_MAX } from '../../../../app/shared/money/currencies'
+import { isPositiveOrEmpty } from '../../../../app/shared/utils/validation'
 
 type Rule = { $validator: unknown; $message?: unknown }
 

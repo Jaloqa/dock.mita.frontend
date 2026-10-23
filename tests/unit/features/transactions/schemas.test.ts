@@ -2,8 +2,6 @@ import { describe, expect, it } from 'bun:test'
 import { tagRules } from '../../../../app/features/transactions/schemas/tagSchema'
 import {
   isPositiveMinor,
-  isPositiveOrEmpty,
-  notAfter,
   quickAddRules,
   TRANSACTION_NOTE_MAX,
   TRANSACTION_TITLE_MAX,
@@ -11,6 +9,7 @@ import {
 } from '../../../../app/features/transactions/schemas/transactionSchema'
 import { TAG_NAME_MAX, TAGS_PER_TRANSACTION_MAX } from '../../../../app/shared/api/contract'
 import { type Currency, MANUAL_RATE_MAX } from '../../../../app/shared/money/currencies'
+import { isPositiveOrEmpty, notAfter } from '../../../../app/shared/utils/validation'
 
 type Rule = { $validator: unknown; $message?: unknown }
 

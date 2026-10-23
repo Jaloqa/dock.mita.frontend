@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { contributionRules, requiredWhen } from '../../../../app/features/goals/schemas/contributionSchema'
+import { contributionRules } from '../../../../app/features/goals/schemas/contributionSchema'
 import {
   GOAL_NAME_MAX,
   GOAL_TARGET_MAX,
@@ -7,6 +7,7 @@ import {
   isDeadlineAllowed,
 } from '../../../../app/features/goals/schemas/goalSchema'
 import { type Currency, MANUAL_RATE_MAX } from '../../../../app/shared/money/currencies'
+import { requiredWhen } from '../../../../app/shared/utils/validation'
 
 type Rule = { $validator: unknown; $message?: unknown }
 

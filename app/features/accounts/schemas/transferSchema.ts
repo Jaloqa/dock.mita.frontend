@@ -1,6 +1,7 @@
 import { helpers, maxLength, required, requiredIf } from '@vuelidate/validators'
 import type { Currency } from '../../../shared/money/currencies'
 import { withinAmountLimit, withinRateLimit } from '../../../shared/money/money'
+import { isPositiveOrEmpty } from '../../../shared/utils/validation'
 
 export const TRANSFER_NOTE_MAX = 200
 
@@ -19,9 +20,6 @@ export const differentFrom =
   (other: () => string | null) =>
   (value: unknown): boolean =>
     value === null || value === undefined || value !== other()
-
-export const isPositiveOrEmpty = (value: unknown): boolean =>
-  value === null || value === undefined || (typeof value === 'number' && value > 0)
 
 export const transferRules = (
   t: Translate,
