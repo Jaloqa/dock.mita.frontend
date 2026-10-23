@@ -6,19 +6,19 @@ import {
   linkQueryEnabled,
   linkScope,
   memberHeaders,
-  ownerScope,
   ratesPath,
   scopeKey,
   scopePath,
   unlessMemberRefusal,
+  userScope,
 } from '../../../../app/features/groups/utils/scope'
 import { ApiError } from '../../../../app/shared/api/problem'
 
 const TOKEN = 'albania-2026-demo-link-0123456789abcdefghij'
 
 describe('group scope', () => {
-  it('builds an owner scope for a group id', () => {
-    expect(ownerScope('grp_albania')).toEqual({ kind: 'owner', groupId: 'grp_albania' })
+  it('builds a user scope for a group id', () => {
+    expect(userScope('grp_albania')).toEqual({ kind: 'user', groupId: 'grp_albania' })
   })
 
   it('builds a link scope for a token and the chosen member', () => {
@@ -27,8 +27,8 @@ describe('group scope', () => {
   })
 
   it('addresses the group below /v1/groups with the id encoded', () => {
-    expect(scopePath(ownerScope('grp_albania'))).toBe('/v1/groups/grp_albania')
-    expect(scopePath(ownerScope('a/b c'))).toBe('/v1/groups/a%2Fb%20c')
+    expect(scopePath(userScope('grp_albania'))).toBe('/v1/groups/grp_albania')
+    expect(scopePath(userScope('a/b c'))).toBe('/v1/groups/a%2Fb%20c')
   })
 
   it('addresses a link below /v1/shared/groups with the token encoded', () => {
@@ -37,7 +37,7 @@ describe('group scope', () => {
   })
 
   it('keys the cache by the kind and the group id', () => {
-    expect(scopeKey(ownerScope('grp_albania'))).toEqual(['owner', 'grp_albania'])
+    expect(scopeKey(userScope('grp_albania'))).toEqual(['user', 'grp_albania'])
   })
 
   it('keys a link by its token whoever the chosen member is', () => {
@@ -46,20 +46,21 @@ describe('group scope', () => {
     expect(scopeKey(linkScope(TOKEN, null))).toEqual(['link', TOKEN])
   })
 
-  it('lets only the owner manage the group', () => {
-    expect(canManage(ownerScope('grp_albania'))).toBe(true)
-    expect(canManage(linkScope(TOKEN, 'gmb_olya'))).toBe(false)
+  it('lets only the owner of the group manage it', () => {
+    expect(canManage({ role: 'owner' })).toBe(true)
+    expect(canManage({ role: 'member' })).toBe(false)
+    expect(canManage({ role: 'link' })).toBe(false)
   })
 
-  it('reads the rates of the user for the owner and of the link for a link holder', () => {
-    expect(ratesPath(ownerScope('grp_albania'))).toBe('/v1/rates')
+  it('reads the rates of the user for a signed-in user and of the link for a link holder', () => {
+    expect(ratesPath(userScope('grp_albania'))).toBe('/v1/rates')
     expect(ratesPath(linkScope(TOKEN, null))).toBe(`/v1/shared/groups/${TOKEN}/rates`)
   })
 
   it('names the chosen member in a header on a link only', () => {
     expect(memberHeaders(linkScope(TOKEN, 'gmb_olya'))).toEqual({ 'X-Group-Member': 'gmb_olya' })
     expect(memberHeaders(linkScope(TOKEN, null))).toEqual({})
-    expect(memberHeaders(ownerScope('grp_albania'))).toEqual({})
+    expect(memberHeaders(userScope('grp_albania'))).toEqual({})
   })
 })
 

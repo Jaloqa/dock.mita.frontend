@@ -6,7 +6,7 @@ import {
   useGroupScope,
   useMemberRefusal,
 } from '../../../../app/features/groups/composables/useGroupScope'
-import { type GroupScope, linkScope, ownerScope } from '../../../../app/features/groups/utils/scope'
+import { type GroupScope, linkScope, userScope } from '../../../../app/features/groups/utils/scope'
 import { ApiError } from '../../../../app/shared/api/problem'
 
 const TOKEN = 'albania-2026-demo-link-0123456789abcdefghij'
@@ -31,14 +31,14 @@ describe('group scope', () => {
     })
     const Parent = defineComponent({
       setup() {
-        provideGroupScope(() => ownerScope(groupId.value))
+        provideGroupScope(() => userScope(groupId.value))
         return () => h(Child)
       },
     })
 
     await renderToString(createSSRApp(Parent))
 
-    expect(seen).toEqual([ownerScope('grp_albania'), ownerScope('grp_rome')])
+    expect(seen).toEqual([userScope('grp_albania'), userScope('grp_rome')])
   })
 
   it('reports a refused member to the page that provides the scope and nothing else', async () => {
@@ -76,7 +76,7 @@ describe('group scope', () => {
     })
     const Parent = defineComponent({
       setup() {
-        provideGroupScope(ownerScope('grp_albania'))
+        provideGroupScope(userScope('grp_albania'))
         return () => h(Child)
       },
     })

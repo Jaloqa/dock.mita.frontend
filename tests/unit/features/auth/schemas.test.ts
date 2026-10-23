@@ -1,13 +1,12 @@
 import { describe, expect, it } from 'bun:test'
 import {
-  EMAIL_MAX,
-  isEmailAddress,
   loginRules,
   NAME_MAX,
   PASSWORD_MAX,
   PASSWORD_MIN,
   registerRules,
 } from '../../../../app/features/auth/schemas/authSchema'
+import { EMAIL_MAX, isEmailAddress } from '../../../../app/shared/utils/email'
 
 type Rule = { $validator: unknown; $message?: unknown }
 

@@ -1,27 +1,27 @@
-import { GROUP_MEMBER_HEADER, SHARE_TOKEN_LENGTH } from '../../../shared/api/contract'
+import { GROUP_MEMBER_HEADER, type GroupDto, SHARE_TOKEN_LENGTH } from '../../../shared/api/contract'
 import { isApiError } from '../../../shared/api/problem'
 import { RATES_PATH } from '../../../shared/rates/ratesApi'
 
-export type GroupScope = { kind: 'owner'; groupId: string } | { kind: 'link'; token: string; memberId: string | null }
+export type GroupScope = { kind: 'user'; groupId: string } | { kind: 'link'; token: string; memberId: string | null }
 
 const SHARE_TOKEN_ALPHABET = /^[A-Za-z0-9_-]*$/
 
-export const ownerScope = (groupId: string): GroupScope => ({ kind: 'owner', groupId })
+export const userScope = (groupId: string): GroupScope => ({ kind: 'user', groupId })
 
 export const linkScope = (token: string, memberId: string | null): GroupScope => ({ kind: 'link', token, memberId })
 
 export const scopePath = (scope: GroupScope): string =>
-  scope.kind === 'owner'
+  scope.kind === 'user'
     ? `/v1/groups/${encodeURIComponent(scope.groupId)}`
     : `/v1/shared/groups/${encodeURIComponent(scope.token)}`
 
 export const scopeKey = (scope: GroupScope): readonly string[] =>
-  scope.kind === 'owner' ? [scope.kind, scope.groupId] : [scope.kind, scope.token]
+  scope.kind === 'user' ? [scope.kind, scope.groupId] : [scope.kind, scope.token]
 
-export const canManage = (scope: GroupScope): boolean => scope.kind === 'owner'
+export const canManage = (group: Pick<GroupDto, 'role'>): boolean => group.role === 'owner'
 
 export const ratesPath = (scope: GroupScope): string =>
-  scope.kind === 'owner' ? RATES_PATH : `${scopePath(scope)}/rates`
+  scope.kind === 'user' ? RATES_PATH : `${scopePath(scope)}/rates`
 
 export const memberHeaders = (scope: GroupScope): Record<string, string> =>
   scope.kind === 'link' && scope.memberId !== null ? { [GROUP_MEMBER_HEADER]: scope.memberId } : {}

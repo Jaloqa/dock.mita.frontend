@@ -219,7 +219,7 @@ function remove(member: GroupMemberDto) {
         <li
           v-for="member in group.members"
           :key="member.id"
-          class="flex min-h-12 flex-col justify-center gap-1 border-b border-border py-1 last:border-b-0"
+          class="flex min-h-12 shrink-0 flex-col justify-center gap-1 border-b border-border py-1 last:border-b-0"
         >
           <form
             v-if="editingId === member.id"
@@ -305,10 +305,12 @@ function remove(member: GroupMemberDto) {
             >
               {{ removeErrors[0] }}
             </p>
+            <MemberAccountControls :group="group" :member="member" />
           </template>
         </li>
       </ul>
       <p v-else class="m-0 text-sm text-muted">{{ t('groups.members.empty') }}</p>
+      <p v-if="group.members.length > 0" class="m-0 text-xs text-muted">{{ t('groups.members.inviteHint') }}</p>
       <form v-if="!isFull" data-new-member-form novalidate @submit.prevent="submitAdd">
         <FormRow :id="NEW_MEMBER_ID" :label="t('groups.members.newMember')" :errors="addErrors">
           <template #default="{ invalid, describedBy }">

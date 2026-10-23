@@ -1,11 +1,10 @@
 import { describe, expect, it } from 'bun:test'
 import {
-  EMAIL_MAX,
   fitsProfileName,
-  isEmailAddress,
   PROFILE_NAME_MAX,
   profileRules,
 } from '../../../../app/features/settings/schemas/profileSchema'
+import { EMAIL_MAX, isEmailAddress } from '../../../../app/shared/utils/email'
 
 type Rule = { $validator: unknown; $message?: unknown }
 

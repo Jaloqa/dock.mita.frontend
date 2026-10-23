@@ -817,10 +817,34 @@
       "inUse": "Ma wpisy, więc można tylko zmienić imię.",
       "newMember": "Nowy uczestnik",
       "add": "Dodaj",
+      "inviteHint": "Daj im znać: zaproszenie czeka na nich w ich aplikacji dock.mita, w sekcji Narzędzia → Grupy.",
+      "account": {
+        "you": "Ty",
+        "linkedTo": "Powiązany z kontem: {name}",
+        "invited": "Zaproszony: {email}",
+        "thisIsMe": "To ja",
+        "thisIsMeFor": "To ja: {name}",
+        "invite": "Zaproś",
+        "inviteFor": "Zaproś: {name}",
+        "emailField": "E-mail uczestnika {name}",
+        "send": "Wyślij zaproszenie",
+        "cancelInvite": "Anuluj zaproszenie",
+        "cancelInviteFor": "Anuluj zaproszenie dla: {name}",
+        "unlink": "Usuń powiązanie",
+        "unlinkFor": "Usuń powiązanie: {name}",
+        "unlinkTitle": "Usunąć powiązanie uczestnika {name} z kontem?",
+        "unlinkMessage": "Ta osoba nie zobaczy już grupy w swojej aplikacji. Jej wpisy zostają.",
+        "unlinkSelfTitle": "Usunąć powiązanie Twojego konta z uczestnikiem {name}?",
+        "unlinkSelfMessage": "Jako właściciel nadal masz dostęp do grupy. Jej wpisy zostają."
+      },
       "toast": {
         "added": "Dodano uczestnika",
         "renamed": "Zmieniono imię uczestnika",
-        "removed": "Usunięto uczestnika"
+        "removed": "Usunięto uczestnika",
+        "linked": "Powiązano z Twoim kontem",
+        "invited": "Wysłano zaproszenie",
+        "inviteCancelled": "Anulowano zaproszenie",
+        "unlinked": "Usunięto powiązanie z kontem"
       }
     },
     "share": {
