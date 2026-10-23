@@ -1,5 +1,5 @@
 import { sessionEvents } from '~/shared/api/sessionEvents'
-import { isPublicRoute } from '~/shared/auth/publicRoutes'
+import { isOpenRoute, isPublicRoute } from '~/shared/auth/publicRoutes'
 import { useSessionStatus } from '~/shared/auth/sessionStatus'
 
 export default defineNuxtPlugin((nuxtApp) => {
@@ -15,7 +15,8 @@ export default defineNuxtPlugin((nuxtApp) => {
     status.value = 'anonymous'
     nuxtApp.$queryClient.clear()
     const current = router.currentRoute.value
-    if (!wasAuthenticated || isPublicRoute(routeBaseName(current))) return
+    const name = routeBaseName(current)
+    if (!wasAuthenticated || isPublicRoute(name) || isOpenRoute(name)) return
     void nuxtApp.runWithContext(() =>
       navigateTo(localePath({ name: 'login', query: { redirect: current.fullPath, expired: '1' } })),
     )

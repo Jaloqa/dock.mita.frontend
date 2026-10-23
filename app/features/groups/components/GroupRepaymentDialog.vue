@@ -6,8 +6,8 @@ import { currencyDigits } from '~/shared/money/currencies'
 import { convertMinor, fitMajor, fromMinor, toMinor } from '~/shared/money/money'
 import { addDaysIso, fromLocalDate, todayIso, toLocalDate } from '~/shared/period/period'
 import { useRates } from '~/shared/rates/useRates'
-import { useUserSettings } from '~/shared/user/useUserSettings'
 import { type GroupRepaymentForm, groupRepaymentRules } from '../schemas/groupRepaymentSchema'
+import { ratesPath, unlessMemberRefusal } from '../utils/scope'
 
 const props = defineProps<{ group: GroupDto; repayment?: GroupRepaymentDto; prefill?: GroupTransferDto }>()
 const visible = defineModel<boolean>('visible', { required: true })
@@ -17,7 +17,8 @@ const { format } = useMoney()
 const notify = useNotify()
 const confirm = useConfirm()
 const server = useServerErrors()
-const { baseCurrency } = useUserSettings()
+const scope = useGroupScope()
+const pinnedCurrencies = useGroupCurrencies(() => props.group)
 const { create, update, remove, isMissing, refresh } = useGroupRepaymentMutations()
 
 const fields = ['fromMemberId', 'toMemberId', 'amount', 'currency', 'date', 'rate', 'note'] as const
@@ -60,11 +61,14 @@ const v$ = useVuelidate(
 )
 
 const rateDate = computed(() => (form.date ? fromLocalDate(form.date) : todayIso()))
-const rates = useRates(() => props.group.currency, { date: rateDate, enabled: crossCurrency })
+const rates = useRates(() => props.group.currency, {
+  date: rateDate,
+  enabled: crossCurrency,
+  path: () => ratesPath(scope.value),
+})
 const suggestedRate = computed(() => (crossCurrency.value ? rates.rateFrom(form.currency) : undefined))
 
 const memberOptions = computed(() => props.group.members.map((member) => ({ value: member.id, label: member.name })))
-const pinnedCurrencies = computed(() => [props.group.currency, baseCurrency.value])
 const rateCurrencies = computed(() => ({ from: form.currency, to: props.group.currency }))
 const groupAmountText = computed(() => {
   if (!crossCurrency.value || amountMinor.value === undefined || form.rate === null || form.rate <= 0) return undefined
@@ -187,13 +191,11 @@ async function submit() {
     note: note || null,
   }
   const repayment = props.repayment
+  const onError = unlessMemberRefusal(showServerErrors)
   if (repayment) {
-    update.mutate(
-      { id: repayment.id, input },
-      { onSuccess: () => close(t('groups.repayment.toast.updated')), onError: showServerErrors },
-    )
+    update.mutate({ id: repayment.id, input }, { onSuccess: () => close(t('groups.repayment.toast.updated')), onError })
   } else {
-    create.mutate(input, { onSuccess: () => close(t('groups.repayment.toast.created')), onError: showServerErrors })
+    create.mutate(input, { onSuccess: () => close(t('groups.repayment.toast.created')), onError })
   }
 }
 
@@ -210,7 +212,7 @@ function confirmDelete() {
     accept: () =>
       remove.mutate(repayment.id, {
         onSuccess: () => close(t('groups.repayment.toast.deleted')),
-        onError: fail,
+        onError: unlessMemberRefusal(fail),
       }),
   })
 }

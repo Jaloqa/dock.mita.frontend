@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
-import type { GroupNameInput, GroupUpdateInput } from '~/shared/api/contract'
+import type { GroupDto, GroupNameInput, GroupUpdateInput } from '~/shared/api/contract'
 import { invalidateAfter } from '~/shared/api/invalidation'
 import { isApiError } from '~/shared/api/problem'
 import { groupsApi } from '../api/groupsApi'
@@ -9,7 +9,9 @@ import { type GroupScope, ownerScope } from '../utils/scope'
 export function useGroupMutations() {
   const api = groupsApi(useApi())
   const queryClient = useQueryClient()
+  const onMemberRefused = useMemberRefusal()
   const onSuccess = () => invalidateAfter(queryClient, 'groups')
+  const groupKey = (id: string) => groupKeys.group(ownerScope(id))
 
   return {
     create: useMutation({ mutationFn: api.create, onSuccess }),
@@ -24,8 +26,20 @@ export function useGroupMutations() {
         return queryClient.invalidateQueries({ queryKey: groupKeys.list })
       },
     }),
-    share: useMutation({ mutationFn: api.share, onSuccess }),
-    unshare: useMutation({ mutationFn: api.unshare, onSuccess }),
+    share: useMutation({
+      mutationFn: api.share,
+      onSuccess: (group, id) => {
+        queryClient.setQueryData(groupKey(id), group)
+        return onSuccess()
+      },
+    }),
+    unshare: useMutation({
+      mutationFn: api.unshare,
+      onSuccess: (_, id) => {
+        queryClient.setQueryData<GroupDto>(groupKey(id), (group) => group && { ...group, shareToken: null })
+        return onSuccess()
+      },
+    }),
     addMember: useMutation({
       mutationFn: ({ id, input }: { id: string; input: GroupNameInput }) => api.addMember(id, input),
       onSuccess,
@@ -42,6 +56,7 @@ export function useGroupMutations() {
     addCategory: useMutation({
       mutationFn: ({ scope, input }: { scope: GroupScope; input: GroupNameInput }) => api.addCategory(scope, input),
       onSuccess,
+      onError: onMemberRefused,
     }),
     isMissing: (error: unknown) => isApiError(error) && error.status === 404,
     refresh: onSuccess,

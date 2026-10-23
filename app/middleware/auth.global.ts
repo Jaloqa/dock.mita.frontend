@@ -1,5 +1,5 @@
 import { ApiError } from '~/shared/api/problem'
-import { isPublicRoute } from '~/shared/auth/publicRoutes'
+import { isOpenRoute, isPublicRoute } from '~/shared/auth/publicRoutes'
 import { safeRedirect } from '~/shared/auth/safeRedirect'
 import { type SessionStatus, useSessionStatus } from '~/shared/auth/sessionStatus'
 import { userKeys } from '~/shared/user/keys'
@@ -42,7 +42,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
     await probe(retryUnlessUnauthorized, 'anonymous')
   }
 
-  const isPublic = isPublicRoute(routeBaseName(to))
+  const name = routeBaseName(to)
+  if (isOpenRoute(name)) return
+  const isPublic = isPublicRoute(name)
   if (status.value === 'anonymous' && !isPublic) {
     return navigateTo(localePath({ name: 'login', query: { redirect: to.fullPath } }))
   }

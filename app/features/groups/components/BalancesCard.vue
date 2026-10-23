@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import type { GroupDto, GroupTransferDto } from '~/shared/api/contract'
 import type { Currency } from '~/shared/money/currencies'
-import { useUserSettings } from '~/shared/user/useUserSettings'
 import { balancesIn, transfersIn } from '../utils/balances'
 import { memberName } from '../utils/groupView'
 
 const props = defineProps<{ group: GroupDto }>()
 const emit = defineEmits<{ record: [transfer: GroupTransferDto] }>()
 const { t } = useI18n()
-const { baseCurrency } = useUserSettings()
+const pinnedCurrencies = useGroupCurrencies(() => props.group)
 
 const TITLE_ID = 'group-balances-title'
 const CURRENCY_ID = 'group-balances-currency'
@@ -24,7 +23,6 @@ watch(
   },
 )
 
-const pinnedCurrencies = computed(() => [props.group.currency, baseCurrency.value])
 const isPending = computed(() => main.isPending.value || shown.isPending.value)
 const viewFailed = computed(() => shown.isError.value && !main.isError.value)
 const hasMembers = computed(() => props.group.members.length > 0)

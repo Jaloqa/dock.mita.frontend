@@ -7,12 +7,16 @@ import { ratesApi } from './ratesApi'
 
 export function useRates(
   to: MaybeRefOrGetter<Currency>,
-  options: { date?: MaybeRefOrGetter<string | undefined>; enabled?: MaybeRefOrGetter<boolean> } = {},
+  options: {
+    date?: MaybeRefOrGetter<string | undefined>
+    enabled?: MaybeRefOrGetter<boolean>
+    path?: MaybeRefOrGetter<string | undefined>
+  } = {},
 ) {
   const api = ratesApi(useApi())
   const query = useQuery({
-    queryKey: computed(() => rateKeys.table(toValue(to), toValue(options.date))),
-    queryFn: () => api.list({ to: toValue(to), date: toValue(options.date) }),
+    queryKey: computed(() => rateKeys.table(toValue(to), toValue(options.date), toValue(options.path))),
+    queryFn: () => api.list({ to: toValue(to), date: toValue(options.date) }, toValue(options.path)),
     enabled: computed(() => toValue(options.enabled ?? true)),
     staleTime: 10 * 60_000,
   })

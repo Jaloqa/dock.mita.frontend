@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { GroupDto, GroupExpenseDto } from '~/shared/api/contract'
 import { expenseTitle } from '../utils/groupView'
+import { unlessMemberRefusal } from '../utils/scope'
 
 type ExpenseView = 'active' | 'deleted'
 
@@ -43,10 +44,10 @@ function restoreExpense(expense: GroupExpenseDto) {
       notify.success(t('groups.expense.toast.restored'))
       focusAfterRestore(neighbour?.id)
     },
-    onError: (error) => {
+    onError: unlessMemberRefusal((error) => {
       notify.error(error)
       if (isMissing(error)) refresh()
-    },
+    }),
   })
 }
 </script>

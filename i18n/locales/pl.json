@@ -845,6 +845,16 @@
         "copyFailed": "Nie udało się skopiować linku. Zaznacz go i skopiuj ręcznie."
       }
     },
+    "link": {
+      "whoAreYou": "Kim jesteś?",
+      "pick": "Wybierz swoje imię. Ta przeglądarka je zapamięta.",
+      "askForMembers": "Poproś właściciela grupy o dodanie uczestników.",
+      "again": "Wybierz jeszcze raz, kim jesteś.",
+      "youAre": "Występujesz jako {name}",
+      "change": "Zmień",
+      "dead": "Ten link nie działa. Poproś właściciela grupy o nowy.",
+      "oneMember": "Grupa potrzebuje drugiego uczestnika, zanim będzie można zapisywać spłaty."
+    },
     "empty": {
       "title": "Nie ma jeszcze grup"
     },

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { ComponentPublicInstance, Ref } from 'vue'
 import { entryAccess } from '~/features/groups/utils/groupView'
 import { canManage, ownerScope } from '~/features/groups/utils/scope'
 import type { GroupExpenseDto, GroupRepaymentDto, GroupTransferDto } from '~/shared/api/contract'
@@ -21,10 +20,7 @@ const editedExpense = ref<GroupExpenseDto>()
 const repaymentOpen = ref(false)
 const editedRepayment = ref<GroupRepaymentDto>()
 const prefilledTransfer = ref<GroupTransferDto>()
-const addExpenseButton = ref<ComponentPublicInstance | null>(null)
-const addExpenseIconButton = ref<ComponentPublicInstance | null>(null)
-const recordRepaymentButton = ref<ComponentPublicInstance | null>(null)
-const recordRepaymentIconButton = ref<ComponentPublicInstance | null>(null)
+const entryActions = ref<{ focusAddExpense: () => void; focusRecordRepayment: () => void } | null>(null)
 
 const shown = computed(() => (notFound.value || isError.value ? undefined : group.value))
 const manageable = computed(() => shown.value !== undefined && canManage(scope.value))
@@ -33,8 +29,6 @@ const access = computed(() => (group.value ? entryAccess(group.value) : undefine
 const canAddExpense = computed(() => access.value?.canAddExpense ?? false)
 const canRecordRepayment = computed(() => access.value?.canRecordRepayment ?? false)
 const hint = computed(() => (access.value?.hint ? t(`groups.hints.${access.value.hint}`) : undefined))
-const addExpenseHint = computed(() => (canAddExpense.value ? undefined : HINT_ID))
-const recordRepaymentHint = computed(() => (canRecordRepayment.value ? undefined : HINT_ID))
 
 const openMembers = () => {
   membersOpen.value = true
@@ -66,22 +60,9 @@ function openRepayment(repayment?: GroupRepaymentDto, transfer?: GroupTransferDt
 
 const openNewRepayment = () => openRepayment()
 
-function focusFirstVisible(...buttons: Ref<ComponentPublicInstance | null>[]) {
-  const target = buttons
-    .map((button) => button.value?.$el)
-    .find((element): element is HTMLElement => element instanceof HTMLElement && element.checkVisibility())
-  target?.focus()
-}
+const focusAddExpense = () => entryActions.value?.focusAddExpense()
 
-const focusAddExpense = () => focusFirstVisible(addExpenseButton, addExpenseIconButton)
-
-function focusRecordRepayment() {
-  // The success toast autofocuses its close button while the dialog is closing, and that is not a place to leave the focus.
-  const active = document.activeElement
-  const kept =
-    active instanceof HTMLElement && active !== document.body && active.isConnected && !active.closest('.p-toast')
-  if (!kept) focusFirstVisible(recordRepaymentButton, recordRepaymentIconButton)
-}
+const focusRecordRepayment = () => entryActions.value?.focusRecordRepayment()
 
 const onDeleted = () => navigateTo(localePath('/tools/groups'))
 
@@ -99,50 +80,14 @@ useHead({ title: () => title.value })
       </NuxtLinkLocale>
     </template>
     <template v-if="shown" #actions>
-      <Button
-        ref="addExpenseButton"
-        class="hidden! min-h-11 lg:inline-flex!"
-        :disabled="!canAddExpense"
-        :aria-describedby="addExpenseHint"
-        @click="openNewExpense"
-      >
-        <AppIcon name="plus" :size="16" :stroke-width="2.2" />
-        {{ t('groups.actions.addExpense') }}
-      </Button>
-      <Button
-        ref="addExpenseIconButton"
-        class="size-11 lg:hidden!"
-        :aria-label="t('groups.actions.addExpense')"
-        :disabled="!canAddExpense"
-        :aria-describedby="addExpenseHint"
-        @click="openNewExpense"
-      >
-        <AppIcon name="plus" :size="20" :stroke-width="2.2" />
-      </Button>
-      <Button
-        ref="recordRepaymentButton"
-        severity="secondary"
-        outlined
-        class="hidden! min-h-11 lg:inline-flex!"
-        :disabled="!canRecordRepayment"
-        :aria-describedby="recordRepaymentHint"
-        @click="openNewRepayment"
-      >
-        <AppIcon name="transfer" :size="16" />
-        {{ t('groups.actions.recordRepayment') }}
-      </Button>
-      <Button
-        ref="recordRepaymentIconButton"
-        severity="secondary"
-        outlined
-        class="size-11 lg:hidden!"
-        :aria-label="t('groups.actions.recordRepayment')"
-        :disabled="!canRecordRepayment"
-        :aria-describedby="recordRepaymentHint"
-        @click="openNewRepayment"
-      >
-        <AppIcon name="transfer" :size="20" />
-      </Button>
+      <GroupEntryActions
+        ref="entryActions"
+        :can-add-expense="canAddExpense"
+        :can-record-repayment="canRecordRepayment"
+        :hint-id="HINT_ID"
+        @add-expense="openNewExpense"
+        @record-repayment="openNewRepayment"
+      />
       <template v-if="manageable">
         <Button severity="secondary" outlined class="hidden! min-h-11 lg:inline-flex!" @click="openMembers">
           <AppIcon name="groups" :size="16" />

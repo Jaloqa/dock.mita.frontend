@@ -6,9 +6,9 @@ import { currencyDigits } from '~/shared/money/currencies'
 import { convertMinor, fitMajor, fromMinor, toMinor } from '~/shared/money/money'
 import { addDaysIso, fromLocalDate, todayIso, toLocalDate } from '~/shared/period/period'
 import { useRates } from '~/shared/rates/useRates'
-import { useUserSettings } from '~/shared/user/useUserSettings'
 import { type ExpenseForm, expenseRules } from '../schemas/expenseSchema'
 import { usedGroupTags } from '../utils/groupTags'
+import { ratesPath, unlessMemberRefusal } from '../utils/scope'
 
 const props = defineProps<{ group: GroupDto; expense?: GroupExpenseDto }>()
 const visible = defineModel<boolean>('visible', { required: true })
@@ -18,7 +18,8 @@ const { format } = useMoney()
 const notify = useNotify()
 const confirm = useConfirm()
 const server = useServerErrors()
-const { baseCurrency } = useUserSettings()
+const scope = useGroupScope()
+const pinnedCurrencies = useGroupCurrencies(() => props.group)
 const { create, update, remove, isMissing, refresh } = useExpenseMutations()
 const { items: liveExpenses } = useExpenses(false)
 
@@ -68,11 +69,14 @@ const v$ = useVuelidate(
 )
 
 const rateDate = computed(() => (form.date ? fromLocalDate(form.date) : todayIso()))
-const rates = useRates(() => props.group.currency, { date: rateDate, enabled: crossCurrency })
+const rates = useRates(() => props.group.currency, {
+  date: rateDate,
+  enabled: crossCurrency,
+  path: () => ratesPath(scope.value),
+})
 const suggestedRate = computed(() => (crossCurrency.value ? rates.rateFrom(form.currency) : undefined))
 
 const payerOptions = computed(() => props.group.members.map((member) => ({ value: member.id, label: member.name })))
-const pinnedCurrencies = computed(() => [props.group.currency, baseCurrency.value])
 const rateCurrencies = computed(() => ({ from: form.currency, to: props.group.currency }))
 const tagSuggestions = computed(() => usedGroupTags(liveExpenses.value))
 const groupAmountText = computed(() => {
@@ -225,13 +229,11 @@ async function submit() {
     split: splitInput(),
   }
   const expense = props.expense
+  const onError = unlessMemberRefusal(showServerErrors)
   if (expense) {
-    update.mutate(
-      { id: expense.id, input },
-      { onSuccess: () => close(t('groups.expense.toast.updated')), onError: showServerErrors },
-    )
+    update.mutate({ id: expense.id, input }, { onSuccess: () => close(t('groups.expense.toast.updated')), onError })
   } else {
-    create.mutate(input, { onSuccess: () => close(t('groups.expense.toast.created')), onError: showServerErrors })
+    create.mutate(input, { onSuccess: () => close(t('groups.expense.toast.created')), onError })
   }
 }
 
@@ -251,7 +253,7 @@ function confirmDelete() {
           deleted.value = true
           close(t('groups.expense.toast.deleted'))
         },
-        onError: fail,
+        onError: unlessMemberRefusal(fail),
       }),
   })
 }

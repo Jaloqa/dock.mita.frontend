@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { isPublicRoute } from '~/shared/auth/publicRoutes'
+import { isOpenRoute, isPublicRoute } from '~/shared/auth/publicRoutes'
 import { useSessionStatus } from '~/shared/auth/sessionStatus'
 
 const status = useSessionStatus()
 const route = useRoute()
 const routeBaseName = useRouteBaseName()
-const waiting = computed(() => status.value === 'unknown' && !isPublicRoute(routeBaseName(route)))
+const waiting = computed(() => {
+  const name = routeBaseName(route)
+  return status.value === 'unknown' && !isPublicRoute(name) && !isOpenRoute(name)
+})
 // The client middleware settles the session before hydration; keeping the server's decision until mount avoids a hydration mismatch.
 const pending = useState('session-pending', () => waiting.value)
 
