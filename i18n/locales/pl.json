@@ -844,6 +844,14 @@
     "dueBeforeDate": "Termin spłaty nie może być wcześniejszy niż data długu.",
     "exceedsRemaining": "Spłata jest wyższa niż kwota, która pozostała do oddania.",
     "belowRepaid": "Kwota nie może być niższa niż już spłacona.",
-    "debtCurrencyLocked": "Waluty nie można zmienić, gdy dług ma spłaty."
+    "debtCurrencyLocked": "Waluty nie można zmienić, gdy dług ma spłaty.",
+    "memberNameTaken": "Uczestnik o tym imieniu już istnieje.",
+    "tooManyMembers": "Grupa może mieć najwyżej 50 uczestników.",
+    "memberInUse": "Ten uczestnik ma wpisy, więc można tylko zmienić jego imię.",
+    "unknownMember": "Tego uczestnika nie ma w grupie.",
+    "sameMember": "Wybierz dwóch różnych uczestników.",
+    "splitMismatch": "Suma kwot musi być równa całej kwocie.",
+    "groupCurrencyLocked": "Waluty głównej nie można zmienić, gdy grupa ma wpisy.",
+    "tooManyCategories": "Grupa może mieć najwyżej 100 kategorii."
   }
 }

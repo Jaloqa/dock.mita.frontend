@@ -844,6 +844,14 @@
     "dueBeforeDate": "The due date cannot be before the date of the debt.",
     "exceedsRemaining": "The repayment is more than what is still owed.",
     "belowRepaid": "The amount cannot be lower than what has already been repaid.",
-    "debtCurrencyLocked": "The currency cannot change once the debt has repayments."
+    "debtCurrencyLocked": "The currency cannot change once the debt has repayments.",
+    "memberNameTaken": "A member with this name already exists.",
+    "tooManyMembers": "A group can have at most 50 members.",
+    "memberInUse": "This member has entries, so it can only be renamed.",
+    "unknownMember": "This member is not in the group.",
+    "sameMember": "Choose two different members.",
+    "splitMismatch": "The amounts must add up to the total.",
+    "groupCurrencyLocked": "The main currency cannot change once the group has entries.",
+    "tooManyCategories": "A group can have at most 100 categories."
   }
 }

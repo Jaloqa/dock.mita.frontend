@@ -3,6 +3,11 @@ import type {
   CategoryDto,
   DebtDto,
   DebtRepaymentDto,
+  GroupEntryAction,
+  GroupExpenseDto,
+  GroupExpenseState,
+  GroupRepaymentDto,
+  GroupRepaymentState,
   RateDto,
   SettingsDto,
   TransactionDto,
@@ -73,10 +78,34 @@ export type DebtRow = Omit<DebtDto, 'remaining' | 'status' | 'overdue' | 'repaym
 
 export type DebtRepaymentRow = DebtRepaymentDto & { userId: string; debtId: string; createdAt: string }
 
+export type GroupRow = { id: string; userId: string; name: string; currency: Currency; createdAt: string }
+
+export type GroupMemberRow = { id: string; groupId: string; name: string; position: number }
+
+export type GroupCategoryRow = { id: string; groupId: string; name: string; createdAt: string }
+
+type EntryAudit = 'createdBy' | 'createdAt' | 'updatedBy' | 'updatedAt'
+
+export type GroupExpenseRow = Omit<GroupExpenseDto, EntryAudit> & { groupId: string; createdAt: string }
+
+export type GroupRepaymentRow = Omit<GroupRepaymentDto, EntryAudit> & { groupId: string; createdAt: string }
+
+export type GroupEventRow = {
+  id: string
+  groupId: string
+  kind: 'expense' | 'repayment'
+  entryId: string
+  action: GroupEntryAction
+  at: string
+  actorUserId: string | null
+  actorMemberId: string | null
+  state: GroupExpenseState | GroupRepaymentState
+}
+
 export type CredentialRow = { userId: string; password: string }
 
 export type MockState = {
-  version: 3
+  version: 4
   activeUserId: string | null
   simulateErrors: boolean
   users: UserRow[]
@@ -93,6 +122,12 @@ export type MockState = {
   goalContributions: GoalContributionRow[]
   debts: DebtRow[]
   debtRepayments: DebtRepaymentRow[]
+  groups: GroupRow[]
+  groupMembers: GroupMemberRow[]
+  groupCategories: GroupCategoryRow[]
+  groupExpenses: GroupExpenseRow[]
+  groupRepayments: GroupRepaymentRow[]
+  groupEvents: GroupEventRow[]
 }
 
 export type KeyValueStorage = Pick<Storage, 'getItem' | 'setItem'>
@@ -105,7 +140,7 @@ const isState = (value: unknown, seed: MockState): value is MockState => {
   if (typeof value !== 'object' || value === null) return false
   const state = value as Record<string, unknown>
   return (
-    state.version === 3 &&
+    state.version === 4 &&
     Object.entries(seed).every(([key, seedValue]) => {
       if (key === 'activeUserId') return state[key] === null || typeof state[key] === 'string'
       return Array.isArray(seedValue) ? Array.isArray(state[key]) : typeof state[key] === typeof seedValue

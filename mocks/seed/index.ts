@@ -20,7 +20,7 @@ export const seedState = (today: string = todayIso()): MockState => {
   const { goals, contributions } = demoGoals(today, settings, designed, transfers, rates)
   const { debts, repayments } = demoDebts(today)
   return {
-    version: 3,
+    version: 4,
     activeUserId: null,
     simulateErrors: false,
     users: demoUsers(),
@@ -37,5 +37,11 @@ export const seedState = (today: string = todayIso()): MockState => {
     goalContributions: contributions,
     debts,
     debtRepayments: repayments,
+    groups: [],
+    groupMembers: [],
+    groupCategories: [],
+    groupExpenses: [],
+    groupRepayments: [],
+    groupEvents: [],
   }
 }

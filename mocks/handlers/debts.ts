@@ -46,25 +46,25 @@ const manualRate = (value: unknown): number | undefined => (typeof value === 'nu
 const noteOf = (value: unknown): string | null =>
   typeof value === 'string' && value.trim() !== '' ? value.trim() : null
 
-function checkAmount(value: unknown, errors: Errors): void {
+export function checkAmount(value: unknown, errors: Errors): void {
   if (isMissing(value)) errors.add('amount', 'validation.required')
   else if (!Number.isSafeInteger(value) || (value as number) > AMOUNT_MINOR_MAX) {
     errors.add('amount', 'validation.invalidValue')
   } else if ((value as number) <= 0) errors.add('amount', 'validation.positiveAmount')
 }
 
-function checkCurrency(value: unknown, errors: Errors): void {
+export function checkCurrency(value: unknown, errors: Errors): void {
   if (isMissing(value)) errors.add('currency', 'validation.required')
   else if (!isCurrency(value)) errors.add('currency', 'validation.invalidValue')
 }
 
-function checkDate(value: unknown, today: string, errors: Errors): void {
+export function checkDate(value: unknown, today: string, errors: Errors): void {
   if (isMissing(value)) errors.add('date', 'validation.required')
   else if (!isIsoDate(value)) errors.add('date', 'validation.invalidValue')
   else if (value > oneYearAhead(today)) errors.add('date', 'validation.dateTooFar')
 }
 
-function checkRate(value: unknown, errors: Errors): void {
+export function checkRate(value: unknown, errors: Errors): void {
   if (!isMissing(value) && !isManualRate(value)) errors.add('rate', 'validation.invalidValue')
 }
 
