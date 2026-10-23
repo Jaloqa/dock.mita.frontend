@@ -1,7 +1,7 @@
 import type { IconName } from '~/shared/types/icon'
 
 export type NavigationItem = {
-  key: 'overview' | 'transactions' | 'budgets' | 'goals' | 'accounts' | 'reports' | 'settings'
+  key: 'overview' | 'transactions' | 'budgets' | 'goals' | 'accounts' | 'reports' | 'tools' | 'settings'
   to: string
   icon: IconName
 }
@@ -13,6 +13,7 @@ export const primaryNavigation: NavigationItem[] = [
   { key: 'goals', to: '/goals', icon: 'goals' },
   { key: 'accounts', to: '/accounts', icon: 'accounts' },
   { key: 'reports', to: '/reports', icon: 'reports' },
+  { key: 'tools', to: '/tools', icon: 'tools' },
 ]
 
 export const settingsNavigation: NavigationItem = { key: 'settings', to: '/settings', icon: 'settings' }

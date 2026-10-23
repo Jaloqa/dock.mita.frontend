@@ -10,6 +10,7 @@
     "goals": "Goals",
     "accounts": "Accounts",
     "reports": "Reports",
+    "tools": "Tools",
     "settings": "Settings",
     "addTransaction": "New transaction"
   },
@@ -661,6 +662,18 @@
       "title": "No data for this range",
       "description": "Nothing was recorded in {range}.",
       "showYear": "Show the year"
+    }
+  },
+  "tools": {
+    "eyebrow": "Extras",
+    "list": {
+      "label": "Tools"
+    },
+    "entries": {
+      "debts": {
+        "title": "Debts",
+        "description": "Money you lent or borrowed, and what is left to repay"
+      }
     }
   },
   "auth": {

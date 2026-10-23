@@ -10,6 +10,7 @@
     "goals": "Cele",
     "accounts": "Konta",
     "reports": "Raporty",
+    "tools": "Narzędzia",
     "settings": "Ustawienia",
     "addTransaction": "Nowa operacja"
   },
@@ -661,6 +662,18 @@
       "title": "Brak danych w tym zakresie",
       "description": "W okresie {range} nic nie zapisano.",
       "showYear": "Pokaż rok"
+    }
+  },
+  "tools": {
+    "eyebrow": "Dodatki",
+    "list": {
+      "label": "Narzędzia"
+    },
+    "entries": {
+      "debts": {
+        "title": "Długi",
+        "description": "Pieniądze pożyczone innym lub od innych oraz to, ile zostało do spłaty"
+      }
     }
   },
   "auth": {

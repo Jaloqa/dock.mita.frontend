@@ -11,6 +11,7 @@ const pages = [
   { link: 'Goals', path: '/goals', heading: 'Goals' },
   { link: 'Accounts', path: '/accounts', heading: 'Accounts' },
   { link: 'Reports', path: '/reports', heading: 'Reports' },
+  { link: 'Tools', path: '/tools', heading: 'Tools' },
   { link: 'Settings', path: '/settings', heading: 'Settings' },
 ]
 
