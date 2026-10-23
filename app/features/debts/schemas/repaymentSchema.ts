@@ -2,7 +2,8 @@ import { helpers, required } from '@vuelidate/validators'
 import { DEBT_NOTE_MAX } from '../../../shared/api/contract'
 import type { Currency } from '../../../shared/money/currencies'
 import { toMinor, withinAmountLimit, withinRateLimit } from '../../../shared/money/money'
-import { isPositiveOrEmpty, notAfter, requiredWhen, trimmedWithin } from './debtSchema'
+import { trimmedWithin } from '../../../shared/utils/text'
+import { isPositiveOrEmpty, notAfter, requiredWhen } from './debtSchema'
 
 export type RepaymentForm = {
   amount: number | null

@@ -1,4 +1,5 @@
 import { helpers, required } from '@vuelidate/validators'
+import { hasText } from '../../../shared/utils/text'
 import { monthKeyOfDate } from '../utils/goalView'
 
 export const GOAL_NAME_MAX = 40
@@ -10,8 +11,6 @@ export const GOAL_DEADLINE_MAX_MONTHS = 600
 export type GoalForm = { name: string; target: number | null; deadline: Date | null; accountId: string | null }
 
 type Translate = (key: string) => string
-
-export const hasText = (value: unknown): boolean => typeof value === 'string' && value.trim() !== ''
 
 export const isNameWithinMax = (value: unknown): boolean =>
   typeof value !== 'string' || value.trim().length <= GOAL_NAME_MAX
