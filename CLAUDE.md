@@ -87,7 +87,7 @@ Rules:
 
 ### Real-backend suite
 
-`bun run test:e2e:real` runs `tests/e2e-real` (`playwright.real.config.ts`, one worker, no web server) against a running app in real mode; `E2E_BASE_URL` selects it, `http://localhost:3000` by default. Every spec registers its own user with a unique email and deletes it at the end. The backend allows 10 register, login and delete calls per minute per client, and one run makes about 21 of them, so waiting between runs does not help against a stock backend (10 per minute): set `RateLimiting__AuthPermitLimit` (e.g. `100` in the backend's `.env`) for local runs.
+`bun run test:e2e:real` runs `tests/e2e-real` (`playwright.real.config.ts`, one worker, no web server) against a running app in real mode; `E2E_BASE_URL` selects it, `http://localhost:3000` by default. Every spec registers its own user with a unique email and deletes it at the end. The backend allows 10 register, login and delete calls per minute per client, and one run makes about 23 of them, so waiting between runs does not help against a stock backend (10 per minute): set `RateLimiting__AuthPermitLimit` (e.g. `100` in the backend's `.env`) for local runs.
 
 - `auth`: demo UI is hidden, registers, changes the base currency, signs out and in, checks a wrong password and a rate-limited delete, deletes the account.
 - `accounts`: creates accounts, transfers between them and archives one.
@@ -95,15 +95,23 @@ Rules:
 - `budgets-goals`: adds two accounts and an expense, creates and edits a budget, creates a goal and contributes to it (a transfer into the linked account), then deletes both.
 - `overview-reports`: adds an account, an income and an expense, then checks the totals, recent transactions and spending breakdown on the overview and the averages, savings rate and spending structure on reports.
 - `tags`: adds an account and two expenses with tags typed in the form, filters by tag, adds a suggested tag to a transaction, then renames and deletes tags in Settings and checks the rows.
-- `currencies`: adds a JPY account and a KWD account and checks that their cards show the digits of their own currency, adds a JPY expense and checks the balance, then checks that the base currency list offers four currencies (the expense is priced into the base currency, so the backend needs a recent JPY rate: its rates sync provides one, and a backend started with `Rates__SyncEnabled=false` needs a `JPY` row in `exchange_rates` dated within the last 30 days).
+- `currencies`: adds a JPY account and a KWD account and checks that their cards show the digits of their own currency, adds a JPY expense and checks the balance, then checks that the base currency list offers four currencies (the expense is priced into the base currency, so the backend needs a recent JPY rate: its rates sync provides one, and a backend started with `Rates__SyncEnabled=false` needs a `JPY` row in `exchange_rates` dated within the last 30 days; the `groups` spec likewise needs an `EUR` row, see below).
 - `debts`: adds an account, opens Tools and Debts, lends from the account with a due date in the past (the card is overdue) and checks the balance, repays part of it and checks the balance again, borrows without an account, checks the summary and the debts card and the balance with debts on the overview (income and expense stay at zero), repays the rest so the debt moves to Settled, then deletes the borrowed debt.
+- `groups`: opens Tools and Groups, creates the EUR group "Lisbon" with two more members, adds a 90 € expense split equally and a 100 PLN expense paid by another member with exact amounts at the suggested rate, checks the balances and the suggested transfers, records the first transfer, edits the first expense and reads its history, deletes the PLN expense, restores it from Deleted, shows the balances in PLN, then deletes the group. The figures assume an `EUR` rate of exactly 4.30 PLN (PLN → EUR 0.232558), so run it against a backend started with `Rates__SyncEnabled=false` and seeded with the `EUR` (4.30) and `JPY` (0.024764) rows of Docker smoke step 1, as the smoke script does; with the live rates sync the suggested rate differs and the spec fails.
 - `navigation`: opens every page from the main navigation, Tools included, as a new user and checks its heading and that no section fails to load.
 
 ### Docker smoke
 
 To check the production image against the backend without touching a running dev container:
 
-1. Start the backend stack with a raised auth limit: in `dock.mita.backend`, `docker compose -f compose.yaml -f compose.override.yaml -f <override> up -d --build`, where the override sets `services.api.environment.RateLimiting__AuthPermitLimit: "100"`.
+1. Start the backend stack with a raised auth limit and without the rates sync: in `dock.mita.backend`, `docker compose -f compose.yaml -f compose.override.yaml -f <override> up -d --build`, where the override sets `services.api.environment.RateLimiting__AuthPermitLimit: "100"` and `services.api.environment.Rates__SyncEnabled: "false"`. The `groups` spec needs fixed rates (and the `currencies` spec a recent `JPY` rate), so once `http://localhost:8080/health/ready` answers 200, seed EUR at 4.30 PLN and JPY at 0.024764 PLN for today − 3 to today with `docker compose -f compose.yaml -f compose.override.yaml -f <override> exec -T postgres psql -U mita -d mita` and this SQL:
+
+   ```sql
+   INSERT INTO exchange_rates ("Currency", "Date", "PlnValue", "FetchedAt")
+   SELECT seeded.code, CURRENT_DATE - n, seeded.pln_value, now()
+   FROM (VALUES ('JPY', 0.024764), ('EUR', 4.30)) AS seeded(code, pln_value)
+   CROSS JOIN generate_series(0, 3) AS n;
+   ```
 2. Start the frontend production image on another port with its own project name: `APP_PORT=3100 docker compose -p dock-mita-frontend-smoke -f compose.yaml -f <override> up -d --build`, where the override sets `services.web.image: dock-mita-frontend-smoke` (so the build does not retag `dock-mita-frontend`) and `services.web.environment.NUXT_PUBLIC_API_MOCKS: "false"`. Wait for `http://localhost:3100/login` (200); `http://localhost:3100/v1/me` answers 401 when the proxy reaches the backend.
 3. Run Playwright against it: `docker run --rm --user 1000:1000 -e HOME=/tmp --network host --ipc=host -v "$PWD":/work -w /work -e E2E_BASE_URL=http://localhost:3100 mcr.microsoft.com/playwright:v1.64.1-noble npx playwright test --config playwright.real.config.ts --reporter=line`.
 4. Tear down: `docker compose -p dock-mita-frontend-smoke -f compose.yaml down` and `docker image rm dock-mita-frontend-smoke` here, `docker compose down -v` in the backend (only if you started it for the smoke); remove `test-results` and `playwright-report` once any failure is understood.
