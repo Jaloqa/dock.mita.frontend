@@ -21,6 +21,13 @@ describe('invalidation map', () => {
     expect(invalidationMap.debts).toEqual([['debts'], ['accounts'], ['overview']])
   })
 
+  it('refreshes only the groups after a group change because groups never touch personal data', () => {
+    expect(invalidationMap.groups).toEqual([['groups']])
+    for (const change of ['transactions', 'accounts', 'debts', 'settings'] as const) {
+      expect(invalidationMap[change]).not.toContainEqual(['groups'])
+    }
+  })
+
   it('refreshes debts after a settings change because their summary is in the base currency', () => {
     expect(invalidationMap.settings).toEqual([
       ['overview'],
