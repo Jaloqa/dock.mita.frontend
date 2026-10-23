@@ -70,6 +70,12 @@ withDefaults(defineProps<{ name: IconName; size?: number; strokeWidth?: number }
     </template>
     <path v-else-if="name === 'transfer'" d="M7 7h12l-3-3M17 17H5l3 3" />
     <path v-else-if="name === 'edit'" d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3zM13.5 8.5l3 3" />
+    <template v-else-if="name === 'share'">
+      <circle cx="18" cy="5.5" r="2.5" />
+      <circle cx="6" cy="12" r="2.5" />
+      <circle cx="18" cy="18.5" r="2.5" />
+      <path d="M8.2 10.8l7.6-4.1M8.2 13.2l7.6 4.1" />
+    </template>
     <path v-else-if="name === 'trash'" d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
     <path v-else-if="name === 'download'" d="M12 4v11M7 10l5 5 5-5M5 20h14" />
     <template v-else-if="name === 'search'">

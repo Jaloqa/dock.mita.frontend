@@ -792,6 +792,7 @@
       "add": "New group",
       "addFirst": "Create a group",
       "members": "Members",
+      "share": "Share",
       "edit": "Edit group",
       "delete": "Delete group",
       "addExpense": "Add expense",
@@ -820,6 +821,28 @@
         "added": "Member added",
         "renamed": "Member renamed",
         "removed": "Member removed"
+      }
+    },
+    "share": {
+      "title": "Share",
+      "link": "Link",
+      "off": "Anyone with the link can see the group and add expenses and repayments without an account.",
+      "create": "Create link",
+      "copy": "Copy link",
+      "replace": "New link",
+      "turnOff": "Turn off link",
+      "confirm": {
+        "replaceTitle": "Make a new link?",
+        "replaceMessage": "The current link stops working.",
+        "turnOffTitle": "Turn off the link?",
+        "turnOffMessage": "People with the link can no longer open the group."
+      },
+      "toast": {
+        "created": "Link created",
+        "replaced": "New link created",
+        "turnedOff": "Link turned off",
+        "copied": "Link copied",
+        "copyFailed": "The link could not be copied. Select it and copy it by hand."
       }
     },
     "empty": {

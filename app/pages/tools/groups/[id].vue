@@ -14,6 +14,7 @@ provideGroupScope(scope)
 const { group, isPending, isError, notFound, refetch } = useGroup(scope)
 
 const membersOpen = ref(false)
+const shareOpen = ref(false)
 const settingsOpen = ref(false)
 const expenseOpen = ref(false)
 const editedExpense = ref<GroupExpenseDto>()
@@ -37,6 +38,10 @@ const recordRepaymentHint = computed(() => (canRecordRepayment.value ? undefined
 
 const openMembers = () => {
   membersOpen.value = true
+}
+
+const openShare = () => {
+  shareOpen.value = true
 }
 
 const openSettings = () => {
@@ -152,6 +157,19 @@ useHead({ title: () => title.value })
         >
           <AppIcon name="groups" :size="20" />
         </Button>
+        <Button severity="secondary" outlined class="hidden! min-h-11 lg:inline-flex!" @click="openShare">
+          <AppIcon name="share" :size="16" />
+          {{ t('groups.actions.share') }}
+        </Button>
+        <Button
+          severity="secondary"
+          outlined
+          class="size-11 lg:hidden!"
+          :aria-label="t('groups.actions.share')"
+          @click="openShare"
+        >
+          <AppIcon name="share" :size="20" />
+        </Button>
         <Button severity="secondary" outlined class="hidden! min-h-11 lg:inline-flex!" @click="openSettings">
           <AppIcon name="edit" :size="16" />
           {{ t('groups.actions.edit') }}
@@ -200,6 +218,7 @@ useHead({ title: () => title.value })
     <Skeleton v-for="index in 2" :key="index" height="6.5rem" border-radius="16px" />
   </div>
   <MembersDialog v-if="group" v-model:visible="membersOpen" :group="group" />
+  <ShareDialog v-if="group" v-model:visible="shareOpen" :group="group" />
   <GroupDialog v-if="group" v-model:visible="settingsOpen" :group="group" @deleted="onDeleted" />
   <ExpenseDialog
     v-if="group"

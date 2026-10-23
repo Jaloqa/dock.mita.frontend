@@ -14,6 +14,7 @@ export type IconName =
   | 'calendar'
   | 'transfer'
   | 'edit'
+  | 'share'
   | 'trash'
   | 'download'
   | 'search'

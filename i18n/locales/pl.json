@@ -792,6 +792,7 @@
       "add": "Nowa grupa",
       "addFirst": "Utwórz grupę",
       "members": "Uczestnicy",
+      "share": "Udostępnij",
       "edit": "Edytuj grupę",
       "delete": "Usuń grupę",
       "addExpense": "Dodaj wydatek",
@@ -820,6 +821,28 @@
         "added": "Dodano uczestnika",
         "renamed": "Zmieniono imię uczestnika",
         "removed": "Usunięto uczestnika"
+      }
+    },
+    "share": {
+      "title": "Udostępnij",
+      "link": "Link",
+      "off": "Każdy, kto ma link, widzi grupę i może dodawać wydatki oraz spłaty bez konta.",
+      "create": "Utwórz link",
+      "copy": "Kopiuj link",
+      "replace": "Nowy link",
+      "turnOff": "Wyłącz link",
+      "confirm": {
+        "replaceTitle": "Utworzyć nowy link?",
+        "replaceMessage": "Obecny link przestanie działać.",
+        "turnOffTitle": "Wyłączyć link?",
+        "turnOffMessage": "Osoby z linkiem nie będą już mogły otworzyć grupy."
+      },
+      "toast": {
+        "created": "Link utworzony",
+        "replaced": "Nowy link utworzony",
+        "turnedOff": "Link wyłączony",
+        "copied": "Link skopiowany",
+        "copyFailed": "Nie udało się skopiować linku. Zaznacz go i skopiuj ręcznie."
       }
     },
     "empty": {
