@@ -183,4 +183,33 @@ describe('groups api', () => {
 
     expect(requests).toEqual([{ method: 'DELETE', path: '/v1/groups/grp%2Fkrakow/membership' }])
   })
+
+  it('links the picked member through the share link with the member header and no body', async () => {
+    const requests: ApiRequest[] = []
+    const summary: GroupSummaryDto = {
+      id: 'grp_albania',
+      name: 'Albania 2026',
+      currency: 'EUR',
+      members: 4,
+      total: 0,
+      role: 'owner',
+    }
+    const api = groupsApi(
+      createApiClient(async (request) => {
+        requests.push(request)
+        return summary
+      }),
+    )
+
+    expect(await api.linkThroughShare('albania-2026-demo-link-0123456789abcdefghij', 'gmb_olya')).toEqual(summary)
+
+    expect(requests).toEqual([
+      {
+        method: 'PUT',
+        path: '/v1/shared/groups/albania-2026-demo-link-0123456789abcdefghij/membership',
+        body: undefined,
+        headers: { 'X-Group-Member': 'gmb_olya' },
+      },
+    ])
+  })
 })

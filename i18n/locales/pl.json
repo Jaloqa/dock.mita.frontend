@@ -891,7 +891,13 @@
       "youAre": "Występujesz jako {name}",
       "change": "Zmień",
       "dead": "Ten link nie działa. Poproś właściciela grupy o nowy.",
-      "oneMember": "Grupa potrzebuje drugiego uczestnika, zanim będzie można zapisywać spłaty."
+      "oneMember": "Grupa potrzebuje drugiego uczestnika, zanim będzie można zapisywać spłaty.",
+      "offer": {
+        "text": "Czy to Ty? Powiąż uczestnika {name} ze swoim kontem dock.mita, aby zobaczyć grupę w swojej aplikacji.",
+        "action": "Powiąż z moim kontem",
+        "done": "Uczestnik {name} jest powiązany z Twoim kontem.",
+        "open": "Otwórz w moich grupach"
+      }
     },
     "empty": {
       "title": "Nie ma jeszcze grup"
