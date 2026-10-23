@@ -683,6 +683,8 @@
       "addFirst": "Add a debt",
       "repay": "Repayment",
       "repayNamed": "Record a repayment for {name}",
+      "history": "History",
+      "historyNamed": "Repayment history for {name}",
       "edit": "Edit",
       "editNamed": "Edit {name}",
       "delete": "Delete"
@@ -734,14 +736,33 @@
       "accountAmount": "On the account: {amount}",
       "note": "Note"
     },
+    "repayment": {
+      "titleLent": "Repayment from {name}",
+      "titleBorrowed": "Repayment to {name}",
+      "left": "Left to repay: {amount}",
+      "rest": "Repay the rest",
+      "rateHint": "How many {to} equal 1 {from} on the date of the repayment. You can correct it.",
+      "reduces": "Reduces the debt by {amount}",
+      "accountHintLent": "The money enters this account.",
+      "accountHintBorrowed": "The money leaves this account."
+    },
+    "history": {
+      "label": "Repayments",
+      "converted": "= {amount}",
+      "delete": "Delete the repayment of {date}"
+    },
     "confirm": {
       "deleteTitle": "Delete the debt?",
-      "deleteMessage": "“{name}” and its repayments will be deleted. Account balances are restored."
+      "deleteMessage": "“{name}” and its repayments will be deleted. Account balances are restored.",
+      "deleteRepaymentTitle": "Delete this repayment?",
+      "deleteRepaymentMessage": "The debt and the account balance are restored."
     },
     "toast": {
       "created": "Debt saved",
       "updated": "Debt updated",
-      "deleted": "Debt deleted"
+      "deleted": "Debt deleted",
+      "repaid": "Repayment saved",
+      "repaymentDeleted": "Repayment deleted"
     }
   },
   "auth": {

@@ -20,20 +20,20 @@ type Translate = (key: string) => string
 
 const hasText = (value: unknown): boolean => typeof value === 'string' && value.trim() !== ''
 
-const trimmedWithin =
+export const trimmedWithin =
   (max: number) =>
   (value: unknown): boolean =>
     typeof value !== 'string' || value.trim().length <= max
 
-const isPositiveOrEmpty = (value: unknown): boolean =>
+export const isPositiveOrEmpty = (value: unknown): boolean =>
   value === null || value === undefined || (typeof value === 'number' && value > 0)
 
-const requiredWhen =
+export const requiredWhen =
   (condition: () => boolean) =>
   (value: unknown): boolean =>
     !condition() || (value !== null && value !== undefined && value !== '')
 
-const notAfter =
+export const notAfter =
   (limit: () => Date) =>
   (value: unknown): boolean =>
     !(value instanceof Date) || fromLocalDate(value) <= fromLocalDate(limit())

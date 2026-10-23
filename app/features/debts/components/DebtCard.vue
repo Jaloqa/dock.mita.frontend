@@ -18,6 +18,21 @@ const since = computed(() => t('debts.card.since', { date: day(props.debt.date) 
 const due = computed(() => (props.debt.dueDate ? day(props.debt.dueDate) : undefined))
 const editLabel = computed(() => t('debts.actions.editNamed', { name: name.value }))
 const repayLabel = computed(() => t('debts.actions.repayNamed', { name: name.value }))
+const historyLabel = computed(() => t('debts.actions.historyNamed', { name: name.value }))
+const historyId = computed(() => `debt-history-${props.debt.id}`)
+const hasHistory = computed(() => props.debt.repayments > 0)
+const showHistory = ref(false)
+const historyShown = computed(() => showHistory.value && hasHistory.value)
+const actions = ref<HTMLElement | null>(null)
+
+watch(hasHistory, async (has) => {
+  if (has || !showHistory.value) return
+  showHistory.value = false
+  await nextTick()
+  if (!document.activeElement || document.activeElement === document.body) {
+    actions.value?.querySelector<HTMLElement>('button')?.focus()
+  }
+})
 </script>
 
 <template>
@@ -52,7 +67,19 @@ const repayLabel = computed(() => t('debts.actions.repayNamed', { name: name.val
       </span>
     </div>
     <p v-if="debt.note" class="m-0 text-[13px] break-words text-muted">{{ debt.note }}</p>
-    <div class="mt-auto flex gap-2.5">
+    <div v-if="hasHistory" class="flex flex-col">
+      <Button
+        :label="t('debts.actions.history')"
+        :aria-label="historyLabel"
+        :aria-expanded="historyShown"
+        :aria-controls="historyId"
+        text
+        class="-ml-3 min-h-11 self-start"
+        @click="showHistory = !showHistory"
+      />
+      <RepaymentList v-if="historyShown" :id="historyId" :debt="debt" />
+    </div>
+    <div ref="actions" class="mt-auto flex gap-2.5">
       <Button
         v-if="debt.status === 'open'"
         :label="t('debts.actions.repay')"
