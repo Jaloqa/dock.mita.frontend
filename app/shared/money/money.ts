@@ -69,6 +69,30 @@ export function roundRate(rate: number): number {
 
 export const sumMinor = (values: readonly number[]): number => values.reduce((total, value) => total + value, 0)
 
+export function allocateMinor(total: number, weights: readonly number[], priority: readonly number[]): number[] {
+  const scaledTotal = BigInt(total)
+  const weightSum = weights.reduce((sum, weight) => sum + BigInt(weight), 0n)
+  const rank = new Map(priority.map((index, position) => [index, position]))
+  const parts = weights.map((weight) => {
+    const scaled = scaledTotal * BigInt(weight)
+    const remainder = ((scaled % weightSum) + weightSum) % weightSum
+    return { quotient: (scaled - remainder) / weightSum, remainder }
+  })
+  const left = Number(parts.reduce((rest, part) => rest - part.quotient, scaledTotal))
+  const receivers = new Set(
+    parts
+      .map((part, index) => ({ ...part, index }))
+      .sort(
+        (a, b) =>
+          (a.remainder > b.remainder ? -1 : a.remainder < b.remainder ? 1 : 0) ||
+          (rank.get(a.index) ?? 0) - (rank.get(b.index) ?? 0),
+      )
+      .slice(0, left)
+      .map((part) => part.index),
+  )
+  return parts.map((part, index) => Number(part.quotient) + (receivers.has(index) ? 1 : 0))
+}
+
 export const withinAmountLimit =
   (currency: () => Currency) =>
   (value: unknown): boolean =>

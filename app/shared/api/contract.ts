@@ -299,6 +299,179 @@ export type DebtRepaymentInput = {
   note?: string | null
 }
 
+export const GROUP_NAME_MAX = 40
+
+export const GROUP_MEMBERS_MAX = 50
+
+export const GROUP_CATEGORIES_MAX = 100
+
+export const EXPENSE_DESCRIPTION_MAX = 100
+
+export const GROUP_NOTE_MAX = 200
+
+export const standardGroupCategories = [
+  'groceries',
+  'transport',
+  'housing',
+  'cafes',
+  'health',
+  'shopping',
+  'leisure',
+  'gifts',
+  'other',
+] as const
+
+export type StandardGroupCategory = (typeof standardGroupCategories)[number]
+
+export type GroupSummaryDto = { id: string; name: string; currency: Currency; members: number; total: number }
+
+export type GroupMemberDto = { id: string; name: string; inUse: boolean }
+
+export type GroupCategoryDto = { id: string; standard: boolean; name: string | null }
+
+export type GroupDto = {
+  id: string
+  name: string
+  currency: Currency
+  currencyLocked: boolean
+  total: number
+  members: GroupMemberDto[]
+  categories: GroupCategoryDto[]
+}
+
+export type GroupInput = { name: string; currency: Currency; members: string[] }
+
+export type GroupUpdateInput = { name: string; currency: Currency }
+
+export type GroupNameInput = { name: string }
+
+export type GroupActorKind = 'owner' | 'member'
+
+export type GroupActorDto = { kind: GroupActorKind; memberId: string | null; name: string }
+
+export type GroupShareDto = { memberId: string; amount: number; groupAmount: number }
+
+export type GroupSplitMode = 'equal' | 'exact'
+
+export const groupSplitModes: readonly GroupSplitMode[] = ['equal', 'exact']
+
+export type GroupSplitInput =
+  | { mode: 'equal'; memberIds: string[] }
+  | { mode: 'exact'; shares: { memberId: string; amount: number }[] }
+
+export type GroupExpenseDto = {
+  id: string
+  payerId: string
+  amount: number
+  currency: Currency
+  date: string
+  categoryId: string
+  tags: string[]
+  description: string | null
+  rate: number
+  rateManual: boolean
+  groupAmount: number
+  split: GroupSplitMode
+  shares: GroupShareDto[]
+  deleted: boolean
+  createdBy: GroupActorDto
+  createdAt: string
+  updatedBy: GroupActorDto | null
+  updatedAt: string | null
+}
+
+export type GroupExpenseInput = {
+  payerId: string
+  amount: number
+  currency: Currency
+  date: string
+  categoryId?: string | null
+  tags?: string[]
+  description?: string | null
+  rate?: number
+  split?: GroupSplitInput | null
+}
+
+export type GroupExpenseState = {
+  payerId: string
+  amount: number
+  currency: Currency
+  date: string
+  categoryId: string
+  tags: string[]
+  description: string | null
+  rate: number
+  rateManual: boolean
+  groupAmount: number
+  split: GroupSplitMode
+  shares: GroupShareDto[]
+}
+
+export type GroupRepaymentDto = {
+  id: string
+  fromMemberId: string
+  toMemberId: string
+  amount: number
+  currency: Currency
+  date: string
+  rate: number
+  rateManual: boolean
+  groupAmount: number
+  note: string | null
+  deleted: boolean
+  createdBy: GroupActorDto
+  createdAt: string
+  updatedBy: GroupActorDto | null
+  updatedAt: string | null
+}
+
+export type GroupRepaymentInput = {
+  fromMemberId: string
+  toMemberId: string
+  amount: number
+  currency: Currency
+  date: string
+  rate?: number
+  note?: string | null
+}
+
+export type GroupRepaymentState = {
+  fromMemberId: string
+  toMemberId: string
+  amount: number
+  currency: Currency
+  date: string
+  rate: number
+  rateManual: boolean
+  groupAmount: number
+  note: string | null
+}
+
+export type GroupEntryAction = 'created' | 'updated' | 'deleted' | 'restored'
+
+export const groupEntryActions: readonly GroupEntryAction[] = ['created', 'updated', 'deleted', 'restored']
+
+export type GroupEntryEvent<T> = { id: string; action: GroupEntryAction; at: string; actor: GroupActorDto; state: T }
+
+export type GroupMemberBalanceDto = {
+  memberId: string
+  paid: number
+  share: number
+  sent: number
+  received: number
+  balance: number
+}
+
+export type GroupTransferDto = { fromMemberId: string; toMemberId: string; amount: number }
+
+export type GroupBalancesDto = {
+  currency: Currency
+  groupCurrency: Currency
+  total: number
+  members: GroupMemberBalanceDto[]
+  transfers: GroupTransferDto[]
+}
+
 export type OverviewRange = 'week' | 'month' | 'year'
 
 export const overviewRanges: readonly OverviewRange[] = ['week', 'month', 'year']

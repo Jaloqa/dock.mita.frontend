@@ -2,6 +2,7 @@ import { describe, expect, it } from 'bun:test'
 import type { Currency } from '../../../app/shared/money/currencies'
 import { currencyFormat } from '../../../app/shared/money/format'
 import {
+  allocateMinor,
   convertMinor,
   fitMajor,
   fromMinor,
@@ -136,6 +137,29 @@ describe('money', () => {
     expect(withinRateLimit(1_000_000_000)).toBe(true)
     expect(withinRateLimit(1_000_000_000.5)).toBe(false)
     expect(withinRateLimit(null)).toBe(true)
+  })
+
+  it.each([
+    [10_000, [1, 1, 1], [1, 0, 2], [3_333, 3_334, 3_333]],
+    [3_070, [75_000, 75_000, 75_000, 75_000], [1, 0, 2, 3], [768, 768, 767, 767]],
+    [100, [1, 2], [0, 1], [33, 67]],
+    [0, [5, 5], [0, 1], [0, 0]],
+    [1, [1, 1, 1], [2, 0, 1], [0, 0, 1]],
+    [100_000_000_000, [100_000_000_000, 1], [0, 1], [99_999_999_999, 1]],
+  ])('allocateMinor(%d, %p, %p) = %p', (total, weights, priority, expected) => {
+    expect(allocateMinor(total, weights, priority)).toEqual(expected)
+  })
+
+  it('keeps the total and stays within one minor unit of the exact share', () => {
+    const weights = [100_000_000_000, 99_999_999_999, 7, 1]
+    const total = 99_999_999_997
+    const values = allocateMinor(total, weights, [3, 2, 1, 0])
+    expect(sumMinor(values)).toBe(total)
+    const weightSum = weights.reduce((sum, weight) => sum + BigInt(weight), 0n)
+    for (const [index, value] of values.entries()) {
+      const deviation = BigInt(value) * weightSum - BigInt(total) * BigInt(weights[index] ?? 0)
+      expect(deviation < 0n ? -deviation : deviation).toBeLessThan(weightSum)
+    }
   })
 })
 
