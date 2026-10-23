@@ -17,7 +17,10 @@ async function signOut() {
   }
 }
 
-const isActive = (to: string) => route.path === localePath(to)
+const isActive = (to: string) => {
+  const path = localePath(to)
+  return route.path === path || (to !== '/' && route.path.startsWith(`${path}/`))
+}
 
 const linkClass = (to: string) => [
   'flex min-h-11 items-center gap-3 rounded-(--radius-control) px-3 text-sm no-underline transition-colors',

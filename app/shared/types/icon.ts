@@ -5,6 +5,8 @@ export type IconName =
   | 'goals'
   | 'accounts'
   | 'reports'
+  | 'tools'
+  | 'debts'
   | 'settings'
   | 'plus'
   | 'calendar'

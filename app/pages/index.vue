@@ -45,6 +45,13 @@ useHead({ title: () => t('navigation.overview') })
       >
         <AppIcon name="settings" :size="20" />
       </NuxtLinkLocale>
+      <NuxtLinkLocale
+        to="/tools"
+        :aria-label="t('navigation.tools')"
+        class="flex size-11 items-center justify-center rounded-xl border border-border bg-surface text-ink"
+      >
+        <AppIcon name="tools" :size="20" />
+      </NuxtLinkLocale>
     </template>
   </PageHeader>
   <EmptyState
