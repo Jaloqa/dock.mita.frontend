@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page, test } from '@playwright/test'
+import { pickOverlayOption } from './overlayOption'
 
 const OWN_EMAIL_MESSAGE = 'This is your own email. Use “This is me” instead.'
 
@@ -212,4 +213,162 @@ test('keeps the link when the unlink is not confirmed', async ({ page }) => {
   await expect(confirm).toBeHidden()
   await expect(memberRow(dialog, 'Anna').getByText('You', { exact: true })).toBeVisible()
   await expect(toast(page, 'Member unlinked')).toHaveCount(0)
+})
+
+const INVITATION = 'Oleh Kravets invites you to “Kraków” as Anna.'
+
+const groupList = (page: Page) => page.getByRole('list', { name: 'Groups', exact: true })
+const invitations = (page: Page) => page.getByRole('region', { name: 'Invitations', exact: true })
+const acceptButton = (page: Page) =>
+  invitations(page).getByRole('button', { name: 'Accept the invitation to Kraków', exact: true })
+const declineButton = (page: Page) =>
+  invitations(page).getByRole('button', { name: 'Decline the invitation to Kraków', exact: true })
+const groupsHeading = (page: Page) => page.getByRole('heading', { level: 1, name: 'Groups', exact: true })
+const krakowCard = (page: Page) => groupList(page).getByRole('link', { name: 'Kraków', exact: true })
+const balances = (page: Page) => page.getByRole('region', { name: 'Balances', exact: true })
+const leaveButton = (page: Page) => page.getByRole('button', { name: 'Leave group', exact: true })
+
+const openGroups = async (page: Page) => {
+  await page.goto('/tools/groups')
+  await expect(groupsHeading(page)).toBeVisible()
+  await expect(invitations(page).getByText(INVITATION, { exact: true })).toBeVisible()
+}
+
+const acceptInvitation = async (page: Page) => {
+  await openGroups(page)
+  await acceptButton(page).click()
+  await expect(toast(page, 'You joined “Kraków”')).toBeVisible()
+  await expect(krakowCard(page)).toBeVisible()
+}
+
+const openKrakow = async (page: Page) => {
+  await acceptInvitation(page)
+  await krakowCard(page).click()
+  await expect(page).toHaveURL('/tools/groups/grp_krakow')
+  await expect(page.getByRole('heading', { level: 1, name: 'Kraków', exact: true })).toBeVisible()
+}
+
+test('lists the invitation above the groups', async ({ page }) => {
+  await openGroups(page)
+  await expect(invitations(page).getByRole('heading', { level: 2, name: 'Invitations', exact: true })).toBeVisible()
+  await expect(invitations(page).getByRole('listitem')).toHaveCount(1)
+  for (const button of [acceptButton(page), declineButton(page)]) {
+    expect((await button.boundingBox())?.height).toBeGreaterThanOrEqual(44)
+  }
+  await expect(acceptButton(page)).toHaveText('Accept')
+  await expect(declineButton(page)).toHaveText('Decline')
+  await expect(groupList(page).getByRole('link')).toHaveCount(1)
+  await expect(krakowCard(page)).toHaveCount(0)
+  const invitationsTop = (await invitations(page).boundingBox())?.y ?? Number.POSITIVE_INFINITY
+  const groupsTop = (await groupList(page).boundingBox())?.y ?? 0
+  expect(invitationsTop).toBeLessThan(groupsTop)
+})
+
+test('accepts an invitation', async ({ page }) => {
+  await openGroups(page)
+  await acceptButton(page).click()
+  await expect(toast(page, 'You joined “Kraków”')).toBeVisible()
+  await expect(invitations(page)).toHaveCount(0)
+  await expect(groupsHeading(page)).toBeFocused()
+  await expect(groupList(page).getByRole('link')).toHaveCount(2)
+  await expect(krakowCard(page)).toContainText('Shared with you')
+  await expect(krakowCard(page)).toContainText('3 members')
+  await expect(groupList(page).getByRole('link', { name: 'Albania 2026', exact: true })).not.toContainText(
+    'Shared with you',
+  )
+
+  await krakowCard(page).click()
+  await expect(page).toHaveURL('/tools/groups/grp_krakow')
+  await expect(page.getByRole('heading', { level: 1, name: 'Kraków', exact: true })).toBeVisible()
+  for (const name of ['Members', 'Share', 'Edit group'])
+    await expect(page.getByRole('button', { name, exact: true })).toHaveCount(0)
+  await expect(balances(page).getByText('Anna (you)', { exact: true })).toBeVisible()
+  const anna = balances(page).getByRole('listitem').filter({ hasText: 'Anna (you)' })
+  await expect(anna).toContainText('-zł 100.00')
+  await expect(balances(page).getByText('Oleh', { exact: true })).toBeVisible()
+  await expect(balances(page).getByText(/\(you\)/)).toHaveCount(1)
+
+  await page.getByRole('button', { name: 'Add expense', exact: true }).click()
+  const dialog = page.getByRole('dialog', { name: 'New expense', exact: true })
+  await expect(dialog.getByRole('button', { name: 'Close', exact: true })).toBeFocused()
+  await dialog.getByRole('combobox', { name: 'Paid by', exact: true }).click()
+  await pickOverlayOption(page, 'Anna')
+  await dialog.getByLabel('Amount', { exact: true }).pressSequentially('30')
+  await dialog.getByLabel('Description', { exact: true }).fill('Coffee')
+  await dialog.getByRole('button', { name: 'Save', exact: true }).click()
+  await expect(toast(page, 'Expense added')).toBeVisible()
+  const coffee = page
+    .getByRole('region', { name: 'Expenses', exact: true })
+    .getByRole('article', { name: 'Coffee', exact: true })
+  await expect(coffee).toContainText('Added by Anna')
+  await expect(coffee).toContainText('Paid by Anna')
+})
+
+test('keeps the group after the page reloads', async ({ page }) => {
+  await acceptInvitation(page)
+  await page.reload()
+  await expect(groupsHeading(page)).toBeVisible()
+  await expect(krakowCard(page)).toBeVisible()
+  await expect(invitations(page)).toHaveCount(0)
+})
+
+test('declines an invitation', async ({ page }) => {
+  await openGroups(page)
+  await declineButton(page).click()
+  await expect(toast(page, 'Invitation declined')).toBeVisible()
+  await expect(invitations(page)).toHaveCount(0)
+  await expect(groupsHeading(page)).toBeFocused()
+  await expect(groupList(page).getByRole('link')).toHaveCount(1)
+  await expect(krakowCard(page)).toHaveCount(0)
+  await page.reload()
+  await expect(groupsHeading(page)).toBeVisible()
+  await expect(groupList(page).getByRole('link')).toHaveCount(1)
+  await expect(invitations(page)).toHaveCount(0)
+})
+
+test('leaves a group', async ({ page }) => {
+  await openKrakow(page)
+  const leave = leaveButton(page)
+  expect((await leave.boundingBox())?.height).toBeGreaterThanOrEqual(44)
+  await leave.click()
+  const confirm = page.getByRole('alertdialog')
+  await expect(confirm).toContainText('Leave “Kraków”?')
+  await expect(confirm).toContainText('The group disappears from your app. Its entries stay in the group.')
+  await confirm.getByRole('button', { name: 'Leave group', exact: true }).click()
+  await expect(toast(page, 'You left the group')).toBeVisible()
+  await expect(page).toHaveURL('/tools/groups')
+  await expect(groupsHeading(page)).toBeVisible()
+  await expect(groupList(page).getByRole('link')).toHaveCount(1)
+  await expect(krakowCard(page)).toHaveCount(0)
+  await expect(invitations(page)).toHaveCount(0)
+  await page.goto('/tools/groups/grp_krakow')
+  await expect(page.getByText('This group no longer exists.', { exact: true })).toBeVisible()
+})
+
+test('keeps the group when leaving is not confirmed', async ({ page }) => {
+  await openKrakow(page)
+  await leaveButton(page).click()
+  const confirm = page.getByRole('alertdialog')
+  await confirm.getByRole('button', { name: 'Cancel', exact: true }).click()
+  await expect(confirm).toBeHidden()
+  await expect(toast(page, 'You left the group')).toHaveCount(0)
+  await expect(page).toHaveURL('/tools/groups/grp_krakow')
+  await expect(balances(page).getByText('Anna (you)', { exact: true })).toBeVisible()
+})
+
+test('does not offer to leave a group you own', async ({ page }) => {
+  await page.goto('/tools/groups/grp_albania')
+  await expect(page.getByRole('heading', { level: 1, name: 'Albania 2026', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Members', exact: true })).toBeVisible()
+  await expect(leaveButton(page)).toHaveCount(0)
+})
+
+test('names your member in the balances of a group you own', async ({ page }) => {
+  const dialog = await openMembers(page)
+  await thisIsMe(dialog, 'Anna').click()
+  await expect(memberRow(dialog, 'Anna').getByText('You', { exact: true })).toBeVisible()
+  await dialog.getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(dialog).toBeHidden()
+  await expect(balances(page).getByText('Anna (you)', { exact: true })).toBeVisible()
+  await expect(balances(page).getByText('Olya', { exact: true })).toBeVisible()
 })

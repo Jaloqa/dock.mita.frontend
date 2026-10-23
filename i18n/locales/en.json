@@ -795,12 +795,14 @@
       "share": "Share",
       "edit": "Edit group",
       "delete": "Delete group",
+      "leave": "Leave group",
       "addExpense": "Add expense",
       "recordRepayment": "Record repayment"
     },
     "card": {
       "members": "{count} member | {count} members",
-      "spent": "Spent"
+      "spent": "Spent",
+      "shared": "Shared with you"
     },
     "summary": {
       "label": "Summary",
@@ -845,6 +847,18 @@
         "invited": "Invitation sent",
         "inviteCancelled": "Invitation cancelled",
         "unlinked": "Member unlinked"
+      }
+    },
+    "invites": {
+      "title": "Invitations",
+      "text": "{owner} invites you to “{group}” as {member}.",
+      "accept": "Accept",
+      "acceptFor": "Accept the invitation to {group}",
+      "decline": "Decline",
+      "declineFor": "Decline the invitation to {group}",
+      "toast": {
+        "joined": "You joined “{group}”",
+        "declined": "Invitation declined"
       }
     },
     "share": {
@@ -900,12 +914,15 @@
     },
     "confirm": {
       "deleteTitle": "Delete the group?",
-      "deleteMessage": "“{name}”, its expenses, repayments and history will be deleted for good."
+      "deleteMessage": "“{name}”, its expenses, repayments and history will be deleted for good.",
+      "leaveTitle": "Leave “{name}”?",
+      "leaveMessage": "The group disappears from your app. Its entries stay in the group."
     },
     "toast": {
       "created": "Group created",
       "updated": "Group updated",
-      "deleted": "Group deleted"
+      "deleted": "Group deleted",
+      "left": "You left the group"
     },
     "categories": {
       "groceries": "Groceries",
@@ -990,7 +1007,8 @@
       "recordNamed": "Record that {from} paid {to}",
       "settledUp": "Everyone is settled up.",
       "empty": "No members yet.",
-      "viewFailed": "The balances could not be converted into {currency}. They are shown in {main}."
+      "viewFailed": "The balances could not be converted into {currency}. They are shown in {main}.",
+      "you": "{name} (you)"
     },
     "repayments": {
       "title": "Repayments",

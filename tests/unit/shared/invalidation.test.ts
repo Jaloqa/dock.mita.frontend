@@ -66,8 +66,8 @@ describe('invalidation map', () => {
     expect(invalidationMap.demo).toEqual([[]])
   })
 
-  it('refreshes only the demo users after a profile change because the response replaces the current user', () => {
-    expect(invalidationMap.profile).toEqual([['demo']])
+  it('refreshes the demo users and the groups after a profile change because group invitations follow the email', () => {
+    expect(invalidationMap.profile).toEqual([['demo'], ['groups']])
   })
 
   it('refreshes tags and the transaction pages that show them after a tag change', () => {

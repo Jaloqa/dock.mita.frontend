@@ -2,7 +2,7 @@ import { describe, expect, it } from 'bun:test'
 import { groupsApi } from '../../../../app/features/groups/api/groupsApi'
 import { linkScope, userScope } from '../../../../app/features/groups/utils/scope'
 import { createApiClient } from '../../../../app/shared/api/client'
-import type { GroupDto, GroupMemberDto } from '../../../../app/shared/api/contract'
+import type { GroupDto, GroupMemberDto, GroupSummaryDto } from '../../../../app/shared/api/contract'
 import type { ApiRequest } from '../../../../app/shared/api/transport'
 
 describe('groups api', () => {
@@ -139,5 +139,48 @@ describe('groups api', () => {
       },
       { method: 'DELETE', path: '/v1/groups/grp%2Falbania/members/gmb%2Folya/invite' },
     ])
+  })
+
+  it('lists, accepts and declines the invitations of the signed-in user', async () => {
+    const requests: ApiRequest[] = []
+    const summary: GroupSummaryDto = {
+      id: 'grp_krakow',
+      name: 'Kraków',
+      currency: 'PLN',
+      members: 3,
+      total: 30000,
+      role: 'member',
+    }
+    const api = groupsApi(
+      createApiClient(async (request) => {
+        requests.push(request)
+        if (request.method === 'GET') return { items: [], page: 1, pageSize: 100, total: 0 }
+        return request.path.endsWith('/accept') ? summary : undefined
+      }),
+    )
+
+    await api.invites()
+    expect(await api.acceptInvite('gmb/anna')).toEqual(summary)
+    await api.declineInvite('gmb/anna')
+
+    expect(requests).toEqual([
+      { method: 'GET', path: '/v1/group-invites', query: { pageSize: 100 } },
+      { method: 'POST', path: '/v1/group-invites/gmb%2Fanna/accept' },
+      { method: 'POST', path: '/v1/group-invites/gmb%2Fanna/decline' },
+    ])
+  })
+
+  it('leaves a group through the membership of the signed-in user', async () => {
+    const requests: ApiRequest[] = []
+    const api = groupsApi(
+      createApiClient(async (request) => {
+        requests.push(request)
+        return undefined
+      }),
+    )
+
+    await api.leave('grp/krakow')
+
+    expect(requests).toEqual([{ method: 'DELETE', path: '/v1/groups/grp%2Fkrakow/membership' }])
   })
 })

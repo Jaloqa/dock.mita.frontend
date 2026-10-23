@@ -3,6 +3,7 @@ import type {
   GroupCategoryDto,
   GroupDto,
   GroupInput,
+  GroupInviteDto,
   GroupInviteInput,
   GroupMemberDto,
   GroupNameInput,
@@ -24,12 +25,20 @@ const linkPath = (id: string, memberId: string) => `${memberPath(id, memberId)}/
 
 const invitePath = (id: string, memberId: string) => `${memberPath(id, memberId)}/invite`
 
+const membershipPath = (id: string) => `${groupPath(id)}/membership`
+
+const receivedInvitePath = (memberId: string) => `/v1/group-invites/${encodeURIComponent(memberId)}`
+
 export const groupsApi = (api: ApiClient) => ({
   list: () => api.get<Page<GroupSummaryDto>>('/v1/groups', { pageSize: 100 }),
   create: (body: GroupInput) => api.post<GroupDto>('/v1/groups', body),
   get: (scope: GroupScope) => api.get<GroupDto>(scopePath(scope)),
   update: (id: string, body: GroupUpdateInput) => api.put<GroupDto>(groupPath(id), body),
   remove: (id: string) => api.delete(groupPath(id)),
+  leave: (id: string) => api.delete(membershipPath(id)),
+  invites: () => api.get<Page<GroupInviteDto>>('/v1/group-invites', { pageSize: 100 }),
+  acceptInvite: (memberId: string) => api.post<GroupSummaryDto>(`${receivedInvitePath(memberId)}/accept`),
+  declineInvite: (memberId: string) => api.post(`${receivedInvitePath(memberId)}/decline`),
   share: (id: string) => api.post<GroupDto>(sharePath(id)),
   unshare: (id: string) => api.delete(sharePath(id)),
   addMember: (id: string, body: GroupNameInput) => api.post<GroupMemberDto>(membersPath(id), body),
