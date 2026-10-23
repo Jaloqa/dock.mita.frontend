@@ -102,6 +102,13 @@ const shareNewGroup = async (page: Page, name: string) => {
   return link.pathname
 }
 
+const offerText = (page: Page, name: string) =>
+  page.getByText(`Is this you? Link ${name} to your dock.mita account to see the group in your app.`, { exact: true })
+const linkButton = (page: Page) => page.getByRole('button', { name: 'Link to my account', exact: true })
+const linkedText = (page: Page, name: string) => page.getByText(`${name} is linked to your account.`, { exact: true })
+const openInGroups = (page: Page) => page.getByRole('link', { name: 'Open in my groups', exact: true })
+const offerAlert = (page: Page, text: string) => page.getByRole('alert').filter({ hasText: text })
+
 const storedMember = (page: Page) => page.evaluate((key) => window.localStorage.getItem(key), MEMBER_KEY)
 
 const errorToasts = (page: Page) => page.getByRole('alert').filter({ hasText: ERROR_TITLE })
@@ -182,6 +189,15 @@ test.describe('without an account', () => {
     await expect(page.getByRole('link')).toHaveCount(0)
   })
 
+  test('offers no account link to an anonymous visitor', async ({ page }) => {
+    await openLinkAs(page, 'Olya')
+    await expect(offerText(page, 'Olya')).toHaveCount(0)
+    await expect(page.getByText(/dock\.mita account/)).toHaveCount(0)
+    await expect(linkButton(page)).toHaveCount(0)
+    await expect(openInGroups(page)).toHaveCount(0)
+    await expectOnlyLinkRequests(page)
+  })
+
   test('asks again when the member is gone', async ({ page }) => {
     await page.addInitScript((key) => window.localStorage.setItem(key, 'gmb_gone'), MEMBER_KEY)
     await page.goto(LINK)
@@ -246,6 +262,122 @@ test('lets a signed-in visitor act as the member they choose', async ({ page }) 
   await expect(groupHeading(page)).toBeVisible()
   await expect(row(page, 'Coffee')).toContainText('Added by Anna')
   await expect(row(page, 'Coffee')).not.toContainText('Anna Nowak')
+})
+
+test('links the member a signed-in visitor picked to their account', async ({ page }) => {
+  await openLinkAs(page, 'Olya')
+  await expect(offerText(page, 'Olya')).toBeVisible()
+  const button = linkButton(page)
+  expect((await button.boundingBox())?.height).toBeGreaterThanOrEqual(44)
+  await expect(openInGroups(page)).toHaveCount(0)
+
+  await button.click()
+  const done = linkedText(page, 'Olya')
+  await expect(done).toBeVisible()
+  await expect(done).toBeFocused()
+  await expect(offerText(page, 'Olya')).toHaveCount(0)
+  await expect(linkButton(page)).toHaveCount(0)
+  await expect(errorToasts(page)).toHaveCount(0)
+  await expectOnlyLinkRequests(page)
+  await expect(youAre(page, 'Olya')).toBeVisible()
+
+  const open = openInGroups(page)
+  const box = await open.boundingBox()
+  expect(box?.height).toBeGreaterThanOrEqual(44)
+  await open.click()
+  await expect(page).toHaveURL('/tools/groups/grp_albania')
+  await expect(groupHeading(page)).toBeVisible()
+  await expect(balanceRow(page, 'Olya (you)')).toHaveCount(1)
+  await expect(page.getByText(/\(you\)/)).toHaveCount(1)
+})
+
+test('stops offering a member once it is linked', async ({ page }) => {
+  await openLinkAs(page, 'Olya')
+  await linkButton(page).click()
+  await expect(linkedText(page, 'Olya')).toBeVisible()
+
+  await page.reload()
+  await expect(groupHeading(page)).toBeVisible()
+  await expect(youAre(page, 'Olya')).toBeVisible()
+  await expect(linkButton(page)).toHaveCount(0)
+  await expect(page.getByText(/dock\.mita account/)).toHaveCount(0)
+  await expect(openInGroups(page)).toHaveCount(0)
+})
+
+test('explains that the visitor is already linked to another member', async ({ page }) => {
+  await openLinkAs(page, 'Olya')
+  await linkButton(page).click()
+  await expect(linkedText(page, 'Olya')).toBeVisible()
+
+  await changeButton(page).click()
+  await chooseAs(page, 'Max')
+  await expect(offerText(page, 'Max')).toBeVisible()
+  await expect(linkedText(page, 'Olya')).toHaveCount(0)
+  await linkButton(page).click()
+  const alreadyLinked = 'You are already linked to another member of this group.'
+  await expect(offerAlert(page, alreadyLinked)).toHaveText(alreadyLinked)
+  await expect(offerAlert(page, alreadyLinked)).toBeFocused()
+  await expect(offerText(page, 'Max')).toBeVisible()
+  await expect(linkButton(page)).toBeVisible()
+  await expect(linkedText(page, 'Max')).toHaveCount(0)
+  await expect(errorToasts(page)).toHaveCount(0)
+})
+
+test('explains that another account linked the member first', async ({ page }) => {
+  await openLinkAs(page, 'Olya')
+  await expect(offerText(page, 'Olya')).toBeVisible()
+
+  const other = await page.context().newPage()
+  await other.goto('/tools/groups')
+  await other.evaluate(() => {
+    const key = 'mita-mock-db-v1'
+    const state = JSON.parse(localStorage.getItem(key) ?? '{}')
+    const olya = state.groupMembers.find((row: { id: string }) => row.id === 'gmb_olya')
+    olya.userId = 'usr_oleh'
+    localStorage.setItem(key, JSON.stringify(state))
+  })
+  await other.close()
+
+  await linkButton(page).click()
+  const memberLinked = 'This member is already linked to an account.'
+  const alert = offerAlert(page, memberLinked)
+  await expect(alert).toHaveText(memberLinked)
+  await expect(alert).toBeFocused()
+  await expect(linkButton(page)).toHaveCount(0)
+  await expect(linkedText(page, 'Olya')).toHaveCount(0)
+  await expect(errorToasts(page)).toHaveCount(0)
+})
+
+test('asks again when the member is removed before linking', async ({ page, context }) => {
+  const owner = await context.newPage()
+  await owner.goto('/tools/groups/grp_albania')
+  await expect(groupHeading(owner)).toBeVisible()
+  await owner.getByRole('button', { name: 'Members', exact: true }).click()
+  const members = owner.getByRole('dialog', { name: 'Members', exact: true })
+  await members.getByLabel('New member', { exact: true }).fill('Zoe')
+  await members.getByRole('button', { name: 'Add', exact: true }).click()
+  await expect(owner.getByText('Member added')).toBeVisible()
+
+  await openLinkAs(page, 'Zoe')
+  await expect(offerText(page, 'Zoe')).toBeVisible()
+
+  await members.getByRole('button', { name: 'Remove Zoe', exact: true }).click()
+  await expect(owner.getByText('Member removed')).toBeVisible()
+
+  await linkButton(page).click()
+  const question = chooser(page)
+  await expect(question.getByRole('alert')).toHaveText(AGAIN)
+  await expect(question.getByRole('button')).toHaveText(['Anna', 'Olya', 'Max', 'Kasia'])
+  await expect(linkButton(page)).toHaveCount(0)
+  await expect(errorToasts(page)).toHaveCount(0)
+  expect(await storedMember(page)).toBeNull()
+})
+
+test('offers the account link in Polish', async ({ page }) => {
+  await page.goto(`/pl${LINK}`)
+  await chooser(page, 'Kim jesteś?').getByRole('button', { name: 'Olya', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Powiąż z moim kontem', exact: true })).toBeVisible()
+  await expect(page.getByText('Czy to Ty?', { exact: false })).toBeVisible()
 })
 
 test('asks again when the chosen member is removed before a write', async ({ page, context }) => {

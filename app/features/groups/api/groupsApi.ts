@@ -11,7 +11,7 @@ import type {
   GroupUpdateInput,
   Page,
 } from '~/shared/api/contract'
-import { type GroupScope, memberHeaders, scopePath, userScope } from '../utils/scope'
+import { type GroupScope, linkScope, memberHeaders, scopePath, userScope } from '../utils/scope'
 
 const groupPath = (id: string) => scopePath(userScope(id))
 
@@ -50,6 +50,10 @@ export const groupsApi = (api: ApiClient) => ({
   invite: (id: string, memberId: string, body: GroupInviteInput) =>
     api.put<GroupMemberDto>(invitePath(id, memberId), body),
   cancelInvite: (id: string, memberId: string) => api.delete(invitePath(id, memberId)),
+  linkThroughShare: (token: string, memberId: string) => {
+    const scope = linkScope(token, memberId)
+    return api.put<GroupSummaryDto>(`${scopePath(scope)}/membership`, undefined, { headers: memberHeaders(scope) })
+  },
   addCategory: (scope: GroupScope, body: GroupNameInput) =>
     api.post<GroupCategoryDto>(`${scopePath(scope)}/categories`, body, { headers: memberHeaders(scope) }),
 })

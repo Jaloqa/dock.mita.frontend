@@ -115,6 +115,7 @@ useHead({
   <WhoAmI v-else-if="!member" :group-name="group.name" :members="group.members" :again="again" @choose="onChoose" />
   <template v-else>
     <LinkBar ref="linkBar" :name="member.name" @change="forget" />
+    <LinkAccountOffer :key="member.id" :group="group" :member="member" />
     <PageHeader :title="group.name">
       <template #actions>
         <GroupEntryActions

@@ -71,6 +71,11 @@ export function useGroupMutations() {
       mutationFn: ({ id, memberId }: { id: string; memberId: string }) => api.cancelInvite(id, memberId),
       onSuccess,
     }),
+    linkThroughShare: useMutation({
+      mutationFn: ({ token, memberId }: { token: string; memberId: string }) => api.linkThroughShare(token, memberId),
+      onSuccess,
+      onError: onMemberRefused,
+    }),
     addCategory: useMutation({
       mutationFn: ({ scope, input }: { scope: GroupScope; input: GroupNameInput }) => api.addCategory(scope, input),
       onSuccess,

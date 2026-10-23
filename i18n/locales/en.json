@@ -891,7 +891,13 @@
       "youAre": "You are {name}",
       "change": "Change",
       "dead": "This link does not work. Ask the group's owner for a new one.",
-      "oneMember": "The group needs a second member before repayments can be recorded."
+      "oneMember": "The group needs a second member before repayments can be recorded.",
+      "offer": {
+        "text": "Is this you? Link {name} to your dock.mita account to see the group in your app.",
+        "action": "Link to my account",
+        "done": "{name} is linked to your account.",
+        "open": "Open in my groups"
+      }
     },
     "empty": {
       "title": "No groups yet"
