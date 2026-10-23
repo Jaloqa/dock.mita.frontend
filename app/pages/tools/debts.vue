@@ -127,6 +127,7 @@ useHead({ title: () => t('debts.title') })
         />
       </div>
     </section>
+    <GroupDebtList />
   </template>
   <DebtDialog v-model:visible="dialogOpen" :debt="editing" @deleted="focusAddButton" @saved="onSaved" />
   <RepaymentDialog v-if="repaying" v-model:visible="repayOpen" :debt="repaying" @settled="focusAddButton" />

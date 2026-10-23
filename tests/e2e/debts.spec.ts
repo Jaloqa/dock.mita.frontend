@@ -350,6 +350,117 @@ test('moves the focus to New debt when deleting a repayment reopens a settled de
   await expect(newDebtButton(page)).toBeFocused()
 })
 
+const groupsRegion = (page: Page) => page.getByRole('region', { name: 'Groups', exact: true })
+const groupLine = (page: Page, name: string) => groupsRegion(page).getByRole('link', { name, exact: true })
+const inMain = (page: Page, name: string) => page.getByRole('main').getByRole('link', { name, exact: true })
+const toolsEntry = (page: Page, name: string) =>
+  page.getByRole('list', { name: 'Tools', exact: true }).getByRole('link', { name, exact: true })
+
+const openGroupsFromDebts = async (page: Page) => {
+  await inMain(page, 'Tools').click()
+  await toolsEntry(page, 'Groups').click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Groups', exact: true })).toBeVisible()
+}
+
+const openDebtsFromGroups = async (page: Page) => {
+  await inMain(page, 'Tools').click()
+  await toolsEntry(page, 'Debts').click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Debts', exact: true })).toBeVisible()
+}
+
+test('shows the balance of a group you are linked to', async ({ page }) => {
+  await page.goto('/tools/debts')
+  await expect(cards(page)).toHaveCount(3)
+  await expect(groupsRegion(page)).toHaveCount(0)
+  const owedToMeBefore = await summary(page, 'owed-to-me').textContent()
+
+  await openGroupsFromDebts(page)
+  await page
+    .getByRole('list', { name: 'Groups', exact: true })
+    .getByRole('link', { name: 'Albania 2026', exact: true })
+    .click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Albania 2026', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Members', exact: true }).click()
+  const members = page.getByRole('dialog', { name: 'Members', exact: true })
+  await members.getByRole('button', { name: 'This is me: Anna', exact: true }).click()
+  await expect(page.getByText('Linked to you', { exact: true })).toBeVisible()
+  await members.getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(members).toBeHidden()
+  await inMain(page, 'Groups').click()
+  await openDebtsFromGroups(page)
+
+  const groups = groupsRegion(page)
+  await expect(groups.getByRole('heading', { level: 2, name: 'Groups', exact: true })).toBeVisible()
+  await expect(groups.getByRole('link')).toHaveCount(1)
+  const line = groupLine(page, 'Albania 2026')
+  await expect(line).toContainText('+€42.32')
+  await expect(line).toContainText('You get back')
+  await expect(line).toHaveAttribute('href', '/tools/groups/grp_albania')
+  expect((await line.boundingBox())?.height).toBeGreaterThanOrEqual(44)
+  await expect(summary(page, 'owed-to-me')).not.toHaveText(owedToMeBefore ?? '')
+  const personalTop = (await debtsRegion(page).boundingBox())?.y ?? Number.POSITIVE_INFINITY
+  const groupsTop = (await groups.boundingBox())?.y ?? 0
+  expect(personalTop).toBeLessThan(groupsTop)
+
+  await page.reload()
+  await expect(groupLine(page, 'Albania 2026')).toContainText('+€42.32')
+  await line.click()
+  await expect(page).toHaveURL('/tools/groups/grp_albania')
+  await expect(page.getByRole('heading', { level: 1, name: 'Albania 2026', exact: true })).toBeVisible()
+})
+
+test('counts accepted groups in I owe', async ({ page }) => {
+  await page.goto('/tools/debts')
+  await expect(summary(page, 'owed-by-me')).toContainText('zł 1,500.00')
+  await expect(groupsRegion(page)).toHaveCount(0)
+
+  await openGroupsFromDebts(page)
+  await page
+    .getByRole('region', { name: 'Invitations', exact: true })
+    .getByRole('button', { name: 'Accept the invitation to Kraków', exact: true })
+    .click()
+  await expect(page.getByText('You joined “Kraków”', { exact: true })).toBeVisible()
+  await openDebtsFromGroups(page)
+
+  const line = groupLine(page, 'Kraków')
+  await expect(line).toContainText('-zł 100.00')
+  await expect(line).toContainText('You owe')
+  await expect(line).toHaveAttribute('href', '/tools/groups/grp_krakow')
+  await expect(summary(page, 'owed-by-me')).toContainText('zł 1,600.00')
+  await expect(cards(page)).toHaveCount(3)
+})
+
+test('drops a group you left from the debts at once', async ({ page }) => {
+  await page.goto('/tools/debts')
+  await expect(summary(page, 'owed-by-me')).toContainText('zł 1,500.00')
+
+  await openGroupsFromDebts(page)
+  await page
+    .getByRole('region', { name: 'Invitations', exact: true })
+    .getByRole('button', { name: 'Accept the invitation to Kraków', exact: true })
+    .click()
+  await expect(page.getByText('You joined “Kraków”', { exact: true })).toBeVisible()
+  await openDebtsFromGroups(page)
+  await expect(groupLine(page, 'Kraków')).toContainText('-zł 100.00')
+  await expect(summary(page, 'owed-by-me')).toContainText('zł 1,600.00')
+
+  await openGroupsFromDebts(page)
+  await page
+    .getByRole('list', { name: 'Groups', exact: true })
+    .getByRole('link', { name: 'Kraków', exact: true })
+    .click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Kraków', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Leave group', exact: true }).click()
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Leave group', exact: true }).click()
+  await expect(page.getByText('You left the group', { exact: true })).toBeVisible()
+  await expect(page).toHaveURL('/tools/groups')
+  await openDebtsFromGroups(page)
+
+  await expect(summary(page, 'owed-by-me')).toContainText('zł 1,500.00')
+  await expect(groupLine(page, 'Kraków')).toHaveCount(0)
+  await expect(groupsRegion(page)).toHaveCount(0)
+})
+
 test('/pl/tools/debts shows the page in Polish', async ({ page }) => {
   await page.goto('/pl/tools/debts')
   await expect(page.getByRole('heading', { level: 1, name: 'Długi', exact: true })).toBeVisible()

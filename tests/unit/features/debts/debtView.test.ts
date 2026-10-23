@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'bun:test'
-import { convertedPreview, repaidShare } from '../../../../app/features/debts/utils/debtView'
+import { convertedPreview, groupDebtKind, repaidShare } from '../../../../app/features/debts/utils/debtView'
 
 describe('debt view helpers', () => {
+  it('names a group line by the sign of the balance', () => {
+    expect(groupDebtKind(4_232)).toBe('getsBack')
+    expect(groupDebtKind(-10_000)).toBe('owes')
+    expect(groupDebtKind(0)).toBe('settled')
+  })
+
   it('gives the repaid share of a debt between 0 and 1', () => {
     expect(repaidShare({ amount: 50_000, repaid: 10_000 })).toBe(0.2)
     expect(repaidShare({ amount: 12_000, repaid: 12_000 })).toBe(1)

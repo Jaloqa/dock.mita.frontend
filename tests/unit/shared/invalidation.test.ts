@@ -21,8 +21,8 @@ describe('invalidation map', () => {
     expect(invalidationMap.debts).toEqual([['debts'], ['accounts'], ['overview']])
   })
 
-  it('refreshes only the groups after a group change because groups never touch personal data', () => {
-    expect(invalidationMap.groups).toEqual([['groups']])
+  it('refreshes the debts and the overview after a group change because linked balances feed the debt summary', () => {
+    expect(invalidationMap.groups).toEqual([['groups'], ['debts'], ['overview']])
     for (const change of ['transactions', 'accounts', 'debts', 'settings'] as const) {
       expect(invalidationMap[change]).not.toContainEqual(['groups'])
     }
@@ -49,6 +49,7 @@ describe('invalidation map', () => {
       'goals',
       'goalContributions',
       'debts',
+      'groups',
       'categories',
       'settings',
     ] as const) {

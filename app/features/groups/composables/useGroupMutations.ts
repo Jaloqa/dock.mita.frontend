@@ -14,7 +14,9 @@ export function useGroupMutations() {
   const groupKey = (id: string) => groupKeys.group(userScope(id))
   const onGone = (_: unknown, id: string) => {
     queryClient.removeQueries({ queryKey: groupKeys.scoped(userScope(id)) })
-    return queryClient.invalidateQueries({ queryKey: groupKeys.list })
+    return Promise.all(
+      [groupKeys.list, ['debts'], ['overview']].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+    )
   }
 
   return {
