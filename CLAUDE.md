@@ -87,7 +87,7 @@ Rules:
 
 ### Real-backend suite
 
-`bun run test:e2e:real` runs `tests/e2e-real` (`playwright.real.config.ts`, one worker, no web server) against a running app in real mode; `E2E_BASE_URL` selects it, `http://localhost:3000` by default. Every spec registers its own user with a unique email and deletes it at the end. The backend allows 10 register, login and delete calls per minute per client, and one run makes about 19 of them, so waiting between runs does not help against a stock backend (10 per minute): set `RateLimiting__AuthPermitLimit` (e.g. `100` in the backend's `.env`) for local runs.
+`bun run test:e2e:real` runs `tests/e2e-real` (`playwright.real.config.ts`, one worker, no web server) against a running app in real mode; `E2E_BASE_URL` selects it, `http://localhost:3000` by default. Every spec registers its own user with a unique email and deletes it at the end. The backend allows 10 register, login and delete calls per minute per client, and one run makes about 21 of them, so waiting between runs does not help against a stock backend (10 per minute): set `RateLimiting__AuthPermitLimit` (e.g. `100` in the backend's `.env`) for local runs.
 
 - `auth`: demo UI is hidden, registers, changes the base currency, signs out and in, checks a wrong password and a rate-limited delete, deletes the account.
 - `accounts`: creates accounts, transfers between them and archives one.
@@ -96,7 +96,8 @@ Rules:
 - `overview-reports`: adds an account, an income and an expense, then checks the totals, recent transactions and spending breakdown on the overview and the averages, savings rate and spending structure on reports.
 - `tags`: adds an account and two expenses with tags typed in the form, filters by tag, adds a suggested tag to a transaction, then renames and deletes tags in Settings and checks the rows.
 - `currencies`: adds a JPY account and a KWD account and checks that their cards show the digits of their own currency, adds a JPY expense and checks the balance, then checks that the base currency list offers four currencies (the expense is priced into the base currency, so the backend needs a recent JPY rate: its rates sync provides one, and a backend started with `Rates__SyncEnabled=false` needs a `JPY` row in `exchange_rates` dated within the last 30 days).
-- `navigation`: opens every page from the main navigation as a new user and checks its heading and that no section fails to load.
+- `debts`: adds an account, opens Tools and Debts, lends from the account with a due date in the past (the card is overdue) and checks the balance, repays part of it and checks the balance again, borrows without an account, checks the summary and the debts card and the balance with debts on the overview (income and expense stay at zero), repays the rest so the debt moves to Settled, then deletes the borrowed debt.
+- `navigation`: opens every page from the main navigation, Tools included, as a new user and checks its heading and that no section fails to load.
 
 ### Docker smoke
 
