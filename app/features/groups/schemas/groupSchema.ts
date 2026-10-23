@@ -1,6 +1,7 @@
 import { helpers, required } from '@vuelidate/validators'
 import { GROUP_MEMBERS_MAX, GROUP_NAME_MAX } from '../../../shared/api/contract'
 import type { Currency } from '../../../shared/money/currencies'
+import { hasText, trimmedWithin } from '../../../shared/utils/text'
 
 export type GroupForm = {
   name: string
@@ -9,13 +10,6 @@ export type GroupForm = {
 }
 
 type Translate = (key: string) => string
-
-const hasText = (value: unknown): boolean => typeof value === 'string' && value.trim() !== ''
-
-const trimmedWithin =
-  (max: number) =>
-  (value: unknown): boolean =>
-    typeof value !== 'string' || value.trim().length <= max
 
 const nameKey = (name: string): string => name.trim().toLocaleLowerCase()
 

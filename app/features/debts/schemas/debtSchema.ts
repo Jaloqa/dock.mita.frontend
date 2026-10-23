@@ -3,6 +3,7 @@ import { COUNTERPARTY_MAX, DEBT_NOTE_MAX, type DebtDirection } from '../../../sh
 import type { Currency } from '../../../shared/money/currencies'
 import { withinAmountLimit, withinRateLimit } from '../../../shared/money/money'
 import { fromLocalDate } from '../../../shared/period/period'
+import { hasText, trimmedWithin } from '../../../shared/utils/text'
 
 export type DebtForm = {
   direction: DebtDirection
@@ -17,13 +18,6 @@ export type DebtForm = {
 }
 
 type Translate = (key: string) => string
-
-const hasText = (value: unknown): boolean => typeof value === 'string' && value.trim() !== ''
-
-export const trimmedWithin =
-  (max: number) =>
-  (value: unknown): boolean =>
-    typeof value !== 'string' || value.trim().length <= max
 
 export const isPositiveOrEmpty = (value: unknown): boolean =>
   value === null || value === undefined || (typeof value === 'number' && value > 0)
