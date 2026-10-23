@@ -9,7 +9,16 @@ import {
 import type { Currency } from '../../app/shared/money/currencies'
 import type { GroupCategoryRow, GroupMemberRow, GroupRow, MockDb } from '../db'
 import { badRequest, notFound } from '../errors'
-import { groupSummaries, groupView, hasEntries, isStandardCategory, memberInUse, membersOf, ownGroup } from '../groups'
+import {
+  GROUP_PAGE,
+  groupSummaries,
+  groupView,
+  hasEntries,
+  isStandardCategory,
+  memberInUse,
+  membersOf,
+  ownGroup,
+} from '../groups'
 import { newId } from '../ids'
 import { paginate } from '../paginate'
 import type { MockRouter } from '../router'
@@ -86,7 +95,7 @@ const nameTaken = (rows: readonly { name: string }[], name: string): boolean =>
 
 export function registerGroupHandlers(router: MockRouter) {
   router.on('GET', '/v1/groups', ({ db, userId, query }) =>
-    paginate(groupSummaries(db.state, userId), query, { defaultPageSize: 100, maxPageSize: 100 }),
+    paginate(groupSummaries(db.state, userId), query, GROUP_PAGE),
   )
 
   router.on('POST', '/v1/groups', ({ db, userId, body }) => {

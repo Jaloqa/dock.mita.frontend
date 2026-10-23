@@ -1,5 +1,5 @@
 import type { Page } from '../app/shared/api/contract'
-import { collectErrors } from './validation'
+import { collectErrors, type ErrorCollector } from './validation'
 
 const positiveInteger = (value: string | undefined, fallback: number): number | undefined => {
   if (value === undefined) return fallback
@@ -11,10 +11,10 @@ export function paginate<T>(
   items: readonly T[],
   query: Record<string, string>,
   options: { defaultPageSize: number; maxPageSize: number },
+  errors: ErrorCollector = collectErrors(),
 ): Page<T> {
   const page = positiveInteger(query.page, 1)
   const pageSize = positiveInteger(query.pageSize, options.defaultPageSize)
-  const errors = collectErrors()
   if (page === undefined) errors.add('page', 'validation.invalidValue')
   if (pageSize === undefined || pageSize > options.maxPageSize) errors.add('pageSize', 'validation.invalidValue')
   errors.throwIfAny()

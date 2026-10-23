@@ -2,7 +2,6 @@ import {
   EXPENSE_DESCRIPTION_MAX,
   GROUP_MEMBERS_MAX,
   type GroupEntryAction,
-  type GroupEntryEvent,
   type GroupExpenseState,
   type GroupShareDto,
   type GroupSplitMode,
@@ -13,20 +12,21 @@ import { sumMinor } from '../../app/shared/money/money'
 import { todayIso } from '../../app/shared/period/period'
 import type { GroupExpenseRow, GroupRow, MockDb, MockState } from '../db'
 import { checkConverted } from '../debts'
-import { badRequest, notFound } from '../errors'
+import { notFound } from '../errors'
 import {
-  actorView,
   appendEvent,
-  entryEvents,
   equalShares,
   exactShares,
   expensesOf,
   expenseView,
   findGroup,
+  GROUP_PAGE,
+  historyOf,
   isStandardCategory,
   membersOf,
   ownGroup,
   priceEntry,
+  readDeleted,
 } from '../groups'
 import { newId } from '../ids'
 import { paginate } from '../paginate'
@@ -38,7 +38,6 @@ import { checkAmount, checkCurrency, checkDate, checkRate } from './debts'
 const INVALID = 'validation.invalidValue'
 const UNKNOWN_MEMBER = 'validation.unknownMember'
 const UNKNOWN_CATEGORY = 'validation.unknownCategory'
-const PAGE = { defaultPageSize: 100, maxPageSize: 100 }
 
 type SplitInput = { mode: GroupSplitMode; memberIds: string[]; amounts: number[] }
 
@@ -205,25 +204,8 @@ const expenseState = (row: GroupExpenseRow): GroupExpenseState => ({
   shares: row.shares.map((share) => ({ ...share })),
 })
 
-function readDeleted(value: string | undefined): boolean {
-  if (value === undefined || value === 'false') return false
-  if (value !== 'true') badRequest({ deleted: [INVALID] })
-  return true
-}
-
 const groupExpense = (state: MockState, group: GroupRow, id: string | undefined, deleted: boolean): GroupExpenseRow =>
   state.groupExpenses.find((row) => row.id === id && row.groupId === group.id && row.deleted === deleted) ?? notFound()
-
-const historyOf = (state: MockState, group: GroupRow, expenseId: string): GroupEntryEvent<GroupExpenseState>[] =>
-  entryEvents(state, 'expense', expenseId)
-    .reverse()
-    .map((event) => ({
-      id: event.id,
-      action: event.action,
-      at: event.at,
-      actor: actorView(state, group, event),
-      state: event.state as GroupExpenseState,
-    }))
 
 function record(db: MockDb, group: GroupRow, row: GroupExpenseRow, action: GroupEntryAction, userId: string): void {
   appendEvent(db.state, group, 'expense', row.id, action, expenseState(row), userId)
@@ -232,9 +214,10 @@ function record(db: MockDb, group: GroupRow, row: GroupExpenseRow, action: Group
 
 export function registerGroupExpenseHandlers(router: MockRouter) {
   router.on('GET', '/v1/groups/:id/expenses', ({ db, userId, params, query }) => {
-    const deleted = readDeleted(query.deleted)
+    const errors = collectErrors()
+    const deleted = readDeleted(query.deleted, errors)
     const group = findGroup(db.state, userId, params.id)
-    const page = paginate(group ? expensesOf(db.state, group.id, deleted) : [], query, PAGE)
+    const page = paginate(group ? expensesOf(db.state, group.id, deleted) : [], query, GROUP_PAGE, errors)
     if (!group) notFound()
     return page
   })
@@ -284,7 +267,11 @@ export function registerGroupExpenseHandlers(router: MockRouter) {
     const group = findGroup(db.state, userId, params.id)
     const expense =
       group && db.state.groupExpenses.find((row) => row.id === params.expenseId && row.groupId === group.id)
-    const page = paginate(group && expense ? historyOf(db.state, group, expense.id) : [], query, PAGE)
+    const page = paginate(
+      group && expense ? historyOf<GroupExpenseState>(db.state, group, 'expense', expense.id) : [],
+      query,
+      GROUP_PAGE,
+    )
     if (!expense) notFound()
     return page
   })
