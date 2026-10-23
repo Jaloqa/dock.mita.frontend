@@ -552,6 +552,7 @@
     "stats": {
       "label": "Podsumowanie",
       "balance": "Saldo łączne",
+      "balanceWithDebts": "Saldo z długami",
       "accounts": "{count} konto | {count} konta | {count} kont",
       "income": "Przychody",
       "incomeCount": "{count} wpływ | {count} wpływy | {count} wpływów",
@@ -613,6 +614,16 @@
       "progress": "{name}: zaoszczędzona część celu",
       "empty": "Brak celów.",
       "create": "Utwórz cel"
+    },
+    "debts": {
+      "title": "Długi",
+      "all": "Wszystkie długi",
+      "owedToMe": "Do odzyskania",
+      "owedByMe": "Do oddania",
+      "overdue": "{count} dług po terminie | {count} długi po terminie | {count} długów po terminie",
+      "include": "Uwzględnij długi w saldzie",
+      "empty": "Brak otwartych długów.",
+      "add": "Dodaj dług"
     },
     "mobile": {
       "balance": "Saldo",

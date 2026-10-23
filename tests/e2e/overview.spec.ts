@@ -16,9 +16,17 @@ const rangeLabel = (from: Date, to: Date) =>
 const monthName = new Date().toLocaleString('en-US', { month: 'long' })
 const monthTitle = new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })
 const pressed = (page: Page, name: string) => page.getByRole('button', { name, exact: true })
+const debtsCard = (page: Page) => page.getByRole('region', { name: 'Debts', exact: true })
 
 const MOCK_DB = 'mita-mock-db-v1'
-const desktopSections = [/^Summary$/, /^Spending by category$/, /^Budgets/, /^Recent transactions$/, /^Savings goals$/]
+const desktopSections = [
+  /^Summary$/,
+  /^Spending by category$/,
+  /^Budgets/,
+  /^Recent transactions$/,
+  /^Savings goals$/,
+  /^Debts$/,
+]
 
 const persistMockDb = async (page: Page, isMobile: boolean) => {
   if (isMobile) {
@@ -58,7 +66,16 @@ const startAsNewUser = async (page: Page, isMobile: boolean) => {
   await persistMockDb(page, isMobile)
   await page.evaluate((key) => {
     const state = JSON.parse(localStorage.getItem(key) ?? '{}')
-    for (const table of ['accounts', 'transactions', 'transfers', 'budgets', 'goals', 'goalContributions']) {
+    for (const table of [
+      'accounts',
+      'transactions',
+      'transfers',
+      'budgets',
+      'goals',
+      'goalContributions',
+      'debts',
+      'debtRepayments',
+    ]) {
       state[table] = state[table].filter((row: { userId: string }) => row.userId !== state.activeUserId)
     }
     localStorage.setItem(key, JSON.stringify(state))
@@ -170,6 +187,10 @@ test('a brand-new user sees what to set up first', async ({ page, isMobile }) =>
   const goals = page.getByRole('region', { name: 'Savings goals' })
   await expect(goals).toContainText('No goals yet.')
   await expect(goals.getByRole('link', { name: 'Create a goal' })).toHaveAttribute('href', '/goals')
+  const debts = debtsCard(page)
+  await expect(debts).toContainText('No open debts.')
+  await expect(debts.getByRole('link', { name: 'Add a debt' })).toHaveAttribute('href', '/tools/debts')
+  await expect(debts.getByRole('switch')).toHaveCount(0)
   const spending = page.getByRole('region', { name: 'Spending by category' })
   await expect(spending).toContainText('No transactions yet')
   await expect(spending.locator('dl')).toHaveCount(0)
@@ -326,7 +347,7 @@ test('mobile overview shows the balance, the spending donut with its legend and 
 
 test('mobile sections show their own error and one retry recovers them all', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'mobile layout')
-  const mobileSections = ['Summary', 'Spending by category', 'Recent transactions']
+  const mobileSections = ['Summary', 'Debts', 'Spending by category', 'Recent transactions']
   await failEveryRequest(page, isMobile)
   await page.goto('/')
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
@@ -354,6 +375,9 @@ test('a brand-new user on mobile sees what to add', async ({ page, isMobile }) =
   await startAsNewUser(page, isMobile)
   await expect(page.getByRole('link', { name: 'Add an account' })).toHaveAttribute('href', '/accounts')
   await expect(page.getByTestId('mobile-balance')).toContainText('0.00')
+  const debts = debtsCard(page)
+  await expect(debts).toContainText('No open debts.')
+  await expect(debts.getByRole('link', { name: 'Add a debt' })).toHaveAttribute('href', '/tools/debts')
   const spending = page.getByRole('region', { name: 'Spending by category' })
   await expect(spending).toContainText('No transactions yet')
   await expect(spending.getByRole('link', { name: 'Add your first transaction' })).toHaveAttribute(
@@ -422,4 +446,81 @@ test('a EUR expense from a PLN card updates the account, the overview and the bu
   await open('Budgets', '/budgets')
   await expect(gifts).toContainText('of zł 500.00')
   await expect.poll(() => moneyOf(gifts)).toBeCloseTo(giftsBefore + 200, 2)
+})
+
+test('shows what is owed both ways', async ({ page }) => {
+  await page.goto('/')
+  const debts = debtsCard(page)
+  await expect(debts.getByTestId('overview-owed-by-me')).toHaveText(/^zł\s1,500\.00$/)
+  await expect(debts.getByTestId('overview-owed-to-me')).toHaveText(/^zł\s6\d{2}\.\d{2}$/)
+  await expect(debts).toContainText('I owe')
+  await expect(debts).toContainText('Owed to me')
+  await expect(debts).toContainText('1 overdue')
+  await debts.getByRole('link', { name: 'All debts' }).click()
+  await expect(page).toHaveURL('/tools/debts')
+  await expect(page.getByRole('heading', { level: 1, name: 'Debts', exact: true })).toBeVisible()
+})
+
+test('includes debts in the balance', async ({ page, isMobile }) => {
+  await page.goto('/')
+  const summary = page.getByRole('region', { name: 'Summary', exact: true })
+  const plainLabel = isMobile ? 'Balance' : 'Total balance'
+  const figure = isMobile
+    ? summary.getByTestId('mobile-balance')
+    : summary.getByTestId('overview-balance').locator('.font-mono').first()
+  const balance = async () => amountOf(await figure.textContent())
+  const debts = debtsCard(page)
+  const toggle = debts.getByRole('switch', { name: 'Include debts in the balance' })
+
+  await expect(figure).toContainText(/zł\s[\d,]+\.\d{2}/)
+  await expect(toggle).not.toBeChecked()
+  const hitArea = await debts
+    .getByText('Include debts in the balance', { exact: true })
+    .evaluate((label) => Number.parseFloat(getComputedStyle(label, '::after').height))
+  expect(hitArea).toBeGreaterThanOrEqual(44)
+  await expect(summary).not.toContainText('Balance with debts')
+  const before = await balance()
+  const owedToMe = amountOf(await debts.getByTestId('overview-owed-to-me').textContent())
+  const owedByMe = amountOf(await debts.getByTestId('overview-owed-by-me').textContent())
+
+  await toggle.check()
+  await expect(summary).toContainText('Balance with debts')
+  await expect.poll(balance).toBeCloseTo(before + owedToMe - owedByMe, 2)
+  expect(await balance()).not.toBeCloseTo(before, 2)
+
+  await page.reload()
+  await expect(toggle).toBeChecked()
+  await expect(summary).toContainText('Balance with debts')
+  await expect.poll(balance).toBeCloseTo(before + owedToMe - owedByMe, 2)
+
+  await toggle.uncheck()
+  await expect(summary).not.toContainText('Balance with debts')
+  await expect(summary).toContainText(plainLabel)
+  await expect.poll(balance).toBeCloseTo(before, 2)
+  await page.reload()
+  await expect(toggle).not.toBeChecked()
+  await expect(summary).not.toContainText('Balance with debts')
+})
+
+test('hides the switch without open debts', async ({ page }) => {
+  await page.goto('/')
+  await expect(debtsCard(page).getByRole('switch')).toBeVisible()
+  await page.evaluate(() => localStorage.setItem('mita.balanceWithDebts', '1'))
+
+  await page.goto('/tools/debts')
+  for (const name of ['Max', 'Mama', 'Kasia']) {
+    await card(page, name)
+      .getByRole('button', { name: `Edit ${name}`, exact: true })
+      .click()
+    await page.getByRole('dialog', { name: 'Edit debt' }).getByRole('button', { name: 'Delete' }).click()
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click()
+    await expect(card(page, name)).toHaveCount(0)
+  }
+
+  await page.goto('/')
+  const debts = debtsCard(page)
+  await expect(debts).toContainText('No open debts.')
+  await expect(debts.getByRole('switch')).toHaveCount(0)
+  await expect(debts.getByRole('link', { name: 'Add a debt' })).toHaveAttribute('href', '/tools/debts')
+  await expect(page.getByRole('region', { name: 'Summary', exact: true })).not.toContainText('Balance with debts')
 })

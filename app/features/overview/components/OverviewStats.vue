@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import type { OverviewDto } from '~/shared/api/contract'
-import { usedShare } from '../utils/overviewView'
+import { shownBalance, usedShare } from '../utils/overviewView'
 
-defineProps<{ overview?: OverviewDto; failed?: boolean }>()
+const props = defineProps<{ overview?: OverviewDto; failed?: boolean }>()
 const emit = defineEmits<{ retry: [] }>()
 const { t } = useI18n()
 const monthLabel = useMonthLabel()
 const percent = useOverviewPercent()
+const { included } = useBalanceWithDebts()
+
+const balance = computed(() => (props.overview ? shownBalance(props.overview, included.value) : undefined))
 
 const withChange = (text: string, change: number | null) =>
   change === null ? text : t('overview.stats.withChange', { text, change: percent.change(change) })
@@ -19,9 +22,13 @@ const withChange = (text: string, change: number | null) =>
     class="grid grid-cols-[repeat(auto-fit,minmax(210px,1fr))] gap-4"
   >
     <ErrorState v-if="failed" class="col-span-full" @retry="emit('retry')" />
-    <template v-else-if="overview">
-      <StatCard data-testid="overview-balance" variant="deep" :label="t('overview.stats.balance')">
-        <MoneyText :amount="overview.balance.amount" :currency="overview.currency" />
+    <template v-else-if="overview && balance">
+      <StatCard
+        data-testid="overview-balance"
+        variant="deep"
+        :label="balance.withDebts ? t('overview.stats.balanceWithDebts') : t('overview.stats.balance')"
+      >
+        <MoneyText :amount="balance.amount" :currency="overview.currency" />
         <template #footer>
           {{ t('overview.stats.accounts', { count: overview.balance.accounts }, overview.balance.accounts) }}
         </template>

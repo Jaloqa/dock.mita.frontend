@@ -65,7 +65,16 @@ const startAsNewUser = async (page: Page, isMobile: boolean) => {
   await persistMockDb(page, isMobile)
   await page.evaluate((key) => {
     const state = JSON.parse(localStorage.getItem(key) ?? '{}')
-    for (const table of ['accounts', 'transactions', 'transfers', 'budgets', 'goals', 'goalContributions']) {
+    for (const table of [
+      'accounts',
+      'transactions',
+      'transfers',
+      'budgets',
+      'goals',
+      'goalContributions',
+      'debts',
+      'debtRepayments',
+    ]) {
       state[table] = state[table].filter((row: { userId: string }) => row.userId !== state.activeUserId)
     }
     localStorage.setItem(key, JSON.stringify(state))
