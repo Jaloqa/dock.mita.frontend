@@ -30,6 +30,34 @@ test('the debts entry is a touch target that takes the keyboard focus', async ({
   await expect(entry).toBeFocused()
 })
 
+test('the debts entry opens the debts page and its eyebrow link returns to the hub', async ({ page }) => {
+  await page.goto('/tools')
+  await toolList(page, 'Tools').getByRole('link', { name: 'Debts', exact: true }).click()
+  await expect(page).toHaveURL('/tools/debts')
+  await expect(page.getByRole('heading', { level: 1, name: 'Debts', exact: true })).toBeVisible()
+  await page.getByRole('main').getByRole('link', { name: 'Tools', exact: true }).click()
+  await expect(page).toHaveURL('/tools')
+  await expect(page.getByRole('heading', { level: 1, name: 'Tools', exact: true })).toBeVisible()
+})
+
+const childPages = [
+  { path: '/tools/debts', menu: 'Main navigation', tools: 'Tools', overview: 'Overview' },
+  { path: '/pl/tools/debts', menu: 'Menu główne', tools: 'Narzędzia', overview: 'Przegląd' },
+]
+
+for (const { path, menu, tools, overview } of childPages) {
+  test(`the sidebar marks Tools as the section of ${path} without calling it the current page`, async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, 'the sidebar is the desktop layout')
+    await page.goto(path)
+    const nav = page.getByRole('navigation', { name: menu }).filter({ visible: true })
+    await expect(nav.getByRole('link', { name: tools, exact: true })).toHaveAttribute('aria-current', 'true')
+    await expect(nav.getByRole('link', { name: overview, exact: true })).not.toHaveAttribute('aria-current')
+  })
+}
+
 test('the mobile overview links to the tools hub', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'mobile layout')
   await page.goto('/')
@@ -51,6 +79,7 @@ for (const { path, menu, title, entry } of localized) {
     await expect(page.getByRole('heading', { level: 1, name: title, exact: true })).toBeVisible()
     const link = toolList(page, title).getByRole('link', { name: entry, exact: true })
     await expect(link).toBeVisible()
+    await expect(link).toHaveAttribute('href', `${path}/debts`)
     if (!isMobile) {
       const sidebarLink = page.getByRole('navigation', { name: menu }).getByRole('link', { name: title, exact: true })
       await expect(sidebarLink).toHaveAttribute('aria-current', 'page')

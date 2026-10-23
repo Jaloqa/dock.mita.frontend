@@ -120,7 +120,7 @@
     },
     "delete": {
       "title": "Usuń konto",
-      "description": "Wszystkie Twoje konta, operacje, budżety, cele, kategorie i ustawienia zostaną usunięte, a dane demonstracyjne przywrócone. Tego nie można cofnąć.",
+      "description": "Wszystkie Twoje konta, operacje, budżety, cele, długi, kategorie i ustawienia zostaną usunięte, a dane demonstracyjne przywrócone. Tego nie można cofnąć.",
       "confirmLabel": "Wpisz {email}, aby potwierdzić",
       "confirm": "Usuń konto",
       "done": "Konto usunięte. Przywrócono dane demonstracyjne.",
@@ -674,6 +674,74 @@
         "title": "Długi",
         "description": "Pieniądze pożyczone innym lub od innych oraz to, ile zostało do spłaty"
       }
+    }
+  },
+  "debts": {
+    "title": "Długi",
+    "actions": {
+      "add": "Nowy dług",
+      "addFirst": "Dodaj dług",
+      "repay": "Spłata",
+      "repayNamed": "Zapisz spłatę: {name}",
+      "edit": "Edytuj",
+      "editNamed": "Edytuj {name}",
+      "delete": "Usuń"
+    },
+    "summary": {
+      "label": "Podsumowanie długów",
+      "owedToMe": "Do odzyskania",
+      "owedByMe": "Do oddania",
+      "overdue": "Po terminie"
+    },
+    "list": {
+      "title": "Długi osobiste",
+      "status": "Status długu",
+      "open": "Otwarte",
+      "settled": "Spłacone"
+    },
+    "card": {
+      "lent": "Do odzyskania",
+      "borrowed": "Do oddania",
+      "of": "z {amount}",
+      "progress": "{name}: spłacona część",
+      "since": "Od {date}",
+      "due": "Termin {date}",
+      "overdue": "Po terminie · termin {date}"
+    },
+    "empty": {
+      "open": "Brak otwartych długów",
+      "settled": "Nie ma jeszcze spłaconych długów"
+    },
+    "dialog": {
+      "createTitle": "Nowy dług",
+      "editTitle": "Edycja długu",
+      "direction": "Rodzaj",
+      "lent": "Pożyczam komuś",
+      "borrowed": "Pożyczam od kogoś",
+      "counterparty": "Z kim",
+      "amount": "Kwota",
+      "currency": "Waluta",
+      "currencyLocked": "Waluty nie można zmienić po zapisaniu spłaty.",
+      "date": "Data",
+      "dueDate": "Termin spłaty",
+      "dueDateHint": "Zostaw puste, jeśli nie ma terminu.",
+      "account": "Konto",
+      "accountPlaceholder": "Bez konta",
+      "accountHintLent": "Kwota wychodzi z tego konta.",
+      "accountHintBorrowed": "Kwota wpływa na to konto.",
+      "rate": "Kurs wymiany ({from} → {to})",
+      "rateHint": "Ile {to} to 1 {from} w dniu długu. Kurs możesz poprawić.",
+      "accountAmount": "Na koncie: {amount}",
+      "note": "Notatka"
+    },
+    "confirm": {
+      "deleteTitle": "Usunąć dług?",
+      "deleteMessage": "„{name}” i spłaty tego długu zostaną usunięte. Salda kont zostaną przywrócone."
+    },
+    "toast": {
+      "created": "Dług zapisany",
+      "updated": "Dług zaktualizowany",
+      "deleted": "Dług usunięty"
     }
   },
   "auth": {

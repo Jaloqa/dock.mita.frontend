@@ -120,7 +120,7 @@
     },
     "delete": {
       "title": "Delete account",
-      "description": "Your accounts, transactions, budgets, goals, categories and settings will be erased and the demo data restored. This cannot be undone.",
+      "description": "Your accounts, transactions, budgets, goals, debts, categories and settings will be erased and the demo data restored. This cannot be undone.",
       "confirmLabel": "Type {email} to confirm",
       "confirm": "Delete account",
       "done": "Account deleted. Demo data restored.",
@@ -674,6 +674,74 @@
         "title": "Debts",
         "description": "Money you lent or borrowed, and what is left to repay"
       }
+    }
+  },
+  "debts": {
+    "title": "Debts",
+    "actions": {
+      "add": "New debt",
+      "addFirst": "Add a debt",
+      "repay": "Repayment",
+      "repayNamed": "Record a repayment for {name}",
+      "edit": "Edit",
+      "editNamed": "Edit {name}",
+      "delete": "Delete"
+    },
+    "summary": {
+      "label": "Debts summary",
+      "owedToMe": "Owed to me",
+      "owedByMe": "I owe",
+      "overdue": "Overdue"
+    },
+    "list": {
+      "title": "Personal debts",
+      "status": "Debt status",
+      "open": "Open",
+      "settled": "Settled"
+    },
+    "card": {
+      "lent": "Owed to me",
+      "borrowed": "I owe",
+      "of": "of {amount}",
+      "progress": "{name}: share repaid",
+      "since": "Since {date}",
+      "due": "Due {date}",
+      "overdue": "Overdue · due {date}"
+    },
+    "empty": {
+      "open": "No open debts",
+      "settled": "No settled debts yet"
+    },
+    "dialog": {
+      "createTitle": "New debt",
+      "editTitle": "Edit debt",
+      "direction": "Type",
+      "lent": "I lent",
+      "borrowed": "I borrowed",
+      "counterparty": "Who",
+      "amount": "Amount",
+      "currency": "Currency",
+      "currencyLocked": "The currency cannot change once a repayment is recorded.",
+      "date": "Date",
+      "dueDate": "Due date",
+      "dueDateHint": "Leave it empty if there is no due date.",
+      "account": "Account",
+      "accountPlaceholder": "No account",
+      "accountHintLent": "The amount leaves this account.",
+      "accountHintBorrowed": "The amount enters this account.",
+      "rate": "Exchange rate ({from} → {to})",
+      "rateHint": "How many {to} equal 1 {from} on the date of the debt. You can correct it.",
+      "accountAmount": "On the account: {amount}",
+      "note": "Note"
+    },
+    "confirm": {
+      "deleteTitle": "Delete the debt?",
+      "deleteMessage": "“{name}” and its repayments will be deleted. Account balances are restored."
+    },
+    "toast": {
+      "created": "Debt saved",
+      "updated": "Debt updated",
+      "deleted": "Debt deleted"
     }
   },
   "auth": {
