@@ -3,7 +3,7 @@ import type { GroupDto, GroupExpenseDto } from '~/shared/api/contract'
 
 type ExpenseView = 'active' | 'deleted'
 
-defineProps<{ group: GroupDto }>()
+defineProps<{ group: GroupDto; canAdd: boolean; hintId?: string }>()
 const emit = defineEmits<{ add: []; edit: [expense: GroupExpenseDto] }>()
 const { t } = useI18n()
 
@@ -38,7 +38,13 @@ const viewOptions = computed(() => views.map((value) => ({ value, label: t(`grou
     <ErrorState v-else-if="isError" @retry="refetch()" />
     <EmptyState v-else-if="items.length === 0 && !showsDeleted" :title="t('groups.expenses.empty')">
       <template #action>
-        <Button :label="t('groups.actions.addExpense')" class="min-h-11" @click="emit('add')" />
+        <Button
+          :label="t('groups.actions.addExpense')"
+          class="min-h-11"
+          :disabled="!canAdd"
+          :aria-describedby="canAdd ? undefined : hintId"
+          @click="emit('add')"
+        />
       </template>
     </EmptyState>
     <EmptyState v-else-if="items.length === 0" :title="t('groups.expenses.emptyDeleted')" />

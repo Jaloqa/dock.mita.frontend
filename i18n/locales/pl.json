@@ -794,7 +794,8 @@
       "members": "Uczestnicy",
       "edit": "Edytuj grupę",
       "delete": "Usuń grupę",
-      "addExpense": "Dodaj wydatek"
+      "addExpense": "Dodaj wydatek",
+      "recordRepayment": "Zapisz spłatę"
     },
     "card": {
       "members": "{count} osoba | {count} osoby | {count} osób",
@@ -912,6 +913,62 @@
         "created": "Wydatek dodany",
         "updated": "Wydatek zaktualizowany",
         "deleted": "Wydatek usunięty"
+      }
+    },
+    "hints": {
+      "noMembers": "Najpierw dodaj uczestników.",
+      "oneMember": "Dodaj drugiego uczestnika, aby zapisywać spłaty."
+    },
+    "balances": {
+      "title": "Salda",
+      "showIn": "Pokaż w",
+      "members": "Saldo każdego uczestnika",
+      "getsBack": "do odebrania",
+      "owes": "do oddania",
+      "settled": "rozliczone",
+      "transfers": "Proponowane przelewy",
+      "pays": "{from} płaci osobie: {to}",
+      "record": "Zapisz",
+      "recordNamed": "Zapisz spłatę: {from} → {to}",
+      "settledUp": "Wszyscy są rozliczeni.",
+      "empty": "Nie ma jeszcze uczestników."
+    },
+    "repayments": {
+      "title": "Spłaty",
+      "view": "Które spłaty pokazać",
+      "active": "Aktywne",
+      "deleted": "Usunięte",
+      "empty": "Nie ma jeszcze spłat",
+      "emptyDeleted": "Nie ma usuniętych spłat",
+      "showMore": "Pokaż więcej"
+    },
+    "repayment": {
+      "createTitle": "Nowa spłata",
+      "editTitle": "Edycja spłaty",
+      "title": "{from} → {to}",
+      "from": "Od kogo",
+      "fromPlaceholder": "Wybierz, kto płaci",
+      "to": "Do kogo",
+      "toPlaceholder": "Wybierz, kto otrzymuje",
+      "amount": "Kwota",
+      "currency": "Waluta",
+      "date": "Data",
+      "rate": "Kurs wymiany ({from} → {to})",
+      "rateHint": "Oficjalny kurs NBP z tego dnia. Zmień go, aby użyć własnego.",
+      "groupAmount": "= {amount}",
+      "note": "Notatka",
+      "delete": "Usuń",
+      "edit": "Edytuj spłatę: {from} → {to}",
+      "addedBy": "Dodał(a): {name}",
+      "editedBy": "Zmienił(a): {name}",
+      "confirm": {
+        "deleteTitle": "Usunąć tę spłatę?",
+        "deleteMessage": "Trafi do usuniętych i będzie można ją tam przywrócić."
+      },
+      "toast": {
+        "created": "Spłata zapisana",
+        "updated": "Spłata zaktualizowana",
+        "deleted": "Spłata usunięta"
       }
     }
   },

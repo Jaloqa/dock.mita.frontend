@@ -21,6 +21,16 @@ export function categoryLabel(t: Translate, group: Pick<GroupDto, 'categories'>,
 
 export const actorName = (actor: GroupActorDto): string => actor.name
 
+export function entryAccess(group: Pick<GroupDto, 'members'>): {
+  canAddExpense: boolean
+  canRecordRepayment: boolean
+  hint: 'noMembers' | 'oneMember' | undefined
+} {
+  const count = group.members.length
+  const hint = count === 0 ? 'noMembers' : count === 1 ? 'oneMember' : undefined
+  return { canAddExpense: count >= 1, canRecordRepayment: count >= 2, hint }
+}
+
 export function splitSummary(
   t: Translate,
   group: Pick<GroupDto, 'members'>,

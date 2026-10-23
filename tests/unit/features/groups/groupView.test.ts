@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'bun:test'
-import { actorName, categoryLabel, memberName, splitSummary } from '../../../../app/features/groups/utils/groupView'
+import {
+  actorName,
+  categoryLabel,
+  entryAccess,
+  memberName,
+  splitSummary,
+} from '../../../../app/features/groups/utils/groupView'
 import { type GroupDto, type GroupExpenseDto, standardGroupCategories } from '../../../../app/shared/api/contract'
 import { todayIso } from '../../../../app/shared/period/period'
 import { demoGroups } from '../../../../mocks/seed/groups'
@@ -75,5 +81,13 @@ describe('group view', () => {
       { memberId: 'gmb_max', amount: 15_000, groupAmount: 3_750 },
     ]
     expect(splitSummary(t, group, { split: 'exact', shares })).toBe('groups.expense.summary.exact')
+  })
+
+  it('lets entries be added once the group has a member and repayments once it has two', () => {
+    const withMembers = (count: number) => ({ members: group.members.slice(0, count) })
+    expect(entryAccess(withMembers(0))).toEqual({ canAddExpense: false, canRecordRepayment: false, hint: 'noMembers' })
+    expect(entryAccess(withMembers(1))).toEqual({ canAddExpense: true, canRecordRepayment: false, hint: 'oneMember' })
+    expect(entryAccess(withMembers(2))).toEqual({ canAddExpense: true, canRecordRepayment: true, hint: undefined })
+    expect(entryAccess(group)).toEqual({ canAddExpense: true, canRecordRepayment: true, hint: undefined })
   })
 })
