@@ -17,10 +17,13 @@ async function signOut() {
   }
 }
 
-const isActive = (to: string) => {
+const currentOf = (to: string): 'page' | 'true' | undefined => {
   const path = localePath(to)
-  return route.path === path || (to !== '/' && route.path.startsWith(`${path}/`))
+  if (route.path === path) return 'page'
+  return to !== '/' && route.path.startsWith(`${path}/`) ? 'true' : undefined
 }
+
+const isActive = (to: string) => currentOf(to) !== undefined
 
 const linkClass = (to: string) => [
   'flex min-h-11 items-center gap-3 rounded-(--radius-control) px-3 text-sm no-underline transition-colors',
@@ -42,11 +45,7 @@ const linkClass = (to: string) => [
     </Button>
     <ul class="m-0 flex list-none flex-col gap-0.5 p-0">
       <li v-for="item in primaryNavigation" :key="item.key">
-        <NuxtLinkLocale
-          :to="item.to"
-          :class="linkClass(item.to)"
-          :aria-current="isActive(item.to) ? 'page' : undefined"
-        >
+        <NuxtLinkLocale :to="item.to" :class="linkClass(item.to)" :aria-current="currentOf(item.to)">
           <AppIcon :name="item.icon" />
           {{ t(`navigation.${item.key}`) }}
         </NuxtLinkLocale>
@@ -55,7 +54,7 @@ const linkClass = (to: string) => [
     <NuxtLinkLocale
       :to="settingsNavigation.to"
       :class="linkClass(settingsNavigation.to)"
-      :aria-current="isActive(settingsNavigation.to) ? 'page' : undefined"
+      :aria-current="currentOf(settingsNavigation.to)"
     >
       <AppIcon :name="settingsNavigation.icon" />
       {{ t('navigation.settings') }}

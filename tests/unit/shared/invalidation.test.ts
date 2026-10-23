@@ -17,6 +17,22 @@ describe('invalidation map', () => {
     }
   })
 
+  it('refreshes debts, the accounts they move and the overview after debt changes', () => {
+    expect(invalidationMap.debts).toEqual([['debts'], ['accounts'], ['overview']])
+  })
+
+  it('refreshes debts after a settings change because their summary is in the base currency', () => {
+    expect(invalidationMap.settings).toEqual([
+      ['overview'],
+      ['budgets'],
+      ['reports'],
+      ['transactions'],
+      ['accounts'],
+      ['goals'],
+      ['debts'],
+    ])
+  })
+
   it('refreshes the overview after every change that feeds it', () => {
     for (const change of [
       'transactions',
@@ -25,6 +41,7 @@ describe('invalidation map', () => {
       'budgets',
       'goals',
       'goalContributions',
+      'debts',
       'categories',
       'settings',
     ] as const) {
@@ -36,7 +53,7 @@ describe('invalidation map', () => {
     for (const change of ['transactions', 'accounts', 'categories', 'settings'] as const) {
       expect(invalidationMap[change]).toContainEqual(['reports'])
     }
-    for (const change of ['transfers', 'budgets', 'goals', 'goalContributions'] as const) {
+    for (const change of ['transfers', 'budgets', 'goals', 'goalContributions', 'debts'] as const) {
       expect(invalidationMap[change]).not.toContainEqual(['reports'])
     }
     expect(invalidationMap.demo).toEqual([[]])

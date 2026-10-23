@@ -226,7 +226,7 @@ test('deleting the account needs the email and restores the demo data', async ({
 
   await trigger.click()
   await expect(confirmation).toBeFocused()
-  await expect(dialog).toContainText('accounts, transactions, budgets, goals, categories and settings')
+  await expect(dialog).toContainText('accounts, transactions, budgets, goals, debts, categories and settings')
   const submit = dialog.getByRole('button', { name: 'Delete account' })
   await expect(submit).toBeDisabled()
   await confirmation.fill('anna@demo.mita')
