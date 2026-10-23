@@ -24,6 +24,8 @@ export function useGroupMutations() {
         return queryClient.invalidateQueries({ queryKey: groupKeys.list })
       },
     }),
+    share: useMutation({ mutationFn: api.share, onSuccess }),
+    unshare: useMutation({ mutationFn: api.unshare, onSuccess }),
     addMember: useMutation({
       mutationFn: ({ id, input }: { id: string; input: GroupNameInput }) => api.addMember(id, input),
       onSuccess,

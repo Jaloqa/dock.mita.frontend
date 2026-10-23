@@ -2,6 +2,7 @@ import { describe, expect, it } from 'bun:test'
 import { groupsApi } from '../../../../app/features/groups/api/groupsApi'
 import { ownerScope } from '../../../../app/features/groups/utils/scope'
 import { createApiClient } from '../../../../app/shared/api/client'
+import type { GroupDto } from '../../../../app/shared/api/contract'
 import type { ApiRequest } from '../../../../app/shared/api/transport'
 
 describe('groups api', () => {
@@ -17,5 +18,33 @@ describe('groups api', () => {
     await api.addCategory(ownerScope('grp/albania'), { name: 'Ferry' })
 
     expect(requests).toEqual([{ method: 'POST', path: '/v1/groups/grp%2Falbania/categories', body: { name: 'Ferry' } }])
+  })
+
+  it('turns the share link on and off below the group', async () => {
+    const requests: ApiRequest[] = []
+    const group: GroupDto = {
+      id: 'grp/albania',
+      name: 'Albania 2026',
+      currency: 'EUR',
+      currencyLocked: true,
+      total: 19070,
+      members: [],
+      categories: [],
+      shareToken: 'albania-2026-demo-link-0123456789abcdefghij',
+    }
+    const api = groupsApi(
+      createApiClient(async (request) => {
+        requests.push(request)
+        return request.method === 'POST' ? group : undefined
+      }),
+    )
+
+    expect(await api.share('grp/albania')).toEqual(group)
+    await api.unshare('grp/albania')
+
+    expect(requests).toEqual([
+      { method: 'POST', path: '/v1/groups/grp%2Falbania/share' },
+      { method: 'DELETE', path: '/v1/groups/grp%2Falbania/share' },
+    ])
   })
 })

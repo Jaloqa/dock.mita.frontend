@@ -13,6 +13,8 @@ import { type GroupScope, ownerScope, scopePath } from '../utils/scope'
 
 const groupPath = (id: string) => scopePath(ownerScope(id))
 
+const sharePath = (id: string) => `${groupPath(id)}/share`
+
 const membersPath = (id: string) => `${groupPath(id)}/members`
 
 const memberPath = (id: string, memberId: string) => `${membersPath(id)}/${encodeURIComponent(memberId)}`
@@ -23,6 +25,8 @@ export const groupsApi = (api: ApiClient) => ({
   get: (scope: GroupScope) => api.get<GroupDto>(scopePath(scope)),
   update: (id: string, body: GroupUpdateInput) => api.put<GroupDto>(groupPath(id), body),
   remove: (id: string) => api.delete(groupPath(id)),
+  share: (id: string) => api.post<GroupDto>(sharePath(id)),
+  unshare: (id: string) => api.delete(sharePath(id)),
   addMember: (id: string, body: GroupNameInput) => api.post<GroupMemberDto>(membersPath(id), body),
   renameMember: (id: string, memberId: string, body: GroupNameInput) =>
     api.put<GroupMemberDto>(memberPath(id, memberId), body),
