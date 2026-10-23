@@ -7,11 +7,15 @@ import { badRequest, notFound } from '../errors'
 import {
   appendEvent,
   balancesOf,
-  findGroup,
+  type EventActor,
+  findScopedGroup,
   GROUP_PAGE,
+  type GroupScope,
   historyOf,
   membersOf,
-  ownGroup,
+  onGroup,
+  openGroup,
+  openGroupForWrite,
   priceEntry,
   readDeleted,
   repaymentsOf,
@@ -19,7 +23,7 @@ import {
 } from '../groups'
 import { newId } from '../ids'
 import { paginate } from '../paginate'
-import type { MockRouter } from '../router'
+import type { MockContext, MockRouter } from '../router'
 import { CONTROL } from '../tags'
 import { collectErrors, type ErrorCollector, isMissing, objectBody } from '../validation'
 import { checkAmount, checkCurrency, checkDate, checkRate } from './debts'
@@ -125,79 +129,93 @@ const groupRepayment = (
   state.groupRepayments.find((row) => row.id === id && row.groupId === group.id && row.deleted === deleted) ??
   notFound()
 
-function record(db: MockDb, group: GroupRow, row: GroupRepaymentRow, action: GroupEntryAction, userId: string): void {
-  appendEvent(db.state, group, 'repayment', row.id, action, repaymentState(row), userId)
+function record(
+  db: MockDb,
+  group: GroupRow,
+  row: GroupRepaymentRow,
+  action: GroupEntryAction,
+  actor: EventActor,
+): void {
+  appendEvent(db.state, group, 'repayment', row.id, action, repaymentState(row), actor)
   db.save()
 }
 
+function listRepayments({ db, query }: MockContext, scope: GroupScope) {
+  const errors = collectErrors()
+  const deleted = readDeleted(query.deleted, errors)
+  const group = findScopedGroup(db.state, scope)
+  const page = paginate(group ? repaymentsOf(db.state, group.id, deleted) : [], query, GROUP_PAGE, errors)
+  if (!group) notFound()
+  return page
+}
+
+function createRepayment({ db, body }: MockContext, scope: GroupScope) {
+  const today = todayIso()
+  const input = validateRepayment(body, today)
+  const { group, actor } = openGroupForWrite(db.state, scope)
+  const row: GroupRepaymentRow = {
+    id: newId('gpay'),
+    ...prepareRepayment(db.state, group, input, today),
+    deleted: false,
+    groupId: group.id,
+    createdAt: new Date().toISOString(),
+  }
+  db.state.groupRepayments.push(row)
+  record(db, group, row, 'created', actor)
+  return repaymentView(db.state, row)
+}
+
+function updateRepayment({ db, params, body }: MockContext, scope: GroupScope) {
+  const today = todayIso()
+  const input = validateRepayment(body, today)
+  const { group, actor } = openGroupForWrite(db.state, scope)
+  const row = groupRepayment(db.state, group, params.repaymentId, false)
+  Object.assign(row, prepareRepayment(db.state, group, input, today))
+  record(db, group, row, 'updated', actor)
+  return repaymentView(db.state, row)
+}
+
+function deleteRepayment({ db, params }: MockContext, scope: GroupScope) {
+  const { group, actor } = openGroupForWrite(db.state, scope)
+  const row = groupRepayment(db.state, group, params.repaymentId, false)
+  row.deleted = true
+  record(db, group, row, 'deleted', actor)
+}
+
+function restoreRepayment({ db, params }: MockContext, scope: GroupScope) {
+  const { group, actor } = openGroupForWrite(db.state, scope)
+  const row = groupRepayment(db.state, group, params.repaymentId, true)
+  row.deleted = false
+  record(db, group, row, 'restored', actor)
+  return repaymentView(db.state, row)
+}
+
+function repaymentHistory({ db, params, query }: MockContext, scope: GroupScope) {
+  const group = findScopedGroup(db.state, scope)
+  const repayment =
+    group && db.state.groupRepayments.find((row) => row.id === params.repaymentId && row.groupId === group.id)
+  const page = paginate(
+    group && repayment ? historyOf<GroupRepaymentState>(db.state, group, 'repayment', repayment.id) : [],
+    query,
+    GROUP_PAGE,
+  )
+  if (!repayment) notFound()
+  return page
+}
+
+function groupBalances({ db, query }: MockContext, scope: GroupScope) {
+  const { currency } = query
+  if (currency !== undefined && !isCurrency(currency)) badRequest({ currency: [INVALID] })
+  const group = openGroup(db.state, scope)
+  return balancesOf(db.state, group, isCurrency(currency) ? currency : group.currency, todayIso())
+}
+
 export function registerGroupRepaymentHandlers(router: MockRouter) {
-  router.on('GET', '/v1/groups/:id/repayments', ({ db, userId, params, query }) => {
-    const errors = collectErrors()
-    const deleted = readDeleted(query.deleted, errors)
-    const group = findGroup(db.state, userId, params.id)
-    const page = paginate(group ? repaymentsOf(db.state, group.id, deleted) : [], query, GROUP_PAGE, errors)
-    if (!group) notFound()
-    return page
-  })
-
-  router.on('POST', '/v1/groups/:id/repayments', ({ db, userId, params, body }) => {
-    const today = todayIso()
-    const input = validateRepayment(body, today)
-    const group = ownGroup(db.state, userId, params.id)
-    const row: GroupRepaymentRow = {
-      id: newId('gpay'),
-      ...prepareRepayment(db.state, group, input, today),
-      deleted: false,
-      groupId: group.id,
-      createdAt: new Date().toISOString(),
-    }
-    db.state.groupRepayments.push(row)
-    record(db, group, row, 'created', userId)
-    return repaymentView(db.state, row)
-  })
-
-  router.on('PUT', '/v1/groups/:id/repayments/:repaymentId', ({ db, userId, params, body }) => {
-    const today = todayIso()
-    const input = validateRepayment(body, today)
-    const group = ownGroup(db.state, userId, params.id)
-    const row = groupRepayment(db.state, group, params.repaymentId, false)
-    Object.assign(row, prepareRepayment(db.state, group, input, today))
-    record(db, group, row, 'updated', userId)
-    return repaymentView(db.state, row)
-  })
-
-  router.on('DELETE', '/v1/groups/:id/repayments/:repaymentId', ({ db, userId, params }) => {
-    const group = ownGroup(db.state, userId, params.id)
-    const row = groupRepayment(db.state, group, params.repaymentId, false)
-    row.deleted = true
-    record(db, group, row, 'deleted', userId)
-  })
-
-  router.on('POST', '/v1/groups/:id/repayments/:repaymentId/restore', ({ db, userId, params }) => {
-    const group = ownGroup(db.state, userId, params.id)
-    const row = groupRepayment(db.state, group, params.repaymentId, true)
-    row.deleted = false
-    record(db, group, row, 'restored', userId)
-    return repaymentView(db.state, row)
-  })
-
-  router.on('GET', '/v1/groups/:id/repayments/:repaymentId/history', ({ db, userId, params, query }) => {
-    const group = findGroup(db.state, userId, params.id)
-    const repayment =
-      group && db.state.groupRepayments.find((row) => row.id === params.repaymentId && row.groupId === group.id)
-    const page = paginate(
-      group && repayment ? historyOf<GroupRepaymentState>(db.state, group, 'repayment', repayment.id) : [],
-      query,
-      GROUP_PAGE,
-    )
-    if (!repayment) notFound()
-    return page
-  })
-
-  router.on('GET', '/v1/groups/:id/balances', ({ db, userId, params, query }) => {
-    const { currency } = query
-    if (currency !== undefined && !isCurrency(currency)) badRequest({ currency: [INVALID] })
-    const group = ownGroup(db.state, userId, params.id)
-    return balancesOf(db.state, group, isCurrency(currency) ? currency : group.currency, todayIso())
-  })
+  onGroup(router, 'GET', '/repayments', listRepayments)
+  onGroup(router, 'POST', '/repayments', createRepayment)
+  onGroup(router, 'PUT', '/repayments/:repaymentId', updateRepayment)
+  onGroup(router, 'DELETE', '/repayments/:repaymentId', deleteRepayment)
+  onGroup(router, 'POST', '/repayments/:repaymentId/restore', restoreRepayment)
+  onGroup(router, 'GET', '/repayments/:repaymentId/history', repaymentHistory)
+  onGroup(router, 'GET', '/balances', groupBalances)
 }

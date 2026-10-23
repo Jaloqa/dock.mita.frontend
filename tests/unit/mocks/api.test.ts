@@ -62,6 +62,30 @@ describe('mock api', () => {
     expect(body.nested.value).toBe(1)
   })
 
+  it('passes the request headers to handlers with lower-cased names', async () => {
+    const api = loggedIn({
+      register: [(router) => router.on('GET', '/v1/headers', ({ headers }) => headers)],
+    })
+    expect(
+      await api.handle({ method: 'GET', path: '/v1/headers', headers: { 'X-Group-Member': 'mbr_1', Accept: 'a/b' } }),
+    ).toEqual({ 'x-group-member': 'mbr_1', accept: 'a/b' })
+    expect(await api.handle({ method: 'GET', path: '/v1/headers' })).toEqual({})
+  })
+
+  it('answers /v1/shared/ paths without a session and keeps every other path closed', async () => {
+    const api = createMockApi({
+      register: [
+        (router) => router.on('GET', '/v1/shared/ping', ({ userId }) => ({ userId })),
+        (router) => router.on('GET', '/v1/closed', () => 'closed'),
+      ],
+    })
+    expect(api.db.state.activeUserId).toBeNull()
+    expect(await api.handle({ method: 'GET', path: '/v1/shared/ping' })).toEqual({ userId: '' })
+    expect(await api.handle({ method: 'GET', path: '/v1/closed' }).catch((e: unknown) => e)).toMatchObject({
+      problem: { status: 401, code: 'auth.sessionExpired' },
+    })
+  })
+
   it('answers unknown routes with a 404 problem', async () => {
     const error = await loggedIn({})
       .handle({ method: 'GET', path: '/v1/nope' })

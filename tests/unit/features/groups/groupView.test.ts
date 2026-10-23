@@ -28,6 +28,7 @@ const group: GroupDto = {
     ...standardGroupCategories.map((key) => ({ id: key, standard: true, name: null })),
     { id: 'gcat_beach', standard: false, name: 'Beach' },
   ],
+  shareToken: null,
 }
 
 const expense = (id: string): Pick<GroupExpenseDto, 'split' | 'shares'> => {

@@ -7,6 +7,7 @@ export type MockContext = {
   params: Record<string, string>
   query: Record<string, string>
   body: unknown
+  headers: Record<string, string>
 }
 
 export type MockHandler = (context: MockContext) => unknown

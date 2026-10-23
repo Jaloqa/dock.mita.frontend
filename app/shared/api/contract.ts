@@ -309,6 +309,10 @@ export const EXPENSE_DESCRIPTION_MAX = 100
 
 export const GROUP_NOTE_MAX = 200
 
+export const GROUP_MEMBER_HEADER = 'X-Group-Member'
+
+export const SHARE_TOKEN_LENGTH = 43
+
 export const standardGroupCategories = [
   'groceries',
   'transport',
@@ -337,6 +341,7 @@ export type GroupDto = {
   total: number
   members: GroupMemberDto[]
   categories: GroupCategoryDto[]
+  shareToken: string | null
 }
 
 export type GroupInput = { name: string; currency: Currency; members: string[] }
