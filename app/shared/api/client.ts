@@ -10,7 +10,7 @@ export type ApiClient = {
 }
 
 const withHeaders = (request: ApiRequest, options: RequestOptions | undefined): ApiRequest =>
-  options?.headers ? { ...request, headers: options.headers } : request
+  options?.headers && Object.keys(options.headers).length > 0 ? { ...request, headers: options.headers } : request
 
 export function createApiClient(transport: Transport): ApiClient {
   return {

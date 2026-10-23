@@ -9,7 +9,7 @@ import type {
   GroupUpdateInput,
   Page,
 } from '~/shared/api/contract'
-import { type GroupScope, ownerScope, scopePath } from '../utils/scope'
+import { type GroupScope, memberHeaders, ownerScope, scopePath } from '../utils/scope'
 
 const groupPath = (id: string) => scopePath(ownerScope(id))
 
@@ -32,5 +32,5 @@ export const groupsApi = (api: ApiClient) => ({
     api.put<GroupMemberDto>(memberPath(id, memberId), body),
   removeMember: (id: string, memberId: string) => api.delete(memberPath(id, memberId)),
   addCategory: (scope: GroupScope, body: GroupNameInput) =>
-    api.post<GroupCategoryDto>(`${scopePath(scope)}/categories`, body),
+    api.post<GroupCategoryDto>(`${scopePath(scope)}/categories`, body, { headers: memberHeaders(scope) }),
 })

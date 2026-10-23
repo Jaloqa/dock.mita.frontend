@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type GroupDto, SHARE_TOKEN_LENGTH } from '~/shared/api/contract'
+import type { GroupDto } from '~/shared/api/contract'
 
 const props = defineProps<{ group: GroupDto }>()
 const visible = defineModel<boolean>('visible', { required: true })
@@ -13,14 +13,10 @@ const LINK_ID = 'group-share-link'
 
 const root = ref<HTMLElement | null>(null)
 
-const token = computed(() =>
-  props.group.shareToken?.length === SHARE_TOKEN_LENGTH ? props.group.shareToken : undefined,
-)
-// localePath leaves a path unprefixed when no page matches it, so the locale prefix is taken from the home page.
-const localePrefix = computed(() => localePath('/').replace(/\/$/, ''))
-const link = computed(() =>
-  token.value ? `${window.location.origin}${localePrefix.value}/g/${token.value}` : undefined,
-)
+const link = computed(() => {
+  const token = props.group.shareToken
+  return token ? `${window.location.origin}${localePath(`/g/${token}`)}` : undefined
+})
 const busy = computed(() => share.isPending.value || unshare.isPending.value)
 
 const find = <T extends HTMLElement>(selector: string) => root.value?.querySelector<T>(selector)

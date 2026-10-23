@@ -3,6 +3,7 @@ import { useVuelidate } from '@vuelidate/core'
 import type { GroupCategoryDto, GroupDto } from '~/shared/api/contract'
 import { type GroupCategoryForm, groupCategoryRules } from '../schemas/groupCategorySchema'
 import { categoryLabel } from '../utils/groupView'
+import { unlessMemberRefusal } from '../utils/scope'
 
 const props = defineProps<{ group: GroupDto; id: string; invalid?: boolean; labelId?: string; describedBy?: string }>()
 const model = defineModel<string>({ required: true })
@@ -91,13 +92,13 @@ async function add() {
         await nextTick()
         find('[role="combobox"]')?.focus()
       },
-      onError: async (error) => {
+      onError: unlessMemberRefusal(async (error) => {
         if (!server.apply(error, ['name'])) {
           notify.error(error)
           return
         }
         await focusName()
-      },
+      }),
     },
   )
 }

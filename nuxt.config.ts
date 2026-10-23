@@ -1,3 +1,5 @@
+const noReferrer = { headers: { 'Referrer-Policy': 'no-referrer' } }
+
 export default defineNuxtConfig({
   compatibilityDate: '2026-10-01',
   devtools: { enabled: true },
@@ -44,6 +46,13 @@ export default defineNuxtConfig({
         baseUrl: 'http://localhost:3000',
       },
     },
+  },
+
+  routeRules: {
+    '/g/**': noReferrer,
+    '/pl/g/**': noReferrer,
+    '/ru/g/**': noReferrer,
+    '/uk/g/**': noReferrer,
   },
 
   primevue: {

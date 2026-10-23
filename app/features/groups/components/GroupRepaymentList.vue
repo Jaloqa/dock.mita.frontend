@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { GroupDto, GroupRepaymentDto } from '~/shared/api/contract'
 import { repaymentTitle } from '../utils/groupView'
+import { unlessMemberRefusal } from '../utils/scope'
 
 type RepaymentView = 'active' | 'deleted'
 
@@ -43,10 +44,10 @@ function restoreRepayment(repayment: GroupRepaymentDto) {
       notify.success(t('groups.repayment.toast.restored'))
       focusAfterRestore(neighbour?.id)
     },
-    onError: (error) => {
+    onError: unlessMemberRefusal((error) => {
       notify.error(error)
       if (isMissing(error)) refresh()
-    },
+    }),
   })
 }
 </script>
