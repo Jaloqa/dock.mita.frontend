@@ -3,7 +3,10 @@ import { pickOverlayOption } from '../e2e/overlayOption'
 
 const name = 'Groups Smoke'
 const email = `groups-${Date.now()}@example.com`
+const linkName = 'Link Smoke'
+const linkEmail = `groups-link-${Date.now()}@example.com`
 const password = 'groups-smoke-password'
+const DEAD_LINK = "This link does not work. Ask the group's owner for a new one."
 
 const section = (page: Page, title: string) => page.getByRole('region', { name: title, exact: true })
 const mainNav = (page: Page) => page.getByRole('navigation', { name: 'Main navigation' }).filter({ visible: true })
@@ -63,15 +66,28 @@ const openEditExpense = async (page: Page, title: string) => {
   return page.getByRole('dialog', { name: 'Edit expense', exact: true })
 }
 
-test('real expense groups flow through the backend', async ({ page }) => {
+const register = async (page: Page, userName: string, userEmail: string) => {
   await page.goto('/register')
   const create = page.getByRole('button', { name: 'Create account', exact: true })
   await expect(create).toBeEnabled()
-  await page.getByLabel('Name', { exact: true }).fill(name)
-  await page.getByLabel('Email', { exact: true }).fill(email)
+  await page.getByLabel('Name', { exact: true }).fill(userName)
+  await page.getByLabel('Email', { exact: true }).fill(userEmail)
   await page.getByLabel('Password', { exact: true }).fill(password)
   await create.click()
   await expect(page).toHaveURL('/')
+}
+
+const deleteAccount = async (page: Page) => {
+  await page.goto('/settings')
+  await section(page, 'Data').getByRole('button', { name: 'Delete account' }).click()
+  const account = page.getByRole('dialog', { name: 'Delete account' })
+  await account.getByLabel('Password', { exact: true }).fill(password)
+  await account.getByRole('button', { name: 'Delete account' }).click()
+  await expect(page).toHaveURL('/login')
+}
+
+test('real expense groups flow through the backend', async ({ page }) => {
+  await register(page, name, email)
 
   await mainNav(page).getByRole('link', { name: 'Tools', exact: true }).click()
   await expect(page).toHaveURL('/tools')
@@ -221,10 +237,112 @@ test('real expense groups flow through the backend', async ({ page }) => {
   await expect(page.getByText('Group deleted')).toBeVisible()
   await expect(page.getByRole('heading', { level: 2, name: 'No groups yet' })).toBeVisible()
 
-  await page.goto('/settings')
-  await section(page, 'Data').getByRole('button', { name: 'Delete account' }).click()
-  const account = page.getByRole('dialog', { name: 'Delete account' })
-  await account.getByLabel('Password', { exact: true }).fill(password)
-  await account.getByRole('button', { name: 'Delete account' }).click()
-  await expect(page).toHaveURL('/login')
+  await deleteAccount(page)
+})
+
+test('real expense group share link works without an account', async ({ page, browser, request }) => {
+  await register(page, linkName, linkEmail)
+  await page.goto('/tools/groups')
+  await page.getByRole('button', { name: 'Create a group', exact: true }).click()
+  const group = page.getByRole('dialog', { name: 'New group', exact: true })
+  await group.getByLabel('Name', { exact: true }).fill('Porto')
+  await chooseCurrency(page, group.getByRole('combobox', { name: 'Main currency' }), 'euro', 'EUR — Euro')
+  const member = (number: number) => group.getByRole('textbox', { name: `Member ${number}`, exact: true })
+  await expect(member(1)).toHaveValue(linkName)
+  await group.getByRole('button', { name: 'Add member', exact: true }).click()
+  await member(2).fill('Olya')
+  await group.getByRole('button', { name: 'Add member', exact: true }).click()
+  await member(3).fill('Max')
+  await saveButton(group).click()
+  await expect(page.getByText('Group created')).toBeVisible()
+  const heading = page.getByRole('heading', { level: 1, name: 'Porto', exact: true })
+  await expect(heading).toBeVisible()
+
+  await page.getByRole('button', { name: 'Share', exact: true }).click()
+  const share = page.getByRole('dialog', { name: 'Share', exact: true })
+  await share.getByRole('button', { name: 'Create link', exact: true }).click()
+  await expect(page.getByText('Link created')).toBeVisible()
+  const field = share.getByLabel('Link', { exact: true })
+  await expect(field).toHaveValue(/\/g\/[A-Za-z0-9_-]{43}$/)
+  const link = await field.inputValue()
+  const token = link.slice(link.lastIndexOf('/') + 1)
+  await share.getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(share).toBeHidden()
+
+  const rendered = await request.get(link)
+  expect(rendered.status()).toBe(200)
+  const html = await rendered.text()
+  for (const shown of ['Porto', linkName, 'Olya', 'Max']) expect(html).not.toMatch(new RegExp(`\\b${shown}\\b`))
+
+  const linkPath = `/v1/shared/groups/${token}`
+  const allowed = (path: string) =>
+    path === '/v1/me' || path === '/v1/auth/refresh' || path === linkPath || path.startsWith(`${linkPath}/`)
+  const anonymous = await browser.newContext()
+  try {
+    const guest = await anonymous.newPage()
+    const requested: string[] = []
+    guest.on('request', (sent) => {
+      const { pathname } = new URL(sent.url())
+      if (pathname.startsWith('/v1/')) requested.push(pathname)
+    })
+
+    const response = await guest.goto(link)
+    expect(response?.headers()['referrer-policy']).toBe('no-referrer')
+    const question = guest.getByRole('region', { name: 'Who are you?', exact: true })
+    await expect(question.getByRole('heading', { level: 1, name: 'Who are you?', exact: true })).toBeVisible()
+    await expect(question.getByRole('button')).toHaveText([linkName, 'Olya', 'Max'])
+    await question.getByRole('button', { name: 'Olya', exact: true }).click()
+    await expect(guest.getByRole('heading', { level: 1, name: 'Porto', exact: true })).toBeVisible()
+    await expect(guest.getByText('You are Olya', { exact: true })).toBeVisible()
+
+    const taxi = await openNewExpense(guest)
+    await chooseMember(guest, taxi, 'Paid by', 'Olya')
+    await amountField(taxi).pressSequentially('30')
+    await taxi.getByLabel('Description', { exact: true }).fill('Taxi')
+    await saveButton(taxi).click()
+    await expect(guest.getByText('Expense added')).toBeVisible()
+    await expect(taxi).toBeHidden()
+    await expect(row(guest, 'Taxi')).toContainText('Paid by Olya')
+    await expect(row(guest, 'Taxi')).toContainText('€30.00')
+    await expect(row(guest, 'Taxi')).toContainText('Split equally between everyone')
+    await expect(row(guest, 'Taxi')).toContainText('Added by Olya')
+    await expect(balanceRow(guest, 'Olya')).toContainText('+€20.00')
+    await expect(balanceRow(guest, linkName)).toContainText('-€10.00')
+    await expect(balanceRow(guest, 'Max')).toContainText('-€10.00')
+
+    await page.reload()
+    await expect(heading).toBeVisible()
+    await expect(row(page, 'Taxi')).toContainText('Added by Olya')
+    await expect(total(page)).toContainText('€30.00')
+
+    await page.getByRole('button', { name: 'Share', exact: true }).click()
+    await expect(share.getByLabel('Link', { exact: true })).toHaveValue(link)
+    await share.getByRole('button', { name: 'Turn off link', exact: true }).click()
+    const confirm = page.getByRole('alertdialog')
+    await expect(confirm).toContainText('Turn off the link?')
+    await confirm.getByRole('button', { name: 'Turn off link', exact: true }).click()
+    await expect(page.getByText('Link turned off')).toBeVisible()
+    await expect(share.getByRole('button', { name: 'Create link', exact: true })).toBeVisible()
+    await share.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(share).toBeHidden()
+
+    await guest.reload()
+    await expect(guest.getByText(DEAD_LINK, { exact: true })).toBeVisible()
+    await expect(guest.getByRole('heading', { level: 1, name: 'Porto', exact: true })).toHaveCount(0)
+
+    expect(requested.some((path) => path.startsWith(linkPath))).toBe(true)
+    expect(requested.filter((path) => !allowed(path))).toEqual([])
+  } finally {
+    await anonymous.close()
+  }
+
+  await page.getByRole('button', { name: 'Edit group', exact: true }).click()
+  const settings = page.getByRole('dialog', { name: 'Edit group', exact: true })
+  await settings.getByRole('button', { name: 'Delete group', exact: true }).click()
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Delete group', exact: true }).click()
+  await expect(page).toHaveURL('/tools/groups')
+  await expect(page.getByText('Group deleted')).toBeVisible()
+  await expect(page.getByRole('heading', { level: 2, name: 'No groups yet' })).toBeVisible()
+
+  await deleteAccount(page)
 })
