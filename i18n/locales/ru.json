@@ -793,7 +793,8 @@
       "addFirst": "Создать группу",
       "members": "Участники",
       "edit": "Изменить группу",
-      "delete": "Удалить группу"
+      "delete": "Удалить группу",
+      "addExpense": "Добавить расход"
     },
     "card": {
       "members": "{count} участник | {count} участника | {count} участников",
@@ -847,6 +848,71 @@
       "created": "Группа создана",
       "updated": "Группа изменена",
       "deleted": "Группа удалена"
+    },
+    "categories": {
+      "groceries": "Продукты",
+      "transport": "Транспорт",
+      "housing": "Жильё",
+      "cafes": "Кафе",
+      "health": "Здоровье",
+      "shopping": "Покупки",
+      "leisure": "Досуг",
+      "gifts": "Подарки",
+      "other": "Другое"
+    },
+    "expenses": {
+      "title": "Расходы",
+      "view": "Какие расходы показать",
+      "active": "Активные",
+      "deleted": "Удалённые",
+      "empty": "Расходов пока нет",
+      "emptyDeleted": "Удалённых расходов нет",
+      "showMore": "Показать ещё"
+    },
+    "expense": {
+      "createTitle": "Новый расход",
+      "editTitle": "Изменение расхода",
+      "payer": "Кто заплатил",
+      "payerPlaceholder": "Выберите, кто заплатил",
+      "amount": "Сумма",
+      "currency": "Валюта",
+      "date": "Дата",
+      "category": "Категория",
+      "newCategory": "Новая категория",
+      "addCategory": "Добавить",
+      "tags": "Теги",
+      "tagsPlaceholder": "Введите, чтобы добавить тег",
+      "createTag": "+ “{name}”",
+      "removeTag": "Удалить тег {name}",
+      "description": "Описание",
+      "rate": "Курс ({from} → {to})",
+      "rateHint": "Официальный курс НБП на эту дату. Измените его, чтобы указать свой.",
+      "groupAmount": "= {amount}",
+      "split": "Разделение",
+      "splitEqual": "Поровну",
+      "splitExact": "Точные суммы",
+      "left": "Осталось распределить: {amount}",
+      "over": "Распределено слишком много: {amount}",
+      "chooseMembers": "Выберите хотя бы одного участника.",
+      "delete": "Удалить",
+      "edit": "Изменить {title}",
+      "paidBy": "Плательщик: {name}",
+      "addedBy": "Добавил(а): {name}",
+      "editedBy": "Изменил(а): {name}",
+      "summary": {
+        "everyone": "Поровну между всеми",
+        "some": "Поровну: {names}",
+        "exact": "Точные суммы"
+      },
+      "confirm": {
+        "deleteTitle": "Удалить этот расход?",
+        "deleteMessage": "Он переместится в раздел «Удалённые», откуда его можно восстановить."
+      },
+      "toast": {
+        "created": "Расход добавлен",
+        "updated": "Расход изменён",
+        "deleted": "Расход удалён"
+      }
     }
   },
   "auth": {

@@ -53,6 +53,7 @@ describe('locales', () => {
       locale.goals.dialog.editTitle,
       locale.debts.dialog.editTitle,
       locale.groups.dialog.editTitle,
+      locale.groups.expense.editTitle,
     ]
     for (const title of titles) expect(title.startsWith(prefix)).toBe(true)
   })

@@ -1,5 +1,6 @@
 import type { ApiClient } from '~/shared/api/client'
 import type {
+  GroupCategoryDto,
   GroupDto,
   GroupInput,
   GroupMemberDto,
@@ -26,4 +27,6 @@ export const groupsApi = (api: ApiClient) => ({
   renameMember: (id: string, memberId: string, body: GroupNameInput) =>
     api.put<GroupMemberDto>(memberPath(id, memberId), body),
   removeMember: (id: string, memberId: string) => api.delete(memberPath(id, memberId)),
+  addCategory: (scope: GroupScope, body: GroupNameInput) =>
+    api.post<GroupCategoryDto>(`${scopePath(scope)}/categories`, body),
 })

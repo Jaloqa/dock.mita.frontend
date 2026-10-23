@@ -793,7 +793,8 @@
       "addFirst": "Utwórz grupę",
       "members": "Uczestnicy",
       "edit": "Edytuj grupę",
-      "delete": "Usuń grupę"
+      "delete": "Usuń grupę",
+      "addExpense": "Dodaj wydatek"
     },
     "card": {
       "members": "{count} osoba | {count} osoby | {count} osób",
@@ -847,6 +848,71 @@
       "created": "Grupa utworzona",
       "updated": "Grupa zaktualizowana",
       "deleted": "Grupa usunięta"
+    },
+    "categories": {
+      "groceries": "Spożywcze",
+      "transport": "Transport",
+      "housing": "Mieszkanie",
+      "cafes": "Kawiarnie",
+      "health": "Zdrowie",
+      "shopping": "Zakupy",
+      "leisure": "Rozrywka",
+      "gifts": "Prezenty",
+      "other": "Inne"
+    },
+    "expenses": {
+      "title": "Wydatki",
+      "view": "Które wydatki pokazać",
+      "active": "Aktywne",
+      "deleted": "Usunięte",
+      "empty": "Nie ma jeszcze wydatków",
+      "emptyDeleted": "Nie ma usuniętych wydatków",
+      "showMore": "Pokaż więcej"
+    },
+    "expense": {
+      "createTitle": "Nowy wydatek",
+      "editTitle": "Edycja wydatku",
+      "payer": "Kto zapłacił",
+      "payerPlaceholder": "Wybierz, kto zapłacił",
+      "amount": "Kwota",
+      "currency": "Waluta",
+      "date": "Data",
+      "category": "Kategoria",
+      "newCategory": "Nowa kategoria",
+      "addCategory": "Dodaj",
+      "tags": "Tagi",
+      "tagsPlaceholder": "Wpisz, aby dodać tag",
+      "createTag": "+ “{name}”",
+      "removeTag": "Usuń tag {name}",
+      "description": "Opis",
+      "rate": "Kurs wymiany ({from} → {to})",
+      "rateHint": "Oficjalny kurs NBP z tego dnia. Zmień go, aby użyć własnego.",
+      "groupAmount": "= {amount}",
+      "split": "Podział",
+      "splitEqual": "Po równo",
+      "splitExact": "Dokładne kwoty",
+      "left": "Do rozdzielenia: {amount}",
+      "over": "Przydzielono za dużo: {amount}",
+      "chooseMembers": "Wybierz co najmniej jednego uczestnika.",
+      "delete": "Usuń",
+      "edit": "Edytuj {title}",
+      "paidBy": "Płatnik: {name}",
+      "addedBy": "Dodał(a): {name}",
+      "editedBy": "Zmienił(a): {name}",
+      "summary": {
+        "everyone": "Po równo między wszystkich",
+        "some": "Po równo: {names}",
+        "exact": "Dokładne kwoty"
+      },
+      "confirm": {
+        "deleteTitle": "Usunąć ten wydatek?",
+        "deleteMessage": "Trafi do sekcji „Usunięte”, skąd można go przywrócić."
+      },
+      "toast": {
+        "created": "Wydatek dodany",
+        "updated": "Wydatek zaktualizowany",
+        "deleted": "Wydatek usunięty"
+      }
     }
   },
   "auth": {

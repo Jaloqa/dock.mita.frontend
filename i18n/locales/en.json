@@ -793,7 +793,8 @@
       "addFirst": "Create a group",
       "members": "Members",
       "edit": "Edit group",
-      "delete": "Delete group"
+      "delete": "Delete group",
+      "addExpense": "Add expense"
     },
     "card": {
       "members": "{count} member | {count} members",
@@ -847,6 +848,71 @@
       "created": "Group created",
       "updated": "Group updated",
       "deleted": "Group deleted"
+    },
+    "categories": {
+      "groceries": "Groceries",
+      "transport": "Transport",
+      "housing": "Housing",
+      "cafes": "Cafes",
+      "health": "Health",
+      "shopping": "Shopping",
+      "leisure": "Leisure",
+      "gifts": "Gifts",
+      "other": "Other"
+    },
+    "expenses": {
+      "title": "Expenses",
+      "view": "Expenses to show",
+      "active": "Active",
+      "deleted": "Deleted",
+      "empty": "No expenses yet",
+      "emptyDeleted": "No deleted expenses",
+      "showMore": "Show more"
+    },
+    "expense": {
+      "createTitle": "New expense",
+      "editTitle": "Edit expense",
+      "payer": "Paid by",
+      "payerPlaceholder": "Choose who paid",
+      "amount": "Amount",
+      "currency": "Currency",
+      "date": "Date",
+      "category": "Category",
+      "newCategory": "New category",
+      "addCategory": "Add",
+      "tags": "Tags",
+      "tagsPlaceholder": "Type to add a tag",
+      "createTag": "+ “{name}”",
+      "removeTag": "Remove tag {name}",
+      "description": "Description",
+      "rate": "Exchange rate ({from} → {to})",
+      "rateHint": "Official NBP rate of the date. Change it to use your own.",
+      "groupAmount": "= {amount}",
+      "split": "Split",
+      "splitEqual": "Equally",
+      "splitExact": "Exact amounts",
+      "left": "Left to assign: {amount}",
+      "over": "Assigned too much: {amount}",
+      "chooseMembers": "Choose at least one member.",
+      "delete": "Delete",
+      "edit": "Edit {title}",
+      "paidBy": "Paid by {name}",
+      "addedBy": "Added by {name}",
+      "editedBy": "Edited by {name}",
+      "summary": {
+        "everyone": "Split equally between everyone",
+        "some": "Split equally: {names}",
+        "exact": "Exact amounts"
+      },
+      "confirm": {
+        "deleteTitle": "Delete this expense?",
+        "deleteMessage": "It moves to Deleted and can be restored there."
+      },
+      "toast": {
+        "created": "Expense added",
+        "updated": "Expense updated",
+        "deleted": "Expense deleted"
+      }
     }
   },
   "auth": {
