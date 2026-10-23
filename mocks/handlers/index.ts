@@ -3,6 +3,7 @@ import { registerAccountHandlers } from './accounts'
 import { registerAuthHandlers } from './auth'
 import { registerBudgetHandlers } from './budgets'
 import { registerCategoryHandlers } from './categories'
+import { registerDebtHandlers } from './debts'
 import { registerDemoHandlers } from './demo'
 import { registerGoalHandlers } from './goals'
 import { registerOverviewHandlers } from './overview'
@@ -25,6 +26,7 @@ export const defaultHandlers: ((router: MockRouter) => void)[] = [
   registerTransactionHandlers,
   registerBudgetHandlers,
   registerGoalHandlers,
+  registerDebtHandlers,
   registerOverviewHandlers,
   registerReportHandlers,
 ]

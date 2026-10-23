@@ -3,6 +3,7 @@ import type { BudgetDto, GoalDto, OverviewDto } from '../../../app/shared/api/co
 import { convertMinor } from '../../../app/shared/money/money'
 import { addDaysIso, periodFor, shiftPeriod, todayIso } from '../../../app/shared/period/period'
 import type { MockApi } from '../../../mocks/api'
+import { summarizeDebts } from '../../../mocks/debts'
 import { percentChange, rangesOf, shareTenths } from '../../../mocks/overview'
 import { rateOn } from '../../../mocks/rates'
 import { loggedInMockApi } from './session'
@@ -17,7 +18,15 @@ const failure = (promise: Promise<unknown>) => promise.catch((error: unknown) =>
 
 const api = (): MockApi => {
   const mock = loggedInMockApi()
-  Object.assign(mock.db.state, { transactions: [], transfers: [], budgets: [], goals: [], goalContributions: [] })
+  Object.assign(mock.db.state, {
+    transactions: [],
+    transfers: [],
+    budgets: [],
+    goals: [],
+    goalContributions: [],
+    debts: [],
+    debtRepayments: [],
+  })
   return mock
 }
 
@@ -306,6 +315,7 @@ describe('overview', () => {
     mock.db.state.accounts = mock.db.state.accounts.filter((row) => row.userId !== 'usr_anna')
     expect(await overview(mock)).toMatchObject({
       balance: { amount: 0, accounts: 0 },
+      debts: { owedToMe: 0, owedByMe: 0, open: 0, overdue: 0 },
       income: { amount: 0, count: 0, change: null },
       expense: { amount: 0, count: 0, change: null },
       averageExpense: null,
@@ -318,6 +328,49 @@ describe('overview', () => {
       goalCount: 0,
       hasTransactions: false,
     })
+  })
+
+  it('summarizes the open debts and keeps lending, borrowing and repaying out of the totals', async () => {
+    const mock = api()
+    const before = await overview(mock)
+    const debt = (patch: Record<string, unknown>) =>
+      mock.handle({
+        method: 'POST',
+        path: '/v1/debts',
+        body: { direction: 'lent', counterparty: 'Max', amount: 50_000, currency: 'PLN', date: today, ...patch },
+      }) as Promise<{ id: string }>
+    const lent = await debt({ accountId: 'acc_anna_card', date: addDaysIso(today, -3), dueDate: addDaysIso(today, -1) })
+    await debt({ direction: 'borrowed', counterparty: 'Mum', amount: 20_000, accountId: 'acc_anna_cash' })
+    await debt({ counterparty: 'Kasia', amount: 5_000, currency: 'EUR' })
+    await mock.handle({
+      method: 'POST',
+      path: `/v1/debts/${lent.id}/repayments`,
+      body: { date: today, amount: 10_000, currency: 'PLN', accountId: 'acc_anna_card' },
+    })
+
+    const result = await overview(mock)
+    expect(result.debts).toEqual(summarizeDebts(mock.db.state, 'usr_anna', 'PLN', today))
+    expect(result.debts).toEqual({
+      owedToMe: 40_000 + convertMinor(5_000, rateOn(mock.db.state.rates, today, 'EUR', 'PLN'), 'EUR', 'PLN'),
+      owedByMe: 20_000,
+      open: 3,
+      overdue: 1,
+    })
+    expect(result.balance.amount).toBe(before.balance.amount - 50_000 + 10_000 + 20_000)
+    expect(result.income).toMatchObject({ amount: 0, count: 0 })
+    expect(result.expense).toMatchObject({ amount: 0, count: 0 })
+    expect(result).toMatchObject({ transactionCount: 0, spending: [], recent: [], hasTransactions: false })
+  })
+
+  it('answers 503 when an open debt needs a rate that is not stored', async () => {
+    const mock = api()
+    mock.db.state.rates = mock.db.state.rates.filter((row) => row.from !== 'KWD')
+    await mock.handle({
+      method: 'POST',
+      path: '/v1/debts',
+      body: { direction: 'lent', counterparty: 'Max', amount: 5_000, currency: 'KWD', date: today },
+    })
+    expect(await failure(overview(mock))).toMatchObject({ problem: { status: 503, code: 'rates.unavailable' } })
   })
 
   it('re-prices totals when the base currency changes', async () => {

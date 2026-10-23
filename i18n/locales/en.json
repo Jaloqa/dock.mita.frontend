@@ -727,6 +727,10 @@
     "emailTaken": "This email is already in use.",
     "passwordTooShort": "Use at least 10 characters.",
     "passwordTooLong": "Use at most 128 characters.",
-    "invalidPassword": "Wrong password."
+    "invalidPassword": "Wrong password.",
+    "dueBeforeDate": "The due date cannot be before the date of the debt.",
+    "exceedsRemaining": "The repayment is more than what is still owed.",
+    "belowRepaid": "The amount cannot be lower than what has already been repaid.",
+    "debtCurrencyLocked": "The currency cannot change once the debt has repayments."
   }
 }

@@ -58,15 +58,38 @@ describe('mock db', () => {
   })
 
   it('falls back to the seed when stored data has another version', () => {
-    expect(createDb(memoryStorage(JSON.stringify({ version: 0 })), seedState).state.version).toBe(2)
+    expect(createDb(memoryStorage(JSON.stringify({ version: 0 })), seedState).state.version).toBe(3)
   })
 
   it('reseeds a stored state of version 1 so every currency gets rates', () => {
     const stored = JSON.stringify({ ...seedState(), version: 1, rates: [], simulateErrors: true })
     const { state } = createDb(memoryStorage(stored), seedState)
-    expect(state.version).toBe(2)
+    expect(state.version).toBe(3)
     expect(state.simulateErrors).toBe(false)
     expect(state.rates.some((row) => row.from === 'KWD')).toBe(true)
+  })
+
+  it('reseeds a stored state of version 2 so the demo users get debts', () => {
+    const { debts: _debts, debtRepayments: _repayments, ...before } = seedState()
+    const stored = JSON.stringify({ ...before, version: 2, simulateErrors: true })
+    const { state } = createDb(memoryStorage(stored), seedState)
+    expect(state.version).toBe(3)
+    expect(state.simulateErrors).toBe(false)
+    expect(state.debts.map((row) => row.counterparty)).toEqual(['Max', 'Mama', 'Kasia', 'Tomek', 'Андрій'])
+    expect(state.debtRepayments).toHaveLength(3)
+  })
+
+  it('reseeds a stored state of version 2 even when it carries every key', () => {
+    const stored = JSON.stringify({ ...seedState(), version: 2, simulateErrors: true })
+    expect(createDb(memoryStorage(stored), seedState).state.simulateErrors).toBe(false)
+  })
+
+  it('falls back to the seed when a stored state of version 3 has no debts', () => {
+    const { debts: _debts, ...older } = seedState()
+    const stored = JSON.stringify({ ...older, simulateErrors: true })
+    const { state } = createDb(memoryStorage(stored), seedState)
+    expect(state.simulateErrors).toBe(false)
+    expect(state.debts).toHaveLength(5)
   })
 
   it('keeps a stored state of the current version', () => {

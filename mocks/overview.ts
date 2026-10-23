@@ -12,6 +12,7 @@ import { addDaysIso, daysLeft, type MonthStart, type Period, periodFor, shiftPer
 import { budgetsOf, monthStartOf, spentByCategory, summarize } from './budgets'
 import { ownCategories } from './categories'
 import type { CategoryRow, MockDb, MockState, TransactionRow } from './db'
+import { summarizeDebts } from './debts'
 import { amountIn, goalsOf } from './goals'
 import { accountBalances } from './ledger'
 import { baseAmountOf, baseCurrencyOf, transactionsIn } from './transactions'
@@ -191,6 +192,7 @@ export function overviewOf(db: MockDb, userId: string, range: OverviewRange, tod
     previousTo: previous.to,
     currency: base,
     balance: balanceOf(state, userId, base, today),
+    debts: summarizeDebts(state, userId, base, today),
     income: withChange(now.income, before.income),
     expense: withChange(now.expense, before.expense),
     averageExpense: now.expense.count > 0 ? Math.round(now.expense.amount / now.expense.count) : null,

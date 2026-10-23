@@ -1,4 +1,4 @@
-import type { MockState } from './db'
+import type { DebtRepaymentRow, DebtRow, MockState } from './db'
 
 export type Movement = { accountId: string; amount: number }
 
@@ -20,7 +20,34 @@ export const transactionMovements: Ledger = (state, userId) =>
       amount: row.kind === 'income' ? row.accountAmount : -row.accountAmount,
     }))
 
-export const ledgers: Ledger[] = [transferMovements, transactionMovements]
+export function debtLegs(debts: readonly DebtRow[], repayments: readonly DebtRepaymentRow[]): Movement[] {
+  const directions = new Map(debts.map((debt) => [debt.id, debt.direction]))
+  const legs: Movement[] = []
+  for (const debt of debts) {
+    if (debt.accountId === null || debt.accountAmount === null) continue
+    legs.push({
+      accountId: debt.accountId,
+      amount: debt.direction === 'lent' ? -debt.accountAmount : debt.accountAmount,
+    })
+  }
+  for (const repayment of repayments) {
+    const direction = directions.get(repayment.debtId)
+    if (direction === undefined || repayment.accountId === null || repayment.accountAmount === null) continue
+    legs.push({
+      accountId: repayment.accountId,
+      amount: direction === 'lent' ? repayment.accountAmount : -repayment.accountAmount,
+    })
+  }
+  return legs
+}
+
+export const debtMovements: Ledger = (state, userId) =>
+  debtLegs(
+    state.debts.filter((row) => row.userId === userId),
+    state.debtRepayments.filter((row) => row.userId === userId),
+  )
+
+export const ledgers: Ledger[] = [transferMovements, transactionMovements, debtMovements]
 
 const movementsOf = (state: MockState, userId: string): Movement[] => ledgers.flatMap((ledger) => ledger(state, userId))
 
