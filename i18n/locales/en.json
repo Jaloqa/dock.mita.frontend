@@ -794,7 +794,8 @@
       "members": "Members",
       "edit": "Edit group",
       "delete": "Delete group",
-      "addExpense": "Add expense"
+      "addExpense": "Add expense",
+      "recordRepayment": "Record repayment"
     },
     "card": {
       "members": "{count} member | {count} members",
@@ -912,6 +913,62 @@
         "created": "Expense added",
         "updated": "Expense updated",
         "deleted": "Expense deleted"
+      }
+    },
+    "hints": {
+      "noMembers": "Add members first.",
+      "oneMember": "Add a second member to record repayments."
+    },
+    "balances": {
+      "title": "Balances",
+      "showIn": "Show in",
+      "members": "Balance of each member",
+      "getsBack": "gets back",
+      "owes": "owes",
+      "settled": "settled",
+      "transfers": "Suggested transfers",
+      "pays": "{from} pays {to}",
+      "record": "Record",
+      "recordNamed": "Record that {from} paid {to}",
+      "settledUp": "Everyone is settled up.",
+      "empty": "No members yet."
+    },
+    "repayments": {
+      "title": "Repayments",
+      "view": "Repayments to show",
+      "active": "Active",
+      "deleted": "Deleted",
+      "empty": "No repayments yet",
+      "emptyDeleted": "No deleted repayments",
+      "showMore": "Show more"
+    },
+    "repayment": {
+      "createTitle": "New repayment",
+      "editTitle": "Edit repayment",
+      "title": "{from} → {to}",
+      "from": "From",
+      "fromPlaceholder": "Choose who pays",
+      "to": "To",
+      "toPlaceholder": "Choose who receives",
+      "amount": "Amount",
+      "currency": "Currency",
+      "date": "Date",
+      "rate": "Exchange rate ({from} → {to})",
+      "rateHint": "Official NBP rate of the date. Change it to use your own.",
+      "groupAmount": "= {amount}",
+      "note": "Note",
+      "delete": "Delete",
+      "edit": "Edit repayment from {from} to {to}",
+      "addedBy": "Added by {name}",
+      "editedBy": "Edited by {name}",
+      "confirm": {
+        "deleteTitle": "Delete this repayment?",
+        "deleteMessage": "It moves to Deleted and can be restored there."
+      },
+      "toast": {
+        "created": "Repayment saved",
+        "updated": "Repayment updated",
+        "deleted": "Repayment deleted"
       }
     }
   },

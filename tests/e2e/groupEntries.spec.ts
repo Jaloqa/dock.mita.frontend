@@ -43,12 +43,44 @@ const openEdit = async (page: Page, title: string) => {
   return dialog
 }
 
-const choosePayer = async (page: Page, dialog: Locator, name: string) => {
-  const payer = dialog.getByRole('combobox', { name: 'Paid by', exact: true })
-  await payer.click()
+const chooseMember = async (page: Page, dialog: Locator, label: string, name: string) => {
+  const field = dialog.getByRole('combobox', { name: label, exact: true })
+  await field.click()
   await pickOverlayOption(page, name)
-  await expect(payer).toContainText(name)
+  await expect(field).toContainText(name)
   await expect(page.locator('[data-pc-section="overlay"]')).toHaveCount(0)
+}
+
+const choosePayer = (page: Page, dialog: Locator, name: string) => chooseMember(page, dialog, 'Paid by', name)
+
+const balances = (page: Page) => page.getByRole('region', { name: 'Balances', exact: true })
+const balanceRow = (page: Page, name: string) =>
+  balances(page)
+    .getByRole('list', { name: 'Balance of each member', exact: true })
+    .getByRole('listitem')
+    .filter({ has: page.getByText(name, { exact: true }) })
+const transferRows = (page: Page) =>
+  balances(page).getByRole('list', { name: 'Suggested transfers', exact: true }).getByRole('listitem')
+const recordButton = (page: Page, from: string, to: string) =>
+  balances(page).getByRole('button', { name: `Record that ${from} paid ${to}`, exact: true })
+
+const repayments = (page: Page) => page.getByRole('region', { name: 'Repayments', exact: true })
+const repaymentRows = (page: Page) => repayments(page).getByRole('article')
+const repaymentRow = (page: Page, title: string) => repayments(page).getByRole('article', { name: title, exact: true })
+const recordRepaymentButton = (page: Page) =>
+  page.getByRole('button', { name: 'Record repayment', exact: true }).first()
+
+const openAlbaniaWithBalances = async (page: Page) => {
+  await openAlbania(page)
+  await expect(balanceRow(page, 'Anna')).toContainText('+€42.32')
+}
+
+const openRepaymentEdit = async (page: Page, title: string, label: string) => {
+  await openAlbaniaWithBalances(page)
+  await repaymentRow(page, title).getByRole('button', { name: label, exact: true }).click()
+  const dialog = page.getByRole('dialog', { name: 'Edit repayment', exact: true })
+  await expect(dialog.getByRole('button', { name: 'Close', exact: true })).toBeFocused()
+  return dialog
 }
 
 const typeInto = async (field: Locator, text: string) => {
@@ -421,6 +453,379 @@ test('offers the first expense of a new group', async ({ page }) => {
   await expect(titles(page)).toHaveText(['Other'])
 })
 
+test('shows balances and suggested transfers', async ({ page }) => {
+  await openAlbaniaWithBalances(page)
+  await expect(balances(page).getByRole('heading', { level: 2, name: 'Balances', exact: true })).toBeVisible()
+  const expected = [
+    ['Anna', '+€42.32', 'gets back'],
+    ['Olya', '-€6.98', 'owes'],
+    ['Max', '-€17.67', 'owes'],
+    ['Kasia', '-€17.67', 'owes'],
+  ] as const
+  for (const [name, amount, caption] of expected) {
+    await expect(balanceRow(page, name)).toContainText(amount)
+    await expect(balanceRow(page, name)).toContainText(caption)
+  }
+  await expect(balances(page).getByRole('combobox', { name: 'Show in', exact: true })).toContainText('EUR')
+
+  await expect(
+    balances(page).getByRole('heading', { level: 3, name: 'Suggested transfers', exact: true }),
+  ).toBeVisible()
+  await expect(transferRows(page)).toHaveCount(3)
+  const transfers = [
+    ['Max', 'Anna', '€17.67'],
+    ['Kasia', 'Anna', '€17.67'],
+    ['Olya', 'Anna', '€6.98'],
+  ] as const
+  for (const [index, [from, to, amount]] of transfers.entries()) {
+    const row = transferRows(page).nth(index)
+    await expect(row).toContainText(`${from} pays ${to}`)
+    await expect(row).toContainText(amount)
+    const record = recordButton(page, from, to)
+    await expect(record).toHaveText('Record')
+    expect((await record.boundingBox())?.height).toBeGreaterThanOrEqual(44)
+  }
+  await expect(balances(page).getByText('Everyone is settled up.')).toHaveCount(0)
+})
+
+test('records a suggested transfer', async ({ page }) => {
+  await openAlbaniaWithBalances(page)
+  await recordButton(page, 'Max', 'Anna').click()
+  const dialog = page.getByRole('dialog', { name: 'New repayment', exact: true })
+  await expect(dialog.getByRole('combobox', { name: 'From', exact: true })).toContainText('Max')
+  await expect(dialog.getByRole('combobox', { name: 'To', exact: true })).toContainText('Anna')
+  await expect(amountField(dialog)).toHaveValue('€17.67')
+  await expect(dialog.getByRole('combobox', { name: 'Currency', exact: true })).toContainText('EUR')
+  await expect(dialog.getByLabel('Exchange rate', { exact: false })).toHaveCount(0)
+  await saveButton(dialog).click()
+
+  await expect(page.getByText('Repayment saved')).toBeVisible()
+  await expect(dialog).toBeHidden()
+  await expect(balanceRow(page, 'Max')).toContainText('settled')
+  await expect(balanceRow(page, 'Max')).toContainText('€0.00')
+  await expect(balanceRow(page, 'Anna')).toContainText('+€24.65')
+  await expect(transferRows(page)).toHaveCount(2)
+  await expect(recordButton(page, 'Max', 'Anna')).toHaveCount(0)
+  await expect(repaymentRow(page, 'Max → Anna')).toContainText('€17.67')
+  await expect(repaymentRows(page)).toHaveCount(2)
+  await expect(page.locator(':focus')).toHaveAccessibleName('Record repayment')
+})
+
+test('settles everyone with the suggested transfers', async ({ page }) => {
+  await openAlbaniaWithBalances(page)
+  for (const [from, to] of [
+    ['Max', 'Anna'],
+    ['Kasia', 'Anna'],
+    ['Olya', 'Anna'],
+  ] as const) {
+    await recordButton(page, from, to).click()
+    const dialog = page.getByRole('dialog', { name: 'New repayment', exact: true })
+    await expect(dialog.getByRole('combobox', { name: 'From', exact: true })).toContainText(from)
+    await saveButton(dialog).click()
+    await expect(dialog).toBeHidden()
+    await expect(recordButton(page, from, to)).toHaveCount(0)
+  }
+  for (const name of ['Anna', 'Olya', 'Max', 'Kasia']) {
+    await expect(balanceRow(page, name)).toContainText('settled')
+    await expect(balanceRow(page, name)).toContainText('€0.00')
+  }
+  await expect(transferRows(page)).toHaveCount(0)
+  await expect(balances(page).getByText('Everyone is settled up.')).toBeVisible()
+  await expect(total(page)).toContainText('€190.70')
+  await expect(repaymentRows(page)).toHaveCount(4)
+})
+
+test('shows balances in another currency', async ({ page }) => {
+  await openAlbaniaWithBalances(page)
+  const showIn = balances(page).getByRole('combobox', { name: 'Show in', exact: true })
+  await showIn.click()
+  await pickOverlayOption(page, 'PLN — Polish Zloty')
+  await expect(showIn).toContainText('PLN')
+  await expect(balanceRow(page, 'Anna').locator('span.font-mono')).toHaveText(/^\+zł\s?\d[\d,]*\.\d{2}$/)
+  await expect(balanceRow(page, 'Olya').locator('span.font-mono')).toHaveText(/^-zł\s?\d[\d,]*\.\d{2}$/)
+  await expect(balanceRow(page, 'Anna')).toContainText('gets back')
+  await expect(transferRows(page)).toHaveCount(3)
+  for (const [index, [from, to]] of [
+    ['Max', 'Anna'],
+    ['Kasia', 'Anna'],
+    ['Olya', 'Anna'],
+  ].entries()) {
+    const row = transferRows(page).nth(index)
+    await expect(row).toContainText(`${from} pays ${to}`)
+    await expect(row.locator('span.font-mono')).toHaveText(/^zł\s?\d[\d,]*\.\d{2}$/)
+  }
+
+  await recordButton(page, 'Max', 'Anna').click()
+  const dialog = page.getByRole('dialog', { name: 'New repayment', exact: true })
+  await expect(amountField(dialog)).toHaveValue('€17.67')
+  await expect(dialog.getByRole('combobox', { name: 'Currency', exact: true })).toContainText('EUR')
+  await expect(dialog.getByLabel('Exchange rate', { exact: false })).toHaveCount(0)
+  await saveButton(dialog).click()
+  await expect(page.getByText('Repayment saved')).toBeVisible()
+  await expect(showIn).toContainText('PLN')
+  await expect(balanceRow(page, 'Max')).toContainText('settled')
+  await expect(balanceRow(page, 'Max').locator('span.font-mono')).toHaveText(/^zł\s?0\.00$/)
+  await expect(transferRows(page)).toHaveCount(2)
+
+  await showIn.click()
+  await pickOverlayOption(page, 'EUR — Euro')
+  await expect(balanceRow(page, 'Anna')).toContainText('+€24.65')
+})
+
+test('lists the repayments', async ({ page }) => {
+  await openAlbaniaWithBalances(page)
+  await expect(repayments(page).getByRole('heading', { level: 2, name: 'Repayments', exact: true })).toBeVisible()
+  await expect(repaymentRows(page)).toHaveCount(1)
+  const kasia = repaymentRow(page, 'Kasia → Anna')
+  await expect(kasia).toContainText('€20.00')
+  await expect(kasia).toContainText(dayFromToday(-7))
+  await expect(kasia).toContainText('Added by Anna Nowak')
+  await expect(kasia).not.toContainText('Edited by')
+  await expect(kasia).not.toContainText('= €')
+  const edit = kasia.getByRole('button', { name: 'Edit repayment from Kasia to Anna', exact: true })
+  const box = await edit.boundingBox()
+  expect(box?.height).toBeGreaterThanOrEqual(44)
+  expect(box?.width).toBeGreaterThanOrEqual(44)
+  const record = await recordRepaymentButton(page).boundingBox()
+  expect(record?.height).toBeGreaterThanOrEqual(44)
+  await expect(repayments(page).getByRole('button', { name: 'Show more', exact: true })).toHaveCount(0)
+
+  await repayments(page).getByRole('button', { name: 'Deleted', exact: true }).click()
+  await expect(repayments(page).getByRole('heading', { name: 'No deleted repayments', exact: true })).toBeVisible()
+  await repayments(page).getByRole('button', { name: 'Active', exact: true }).click()
+  await expect(repaymentRows(page)).toHaveCount(1)
+})
+
+test('records a repayment between two members', async ({ page }) => {
+  await openAlbaniaWithBalances(page)
+  await recordRepaymentButton(page).click()
+  const dialog = page.getByRole('dialog', { name: 'New repayment', exact: true })
+  await expect(dialog.getByRole('button', { name: 'Close', exact: true })).toBeFocused()
+  await expect(dialog.getByRole('combobox', { name: 'Currency', exact: true })).toContainText('EUR')
+  await expect(dialog.getByRole('button', { name: 'Delete', exact: true })).toHaveCount(0)
+  await chooseMember(page, dialog, 'From', 'Olya')
+  await chooseMember(page, dialog, 'To', 'Max')
+  await amountField(dialog).pressSequentially('10')
+  await dialog.getByLabel('Note', { exact: true }).fill('Taxi share')
+  await saveButton(dialog).click()
+
+  await expect(page.getByText('Repayment saved')).toBeVisible()
+  await expect(dialog).toBeHidden()
+  await expect(repaymentRows(page)).toHaveCount(2)
+  await expect(repaymentRows(page).first()).toHaveAccessibleName('Olya → Max')
+  const added = repaymentRow(page, 'Olya → Max')
+  await expect(added).toContainText('€10.00')
+  await expect(added).toContainText(dayFromToday(0))
+  await expect(added).toContainText('Taxi share')
+  await expect(balanceRow(page, 'Olya')).toContainText('+€3.02')
+  await expect(balanceRow(page, 'Olya')).toContainText('gets back')
+  await expect(balanceRow(page, 'Max')).toContainText('-€27.67')
+  await expect(total(page)).toContainText('€190.70')
+  await expect(page.locator(':focus')).toHaveAccessibleName('Record repayment')
+})
+
+test('records a repayment in another currency at a manual rate and keeps the rate when it is edited', async ({
+  page,
+}) => {
+  await openAlbaniaWithBalances(page)
+  await recordRepaymentButton(page).click()
+  const dialog = page.getByRole('dialog', { name: 'New repayment', exact: true })
+  await chooseMember(page, dialog, 'From', 'Olya')
+  await chooseMember(page, dialog, 'To', 'Max')
+  await amountField(dialog).pressSequentially('100')
+  await dialog.getByRole('combobox', { name: 'Currency', exact: true }).click()
+  await pickOverlayOption(page, 'PLN — Polish Zloty')
+  const rate = dialog.getByLabel('Exchange rate (PLN → EUR)', { exact: true })
+  await expect(rate).toHaveValue(/^0\.\d+$/)
+  await expect(rate).toHaveAccessibleDescription('Official NBP rate of the date. Change it to use your own.')
+  await typeInto(rate, '0.25')
+  await expect(dialog.getByText('= €25.00', { exact: true })).toBeVisible()
+  await saveButton(dialog).click()
+
+  await expect(page.getByText('Repayment saved')).toBeVisible()
+  const added = repaymentRow(page, 'Olya → Max')
+  await expect(added).toContainText('zł 100.00')
+  await expect(added).toContainText('= €25.00')
+  await expect(balanceRow(page, 'Olya')).toContainText('+€18.02')
+  await expect(balanceRow(page, 'Max')).toContainText('-€42.67')
+
+  await added.getByRole('button', { name: 'Edit repayment from Olya to Max', exact: true }).click()
+  const edit = page.getByRole('dialog', { name: 'Edit repayment', exact: true })
+  await expect(edit.getByLabel('Exchange rate (PLN → EUR)', { exact: true })).toHaveValue('0.25')
+  await edit.getByLabel('Note', { exact: true }).fill('Tickets')
+  await saveButton(edit).click()
+  await expect(page.getByText('Repayment updated')).toBeVisible()
+  await expect(repaymentRow(page, 'Olya → Max')).toContainText('Tickets')
+  await expect(repaymentRow(page, 'Olya → Max')).toContainText('= €25.00')
+  await expect(balanceRow(page, 'Olya')).toContainText('+€18.02')
+})
+
+test('edits a repayment', async ({ page }) => {
+  const dialog = await openRepaymentEdit(page, 'Kasia → Anna', 'Edit repayment from Kasia to Anna')
+  await expect(dialog.getByRole('combobox', { name: 'From', exact: true })).toContainText('Kasia')
+  await expect(dialog.getByRole('combobox', { name: 'To', exact: true })).toContainText('Anna')
+  await expect(amountField(dialog)).toHaveValue('€20.00')
+  await expect(dialog.getByRole('combobox', { name: 'Currency', exact: true })).toContainText('EUR')
+  await typeInto(amountField(dialog), '25')
+  await saveButton(dialog).click()
+
+  await expect(page.getByText('Repayment updated')).toBeVisible()
+  await expect(dialog).toBeHidden()
+  const kasia = repaymentRow(page, 'Kasia → Anna')
+  await expect(kasia).toContainText('€25.00')
+  await expect(kasia).toContainText('Edited by Anna Nowak')
+  await expect(balanceRow(page, 'Kasia')).toContainText('-€12.67')
+  await expect(balanceRow(page, 'Anna')).toContainText('+€37.32')
+  await expect(page.locator(':focus')).toHaveAccessibleName('Edit repayment from Kasia to Anna')
+})
+
+test('deletes a repayment', async ({ page }) => {
+  const dialog = await openRepaymentEdit(page, 'Kasia → Anna', 'Edit repayment from Kasia to Anna')
+  await dialog.getByRole('button', { name: 'Delete', exact: true }).click()
+  const confirm = page.getByRole('alertdialog')
+  await expect(confirm).toContainText('Delete this repayment?')
+  await expect(confirm).toContainText('It moves to Deleted and can be restored there.')
+  await confirm.getByRole('button', { name: 'Delete', exact: true }).click()
+
+  await expect(page.getByText('Repayment deleted')).toBeVisible()
+  await expect(dialog).toBeHidden()
+  await expect(repaymentRows(page)).toHaveCount(0)
+  await expect(repayments(page).getByRole('heading', { name: 'No repayments yet', exact: true })).toBeVisible()
+  await expect(balanceRow(page, 'Kasia')).toContainText('-€37.67')
+  await expect(balanceRow(page, 'Anna')).toContainText('+€62.32')
+  await expect(page.locator(':focus')).toHaveAccessibleName('Record repayment')
+
+  await repayments(page).getByRole('button', { name: 'Deleted', exact: true }).click()
+  await expect(repaymentRows(page)).toHaveCount(1)
+  const kasia = repaymentRow(page, 'Kasia → Anna')
+  await expect(kasia).toContainText('€20.00')
+  await expect(kasia).toContainText('Edited by Anna Nowak')
+  await expect(repayments(page).getByRole('button', { name: /^Edit / })).toHaveCount(0)
+  await repayments(page).getByRole('button', { name: 'Active', exact: true }).click()
+  await expect(repaymentRows(page)).toHaveCount(0)
+})
+
+test('checks the repayment before sending it', async ({ page }) => {
+  await openAlbaniaWithBalances(page)
+  await recordRepaymentButton(page).click()
+  const dialog = page.getByRole('dialog', { name: 'New repayment', exact: true })
+  await saveButton(dialog).click()
+  await expect(dialog.getByText('This field is required.')).toHaveCount(3)
+  await expect(dialog.getByRole('combobox', { name: 'From', exact: true })).toBeFocused()
+
+  await chooseMember(page, dialog, 'From', 'Max')
+  await chooseMember(page, dialog, 'To', 'Max')
+  await expect(dialog.getByText('Choose two different members.')).toBeVisible()
+  await chooseMember(page, dialog, 'From', 'Olya')
+  await expect(dialog.getByText('Choose two different members.')).toHaveCount(0)
+  await chooseMember(page, dialog, 'To', 'Olya')
+  await expect(dialog.getByText('Choose two different members.')).toBeVisible()
+  await chooseMember(page, dialog, 'To', 'Anna')
+  await expect(dialog.getByText('Choose two different members.')).toHaveCount(0)
+
+  await dialog.getByLabel('Note', { exact: true }).fill('x'.repeat(201))
+  await expect(dialog.getByText('Use at most 200 characters.')).toBeVisible()
+  await saveButton(dialog).click()
+  await expect(dialog.getByText('Enter an amount above zero.')).toHaveCount(0)
+  await expect(dialog.getByText('This field is required.')).toHaveCount(1)
+  await expect(amountField(dialog)).toBeFocused()
+  await expect(dialog).toBeVisible()
+  await expect(repaymentRows(page)).toHaveCount(1)
+})
+
+test('keeps the active and the deleted repayments apart while switching', async ({ page }) => {
+  await openAlbaniaWithBalances(page)
+  const active = repayments(page).getByRole('button', { name: 'Active', exact: true })
+  const deleted = repayments(page).getByRole('button', { name: 'Deleted', exact: true })
+  await deleted.click()
+  await expect(repayments(page).getByRole('heading', { name: 'No deleted repayments', exact: true })).toBeVisible()
+  await active.click()
+  await expect(repaymentRows(page)).toHaveCount(1)
+  await deleted.click()
+  await expect(repaymentRows(page)).toHaveCount(0)
+
+  await recordRepaymentButton(page).click()
+  const dialog = page.getByRole('dialog', { name: 'New repayment', exact: true })
+  await chooseMember(page, dialog, 'From', 'Max')
+  await chooseMember(page, dialog, 'To', 'Anna')
+  await amountField(dialog).pressSequentially('4')
+  await saveButton(dialog).click()
+  await expect(page.getByText('Repayment saved')).toBeVisible()
+  await expect(repayments(page).getByRole('heading', { name: 'No deleted repayments', exact: true })).toBeVisible()
+  await active.click()
+  await expect(repaymentRows(page)).toHaveCount(2)
+})
+
+test('shows more repayments on demand', async ({ page }) => {
+  await page.goto('/tools/groups')
+  await expect(page.getByRole('list', { name: 'Groups', exact: true }).getByRole('link')).toHaveCount(1)
+  await page.evaluate(() => {
+    const key = 'mita-mock-db-v1'
+    const state = JSON.parse(localStorage.getItem(key) ?? '{}')
+    const repayment = state.groupRepayments.find((row: { id: string }) => row.id === 'gpay_kasia_anna')
+    const created = state.groupEvents.find((event: { entryId: string }) => event.entryId === 'gpay_kasia_anna')
+    const day = new Date(`${repayment.date}T00:00:00Z`)
+    day.setUTCDate(day.getUTCDate() - 30)
+    const date = day.toISOString().slice(0, 10)
+    for (let number = 1; number <= 102; number += 1) {
+      const id = `gpay_bulk_${number}`
+      state.groupRepayments.push({ ...repayment, id, date })
+      state.groupEvents.push({ ...created, id: `gevt_bulk_${number}`, entryId: id })
+    }
+    localStorage.setItem(key, JSON.stringify(state))
+  })
+  await page.goto('/tools/groups/grp_albania')
+  await expect(repaymentRows(page)).toHaveCount(100)
+  const more = repayments(page).getByRole('button', { name: 'Show more', exact: true })
+  await more.click()
+  await expect(repaymentRows(page)).toHaveCount(103)
+  await expect(more).toHaveCount(0)
+})
+
+test('asks for members before entries can be added', async ({ page }) => {
+  await page.goto('/tools/groups')
+  await page.getByRole('button', { name: 'New group', exact: true }).click()
+  const create = page.getByRole('dialog', { name: 'New group', exact: true })
+  await create.getByLabel('Name', { exact: true }).fill('Rome')
+  await create.getByRole('button', { name: 'Save', exact: true }).click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Rome', exact: true })).toBeVisible()
+
+  const oneMember = 'Add a second member to record repayments.'
+  await expect(page.getByText(oneMember, { exact: true })).toBeVisible()
+  await expect(addExpenseButton(page).first()).toBeEnabled()
+  await expect(recordRepaymentButton(page)).toBeDisabled()
+  await expect(recordRepaymentButton(page)).toHaveAccessibleDescription(oneMember)
+  await expect(repayments(page).getByRole('button', { name: 'Record repayment', exact: true })).toBeDisabled()
+  await expect(balanceRow(page, 'Anna Nowak')).toContainText('settled')
+  await expect(balances(page).getByText('Everyone is settled up.')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Members', exact: true }).click()
+  const members = page.getByRole('dialog', { name: 'Members', exact: true })
+  await members.getByRole('button', { name: 'Remove Anna Nowak', exact: true }).click()
+  await expect(members.getByText('No members yet.')).toBeVisible()
+  await members.getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(members).toBeHidden()
+
+  const noMembers = 'Add members first.'
+  await expect(page.getByText(noMembers, { exact: true })).toBeVisible()
+  await expect(addExpenseButton(page).first()).toBeDisabled()
+  await expect(addExpenseButton(page).first()).toHaveAccessibleDescription(noMembers)
+  await expect(recordRepaymentButton(page)).toBeDisabled()
+  await expect(recordRepaymentButton(page)).toHaveAccessibleDescription(noMembers)
+  await expect(expenses(page).getByRole('button', { name: 'Add expense', exact: true })).toBeDisabled()
+  await expect(balances(page).getByText('No members yet.')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Members', exact: true }).click()
+  await members.getByLabel('New member', { exact: true }).fill('Piotr')
+  await members.getByRole('button', { name: 'Add', exact: true }).click()
+  await expect(members.getByRole('list', { name: 'Members', exact: true }).getByRole('listitem')).toHaveCount(1)
+  await members.getByRole('button', { name: 'Close', exact: true }).click()
+  await expect(members).toBeHidden()
+  await expect(page.getByText(oneMember, { exact: true })).toBeVisible()
+  await expect(addExpenseButton(page).first()).toBeEnabled()
+  await expect(recordRepaymentButton(page)).toBeDisabled()
+})
+
 test('/pl/tools/groups/grp_albania shows the expenses in Polish', async ({ page }) => {
   await page.goto('/pl/tools/groups/grp_albania')
   const region = page.getByRole('region', { name: 'Wydatki', exact: true })
@@ -431,4 +836,23 @@ test('/pl/tools/groups/grp_albania shows the expenses in Polish', async ({ page 
   await expect(groceries).toContainText('Po równo między wszystkich')
   await page.getByRole('button', { name: 'Dodaj wydatek', exact: true }).click()
   await expect(page.getByRole('dialog', { name: 'Nowy wydatek', exact: true })).toBeVisible()
+})
+
+test('/pl/tools/groups/grp_albania shows the balances and repayments in Polish', async ({ page }) => {
+  await page.goto('/pl/tools/groups/grp_albania')
+  const salda = page.getByRole('region', { name: 'Salda', exact: true })
+  const anna = salda
+    .getByRole('list', { name: 'Saldo każdego uczestnika', exact: true })
+    .getByRole('listitem')
+    .filter({ has: page.getByText('Anna', { exact: true }) })
+  await expect(anna).toContainText('do odebrania')
+  await expect(anna).toContainText('+42,32')
+  const transfers = salda.getByRole('list', { name: 'Proponowane przelewy', exact: true }).getByRole('listitem')
+  await expect(transfers).toHaveCount(3)
+  await expect(transfers.first()).toContainText('Max płaci osobie: Anna')
+  await expect(salda.getByRole('combobox', { name: 'Pokaż w', exact: true })).toBeVisible()
+  const region = page.getByRole('region', { name: 'Spłaty', exact: true })
+  await expect(region.getByRole('article', { name: 'Kasia → Anna', exact: true })).toContainText('Dodał(a): Anna Nowak')
+  await page.getByRole('button', { name: 'Zapisz spłatę', exact: true }).click()
+  await expect(page.getByRole('dialog', { name: 'Nowa spłata', exact: true })).toBeVisible()
 })
