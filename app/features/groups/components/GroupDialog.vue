@@ -19,7 +19,7 @@ const { create, update, remove } = useGroupMutations()
 const fields = ['name', 'currency', 'members'] as const
 type Field = (typeof fields)[number]
 
-const CURRENCY_HINT_ID = 'group-currency-hint'
+const CURRENCY_HINT_ID = 'group-currency-locked'
 const MEMBERS_ERROR_ID = 'group-members-error'
 
 const emptyForm = (): GroupForm => ({ name: '', currency: baseCurrency.value, members: [user.value?.name ?? ''] })

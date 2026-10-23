@@ -791,11 +791,34 @@
     "actions": {
       "add": "New group",
       "addFirst": "Create a group",
+      "members": "Members",
+      "edit": "Edit group",
       "delete": "Delete group"
     },
     "card": {
       "members": "{count} member | {count} members",
       "spent": "Spent"
+    },
+    "summary": {
+      "label": "Summary",
+      "total": "Total spent",
+      "members": "Members"
+    },
+    "members": {
+      "title": "Members",
+      "list": "Members",
+      "empty": "No members yet.",
+      "rename": "Rename {name}",
+      "renameField": "Name of {name}",
+      "remove": "Remove {name}",
+      "inUse": "Has entries, so it can only be renamed.",
+      "newMember": "New member",
+      "add": "Add",
+      "toast": {
+        "added": "Member added",
+        "renamed": "Member renamed",
+        "removed": "Member removed"
+      }
     },
     "empty": {
       "title": "No groups yet"

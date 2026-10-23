@@ -11,7 +11,7 @@ export type GroupForm = {
 
 type Translate = (key: string) => string
 
-const nameKey = (name: string): string => name.trim().toLocaleLowerCase()
+export const nameKey = (name: string): string => name.trim().toLocaleLowerCase()
 
 const filled = (rows: readonly string[]): string[] => rows.filter(hasText)
 

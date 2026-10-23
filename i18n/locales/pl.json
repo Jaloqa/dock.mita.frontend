@@ -791,11 +791,34 @@
     "actions": {
       "add": "Nowa grupa",
       "addFirst": "Utwórz grupę",
+      "members": "Uczestnicy",
+      "edit": "Edytuj grupę",
       "delete": "Usuń grupę"
     },
     "card": {
-      "members": "{count} uczestnik | {count} uczestnicy | {count} uczestników",
+      "members": "{count} osoba | {count} osoby | {count} osób",
       "spent": "Wydano"
+    },
+    "summary": {
+      "label": "Podsumowanie",
+      "total": "Wydano łącznie",
+      "members": "Uczestnicy"
+    },
+    "members": {
+      "title": "Uczestnicy",
+      "list": "Uczestnicy",
+      "empty": "Nie ma jeszcze uczestników.",
+      "rename": "Zmień imię: {name}",
+      "renameField": "Imię uczestnika {name}",
+      "remove": "Usuń: {name}",
+      "inUse": "Ma wpisy, więc można tylko zmienić imię.",
+      "newMember": "Nowy uczestnik",
+      "add": "Dodaj",
+      "toast": {
+        "added": "Dodano uczestnika",
+        "renamed": "Zmieniono imię uczestnika",
+        "removed": "Usunięto uczestnika"
+      }
     },
     "empty": {
       "title": "Nie ma jeszcze grup"
