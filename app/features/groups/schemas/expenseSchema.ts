@@ -7,8 +7,8 @@ import {
 } from '../../../shared/api/contract'
 import type { Currency } from '../../../shared/money/currencies'
 import { sumMinor, toMinor, withinAmountLimit, withinRateLimit } from '../../../shared/money/money'
-import { fromLocalDate } from '../../../shared/period/period'
 import { trimmedWithin } from '../../../shared/utils/text'
+import { isPositiveOrEmpty, notAfter, requiredWhen } from '../../../shared/utils/validation'
 
 export type ExpenseForm = {
   payerId: string | null
@@ -27,19 +27,6 @@ export type ExpenseForm = {
 type Translate = (key: string) => string
 
 type SplitSiblings = Partial<Pick<ExpenseForm, 'splitMode'>> | undefined
-
-const isPositiveOrEmpty = (value: unknown): boolean =>
-  value === null || value === undefined || (typeof value === 'number' && value > 0)
-
-const requiredWhen =
-  (condition: () => boolean) =>
-  (value: unknown): boolean =>
-    !condition() || (value !== null && value !== undefined && value !== '')
-
-const notAfter =
-  (limit: () => Date) =>
-  (value: unknown): boolean =>
-    !(value instanceof Date) || fromLocalDate(value) <= fromLocalDate(limit())
 
 const tagList = (check: (tags: string[]) => boolean) => (value: unknown) =>
   !Array.isArray(value) || check(value.filter((tag) => typeof tag === 'string'))

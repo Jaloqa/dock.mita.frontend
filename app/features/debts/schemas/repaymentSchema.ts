@@ -3,7 +3,7 @@ import { DEBT_NOTE_MAX } from '../../../shared/api/contract'
 import type { Currency } from '../../../shared/money/currencies'
 import { toMinor, withinAmountLimit, withinRateLimit } from '../../../shared/money/money'
 import { trimmedWithin } from '../../../shared/utils/text'
-import { isPositiveOrEmpty, notAfter, requiredWhen } from './debtSchema'
+import { isPositiveOrEmpty, notAfter, requiredWhen } from '../../../shared/utils/validation'
 
 export type RepaymentForm = {
   amount: number | null

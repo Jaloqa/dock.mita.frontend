@@ -4,6 +4,7 @@ import type { Currency } from '../../../shared/money/currencies'
 import { withinAmountLimit, withinRateLimit } from '../../../shared/money/money'
 import { fromLocalDate } from '../../../shared/period/period'
 import { hasText, trimmedWithin } from '../../../shared/utils/text'
+import { isPositiveOrEmpty, notAfter, requiredWhen } from '../../../shared/utils/validation'
 
 export type DebtForm = {
   direction: DebtDirection
@@ -18,19 +19,6 @@ export type DebtForm = {
 }
 
 type Translate = (key: string) => string
-
-export const isPositiveOrEmpty = (value: unknown): boolean =>
-  value === null || value === undefined || (typeof value === 'number' && value > 0)
-
-export const requiredWhen =
-  (condition: () => boolean) =>
-  (value: unknown): boolean =>
-    !condition() || (value !== null && value !== undefined && value !== '')
-
-export const notAfter =
-  (limit: () => Date) =>
-  (value: unknown): boolean =>
-    !(value instanceof Date) || fromLocalDate(value) <= fromLocalDate(limit())
 
 const notBeforeDate = (value: unknown, siblings: Partial<Pick<DebtForm, 'date'>> | undefined): boolean => {
   const date = siblings?.date

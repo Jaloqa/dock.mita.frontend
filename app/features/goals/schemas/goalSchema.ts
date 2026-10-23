@@ -1,5 +1,6 @@
 import { helpers, required } from '@vuelidate/validators'
 import { hasText } from '../../../shared/utils/text'
+import { isPositiveOrEmpty } from '../../../shared/utils/validation'
 import { monthKeyOfDate } from '../utils/goalView'
 
 export const GOAL_NAME_MAX = 40
@@ -14,9 +15,6 @@ type Translate = (key: string) => string
 
 export const isNameWithinMax = (value: unknown): boolean =>
   typeof value !== 'string' || value.trim().length <= GOAL_NAME_MAX
-
-export const isPositiveAmount = (value: unknown): boolean =>
-  value === null || value === undefined || (typeof value === 'number' && value > 0)
 
 export const isWithinMax =
   (max: number) =>
@@ -41,7 +39,7 @@ export const goalRules = (
   },
   target: {
     required: helpers.withMessage(() => t('validation.required'), required),
-    positive: helpers.withMessage(() => t('validation.positiveAmount'), isPositiveAmount),
+    positive: helpers.withMessage(() => t('validation.positiveAmount'), isPositiveOrEmpty),
     max: helpers.withMessage(() => t('validation.invalidValue'), isWithinMax(GOAL_TARGET_MAX)),
   },
   deadline: {

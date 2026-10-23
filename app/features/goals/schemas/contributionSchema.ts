@@ -1,7 +1,7 @@
 import { helpers, required } from '@vuelidate/validators'
 import type { Currency } from '../../../shared/money/currencies'
 import { withinAmountLimit, withinRateLimit } from '../../../shared/money/money'
-import { isPositiveAmount } from './goalSchema'
+import { isPositiveOrEmpty, requiredWhen } from '../../../shared/utils/validation'
 
 export type ContributionForm = {
   amount: number | null
@@ -12,11 +12,6 @@ export type ContributionForm = {
 
 type Translate = (key: string) => string
 
-export const requiredWhen =
-  (condition: () => boolean) =>
-  (value: unknown): boolean =>
-    !condition() || (value !== null && value !== undefined && value !== '')
-
 export const contributionRules = (
   t: Translate,
   options: { linked: () => boolean; crossCurrency: () => boolean; currency: () => Currency },
@@ -26,14 +21,14 @@ export const contributionRules = (
   return {
     amount: {
       required: requiredField,
-      positive: helpers.withMessage(() => t('validation.positiveAmount'), isPositiveAmount),
+      positive: helpers.withMessage(() => t('validation.positiveAmount'), isPositiveOrEmpty),
       max: helpers.withMessage(invalidValue, withinAmountLimit(options.currency)),
     },
     fromAccountId: { required: helpers.withMessage(() => t('validation.required'), requiredWhen(options.linked)) },
     date: { required: requiredField },
     rate: {
       required: helpers.withMessage(() => t('validation.required'), requiredWhen(options.crossCurrency)),
-      positive: helpers.withMessage(() => t('validation.positiveAmount'), isPositiveAmount),
+      positive: helpers.withMessage(() => t('validation.positiveAmount'), isPositiveOrEmpty),
       max: helpers.withMessage(invalidValue, withinRateLimit),
     },
   }
