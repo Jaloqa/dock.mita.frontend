@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
-import type { DebtInput } from '~/shared/api/contract'
+import type { DebtInput, DebtRepaymentInput } from '~/shared/api/contract'
 import { invalidateAfter } from '~/shared/api/invalidation'
 import { debtsApi } from '../api/debtsApi'
 
@@ -15,5 +15,13 @@ export function useDebtMutations() {
       onSuccess,
     }),
     remove: useMutation({ mutationFn: api.remove, onSuccess }),
+    repay: useMutation({
+      mutationFn: ({ id, input }: { id: string; input: DebtRepaymentInput }) => api.repay(id, input),
+      onSuccess,
+    }),
+    removeRepayment: useMutation({
+      mutationFn: ({ id, repaymentId }: { id: string; repaymentId: string }) => api.removeRepayment(id, repaymentId),
+      onSuccess,
+    }),
   }
 }

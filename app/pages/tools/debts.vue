@@ -11,6 +11,8 @@ const { accounts } = useAccounts()
 
 const dialogOpen = ref(false)
 const editing = ref<DebtDto>()
+const repayOpen = ref(false)
+const repaying = ref<DebtDto>()
 const addButton = ref<ComponentPublicInstance | null>(null)
 const addIconButton = ref<ComponentPublicInstance | null>(null)
 
@@ -33,12 +35,23 @@ function openEdit(debt: DebtDto) {
   dialogOpen.value = true
 }
 
+function openRepay(debt: DebtDto) {
+  repaying.value = debt
+  repayOpen.value = true
+}
+
 function focusAddButton() {
   const target = [addButton.value?.$el, addIconButton.value?.$el].find(
     (element): element is HTMLElement => element instanceof HTMLElement && element.checkVisibility(),
   )
   target?.focus()
 }
+
+function onSaved(debt: DebtDto) {
+  if (debt.status !== status.value) focusAddButton()
+}
+
+provideNewDebtFocus(focusAddButton)
 
 useHead({ title: () => t('debts.title') })
 </script>
@@ -110,9 +123,11 @@ useHead({ title: () => t('debts.title') })
           :debt="debt"
           :account-name="accountName(debt.accountId)"
           @edit="openEdit(debt)"
+          @repay="openRepay(debt)"
         />
       </div>
     </section>
   </template>
-  <DebtDialog v-model:visible="dialogOpen" :debt="editing" @deleted="focusAddButton" />
+  <DebtDialog v-model:visible="dialogOpen" :debt="editing" @deleted="focusAddButton" @saved="onSaved" />
+  <RepaymentDialog v-if="repaying" v-model:visible="repayOpen" :debt="repaying" @settled="focusAddButton" />
 </template>

@@ -683,6 +683,8 @@
       "addFirst": "Добавить долг",
       "repay": "Возврат",
       "repayNamed": "Записать возврат: {name}",
+      "history": "История",
+      "historyNamed": "История возвратов: {name}",
       "edit": "Изменить",
       "editNamed": "Изменить {name}",
       "delete": "Удалить"
@@ -734,14 +736,33 @@
       "accountAmount": "На счёте: {amount}",
       "note": "Заметка"
     },
+    "repayment": {
+      "titleLent": "Возврат от: {name}",
+      "titleBorrowed": "Возврат долга: {name}",
+      "left": "Осталось вернуть: {amount}",
+      "rest": "Вернуть остаток",
+      "rateHint": "Сколько {to} стоит 1 {from} на дату возврата. Курс можно исправить.",
+      "reduces": "Уменьшает долг на {amount}",
+      "accountHintLent": "Деньги поступают на этот счёт.",
+      "accountHintBorrowed": "Деньги списываются с этого счёта."
+    },
+    "history": {
+      "label": "Возвраты",
+      "converted": "= {amount}",
+      "delete": "Удалить возврат от {date}"
+    },
     "confirm": {
       "deleteTitle": "Удалить долг?",
-      "deleteMessage": "«{name}» и возвраты по этому долгу будут удалены. Балансы счетов будут восстановлены."
+      "deleteMessage": "«{name}» и возвраты по этому долгу будут удалены. Балансы счетов будут восстановлены.",
+      "deleteRepaymentTitle": "Удалить этот возврат?",
+      "deleteRepaymentMessage": "Долг и баланс счёта будут восстановлены."
     },
     "toast": {
       "created": "Долг сохранён",
       "updated": "Долг изменён",
-      "deleted": "Долг удалён"
+      "deleted": "Долг удалён",
+      "repaid": "Возврат сохранён",
+      "repaymentDeleted": "Возврат удалён"
     }
   },
   "auth": {

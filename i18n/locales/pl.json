@@ -682,7 +682,9 @@
       "add": "Nowy dług",
       "addFirst": "Dodaj dług",
       "repay": "Spłata",
-      "repayNamed": "Zapisz spłatę: {name}",
+      "repayNamed": "Spłata: {name}",
+      "history": "Historia",
+      "historyNamed": "Historia spłat: {name}",
       "edit": "Edytuj",
       "editNamed": "Edytuj {name}",
       "delete": "Usuń"
@@ -734,14 +736,33 @@
       "accountAmount": "Na koncie: {amount}",
       "note": "Notatka"
     },
+    "repayment": {
+      "titleLent": "Spłata od: {name}",
+      "titleBorrowed": "Spłata dla: {name}",
+      "left": "Pozostało do spłaty: {amount}",
+      "rest": "Spłać resztę",
+      "rateHint": "Ile {to} to 1 {from} w dniu spłaty. Kurs możesz poprawić.",
+      "reduces": "Zmniejsza dług o {amount}",
+      "accountHintLent": "Pieniądze wpływają na to konto.",
+      "accountHintBorrowed": "Pieniądze wychodzą z tego konta."
+    },
+    "history": {
+      "label": "Spłaty",
+      "converted": "= {amount}",
+      "delete": "Usuń spłatę z dnia {date}"
+    },
     "confirm": {
       "deleteTitle": "Usunąć dług?",
-      "deleteMessage": "„{name}” i spłaty tego długu zostaną usunięte. Salda kont zostaną przywrócone."
+      "deleteMessage": "„{name}” i spłaty tego długu zostaną usunięte. Salda kont zostaną przywrócone.",
+      "deleteRepaymentTitle": "Usunąć tę spłatę?",
+      "deleteRepaymentMessage": "Dług i saldo konta zostaną przywrócone."
     },
     "toast": {
       "created": "Dług zapisany",
       "updated": "Dług zaktualizowany",
-      "deleted": "Dług usunięty"
+      "deleted": "Dług usunięty",
+      "repaid": "Spłata zapisana",
+      "repaymentDeleted": "Spłata usunięta"
     }
   },
   "auth": {
