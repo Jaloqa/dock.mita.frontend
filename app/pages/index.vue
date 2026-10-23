@@ -80,14 +80,16 @@ useHead({ title: () => t('navigation.overview') })
       />
       <QuickAddPanel class="flex-[1_1_300px]" />
     </div>
-    <div class="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] items-stretch gap-4">
+    <div class="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] items-stretch gap-4">
       <OverviewBudgets :overview="overview" :failed="failed" @retry="refetch()" />
       <RecentTransactions :overview="overview" :failed="failed" @retry="refetch()" />
       <OverviewGoals :overview="overview" :failed="failed" @retry="refetch()" />
+      <OverviewDebts :overview="overview" :failed="failed" @retry="refetch()" />
     </div>
   </div>
   <div class="flex flex-col gap-4.5 lg:hidden">
     <OverviewBalanceCompact :overview="overview" :failed="failed" @retry="refetch()" />
+    <OverviewDebts :overview="overview" :failed="failed" @retry="refetch()" />
     <SpendingCard compact :overview="overview" :failed="failed" @retry="refetch()" />
     <RecentTransactions :overview="overview" :failed="failed" @retry="refetch()" />
   </div>

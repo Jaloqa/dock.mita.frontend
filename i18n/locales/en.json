@@ -552,6 +552,7 @@
     "stats": {
       "label": "Summary",
       "balance": "Total balance",
+      "balanceWithDebts": "Balance with debts",
       "accounts": "{count} account | {count} accounts",
       "income": "Income",
       "incomeCount": "{count} payment in | {count} payments in",
@@ -613,6 +614,16 @@
       "progress": "{name}: share of the target saved",
       "empty": "No goals yet.",
       "create": "Create a goal"
+    },
+    "debts": {
+      "title": "Debts",
+      "all": "All debts",
+      "owedToMe": "Owed to me",
+      "owedByMe": "I owe",
+      "overdue": "{count} overdue",
+      "include": "Include debts in the balance",
+      "empty": "No open debts.",
+      "add": "Add a debt"
     },
     "mobile": {
       "balance": "Balance",

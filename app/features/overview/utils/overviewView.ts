@@ -1,7 +1,9 @@
 import {
   type BudgetStatus,
   type CategoryColor,
+  type DebtSummary,
   isOverviewRange,
+  type OverviewDto,
   type OverviewRange,
 } from '../../../shared/api/contract'
 import { addDaysIso, shiftPeriod } from '../../../shared/period/period'
@@ -25,6 +27,19 @@ export function dayLabelOf(date: string, today: string): DayLabel {
 }
 
 export const usedShare = (spent: number, limit: number): number => (limit > 0 ? spent / limit : 0)
+
+export const balanceWithDebts = (amount: number, debts: DebtSummary): number => amount + debts.owedToMe - debts.owedByMe
+
+export const hasOpenDebts = (debts: DebtSummary): boolean => debts.open > 0
+
+export function shownBalance(
+  overview: Pick<OverviewDto, 'balance' | 'debts'>,
+  included: boolean,
+): { amount: number; withDebts: boolean } {
+  const withDebts = included && hasOpenDebts(overview.debts)
+  const amount = withDebts ? balanceWithDebts(overview.balance.amount, overview.debts) : overview.balance.amount
+  return { amount, withDebts }
+}
 
 export const budgetTone = (status: BudgetStatus): 'accent' | 'ink' => (status === 'over_budget' ? 'ink' : 'accent')
 

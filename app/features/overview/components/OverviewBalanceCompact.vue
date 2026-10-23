@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import type { OverviewDto } from '~/shared/api/contract'
+import { shownBalance } from '../utils/overviewView'
 
-defineProps<{ overview?: OverviewDto; failed?: boolean }>()
+const props = defineProps<{ overview?: OverviewDto; failed?: boolean }>()
 const emit = defineEmits<{ retry: [] }>()
 const { t } = useI18n()
+const { included } = useBalanceWithDebts()
+
+const balance = computed(() => (props.overview ? shownBalance(props.overview, included.value) : undefined))
 </script>
 
 <template>
@@ -14,13 +18,15 @@ const { t } = useI18n()
     :class="overview ? 'bg-deep text-on-deep' : 'bg-surface'"
   >
     <ErrorState v-if="failed" compact @retry="emit('retry')" />
-    <template v-else-if="overview">
+    <template v-else-if="overview && balance">
       <div class="flex items-baseline justify-between gap-3">
-        <span class="text-[13px] font-medium text-deep-muted">{{ t('overview.mobile.balance') }}</span>
+        <span class="text-[13px] font-medium text-deep-muted">
+          {{ balance.withDebts ? t('overview.stats.balanceWithDebts') : t('overview.mobile.balance') }}
+        </span>
         <MoneyText
           data-testid="mobile-balance"
           class="text-2xl tracking-tight"
-          :amount="overview.balance.amount"
+          :amount="balance.amount"
           :currency="overview.currency"
         />
       </div>

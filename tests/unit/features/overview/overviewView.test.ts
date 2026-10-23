@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'bun:test'
 import {
+  balanceWithDebts,
   budgetTone,
   dayLabelOf,
+  hasOpenDebts,
   initialOf,
   previousMonthKey,
   resolveOverviewRange,
   sameYear,
+  shownBalance,
   sliceColor,
   usedShare,
 } from '../../../../app/features/overview/utils/overviewView'
@@ -52,6 +55,27 @@ describe('overview view helpers', () => {
     expect(budgetTone('over_budget')).toBe('ink')
     expect(budgetTone('almost_spent')).toBe('accent')
     expect(budgetTone('on_track')).toBe('accent')
+  })
+
+  it('adds what is owed to me and takes what I owe off the balance', () => {
+    expect(balanceWithDebts(1_000_000, { owedToMe: 61_500, owedByMe: 150_000, open: 3, overdue: 1 })).toBe(911_500)
+    expect(balanceWithDebts(500, { owedToMe: 0, owedByMe: 0, open: 0, overdue: 0 })).toBe(500)
+    expect(balanceWithDebts(-2_000, { owedToMe: 10_000, owedByMe: 0, open: 1, overdue: 0 })).toBe(8_000)
+  })
+
+  it('counts debts as open while at least one is open', () => {
+    expect(hasOpenDebts({ owedToMe: 0, owedByMe: 100, open: 1, overdue: 0 })).toBe(true)
+    expect(hasOpenDebts({ owedToMe: 0, owedByMe: 0, open: 0, overdue: 0 })).toBe(false)
+  })
+
+  it('shows the balance with debts only when the switch is on and a debt is open', () => {
+    const balance = { amount: 1_000_000, accounts: 4 }
+    const open = { owedToMe: 61_500, owedByMe: 150_000, open: 3, overdue: 1 }
+    const none = { owedToMe: 0, owedByMe: 0, open: 0, overdue: 0 }
+    expect(shownBalance({ balance, debts: open }, true)).toEqual({ amount: 911_500, withDebts: true })
+    expect(shownBalance({ balance, debts: open }, false)).toEqual({ amount: 1_000_000, withDebts: false })
+    expect(shownBalance({ balance, debts: none }, true)).toEqual({ amount: 1_000_000, withDebts: false })
+    expect(shownBalance({ balance, debts: none }, false)).toEqual({ amount: 1_000_000, withDebts: false })
   })
 
   it('takes the first letter of a title', () => {
