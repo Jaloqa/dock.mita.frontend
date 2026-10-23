@@ -30,10 +30,10 @@ const figures = computed(() => (viewFailed.value ? main.balances.value : shown.b
 const figuresCurrency = computed(() => figures.value?.currency ?? props.group.currency)
 
 const rows = computed(() =>
-  balancesIn(main.balances.value?.members ?? [], figures.value?.members ?? []).map((entry) => ({
-    ...entry,
-    name: memberName(props.group, entry.memberId),
-  })),
+  balancesIn(main.balances.value?.members ?? [], figures.value?.members ?? []).map((entry) => {
+    const name = memberName(props.group, entry.memberId)
+    return { ...entry, name: entry.memberId === props.group.myMemberId ? t('groups.balances.you', { name }) : name }
+  }),
 )
 
 const transfers = computed(() =>

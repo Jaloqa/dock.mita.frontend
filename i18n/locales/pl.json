@@ -795,12 +795,14 @@
       "share": "Udostępnij",
       "edit": "Edytuj grupę",
       "delete": "Usuń grupę",
+      "leave": "Opuść grupę",
       "addExpense": "Dodaj wydatek",
       "recordRepayment": "Zapisz spłatę"
     },
     "card": {
       "members": "{count} osoba | {count} osoby | {count} osób",
-      "spent": "Wydano"
+      "spent": "Wydano",
+      "shared": "Udostępniona Tobie"
     },
     "summary": {
       "label": "Podsumowanie",
@@ -845,6 +847,18 @@
         "invited": "Wysłano zaproszenie",
         "inviteCancelled": "Anulowano zaproszenie",
         "unlinked": "Usunięto powiązanie z kontem"
+      }
+    },
+    "invites": {
+      "title": "Zaproszenia",
+      "text": "{owner} zaprasza Cię do grupy „{group}” jako {member}.",
+      "accept": "Przyjmij",
+      "acceptFor": "Przyjmij zaproszenie do grupy {group}",
+      "decline": "Odrzuć",
+      "declineFor": "Odrzuć zaproszenie do grupy {group}",
+      "toast": {
+        "joined": "Dołączono do grupy „{group}”",
+        "declined": "Odrzucono zaproszenie"
       }
     },
     "share": {
@@ -900,12 +914,15 @@
     },
     "confirm": {
       "deleteTitle": "Usunąć grupę?",
-      "deleteMessage": "„{name}”, jej wydatki, spłaty i historia zostaną usunięte bezpowrotnie."
+      "deleteMessage": "„{name}”, jej wydatki, spłaty i historia zostaną usunięte bezpowrotnie.",
+      "leaveTitle": "Opuścić grupę „{name}”?",
+      "leaveMessage": "Grupa zniknie z Twojej aplikacji. Jej wpisy zostaną w grupie."
     },
     "toast": {
       "created": "Grupa utworzona",
       "updated": "Grupa zaktualizowana",
-      "deleted": "Grupa usunięta"
+      "deleted": "Grupa usunięta",
+      "left": "Opuszczono grupę"
     },
     "categories": {
       "groceries": "Spożywcze",
@@ -990,7 +1007,8 @@
       "recordNamed": "Zapisz spłatę: {from} → {to}",
       "settledUp": "Wszyscy są rozliczeni.",
       "empty": "Nie ma jeszcze uczestników.",
-      "viewFailed": "Nie udało się przeliczyć sald na {currency}. Pokazujemy je w {main}."
+      "viewFailed": "Nie udało się przeliczyć sald na {currency}. Pokazujemy je w {main}.",
+      "you": "{name} (Ty)"
     },
     "repayments": {
       "title": "Spłaty",

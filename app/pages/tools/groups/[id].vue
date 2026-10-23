@@ -6,11 +6,14 @@ import type { GroupExpenseDto, GroupRepaymentDto, GroupTransferDto } from '~/sha
 const HINT_ID = 'group-entry-hint'
 
 const { t } = useI18n()
+const notify = useNotify()
+const confirm = useConfirm()
 const route = useRoute()
 const localePath = useLocalePath()
 const scope = computed(() => userScope(String(route.params.id)))
 provideGroupScope(scope)
 const { group, isPending, isError, notFound, refetch } = useGroup(scope)
+const { leave, isMissing, refresh } = useGroupMutations()
 
 const membersOpen = ref(false)
 const shareOpen = ref(false)
@@ -24,6 +27,7 @@ const entryActions = ref<{ focusAddExpense: () => void; focusRecordRepayment: ()
 
 const shown = computed(() => (notFound.value || isError.value ? undefined : group.value))
 const manageable = computed(() => shown.value !== undefined && canManage(shown.value))
+const leavable = computed(() => shown.value?.role === 'member')
 const title = computed(() => shown.value?.name ?? t('groups.page.title'))
 const access = computed(() => (group.value ? entryAccess(group.value) : undefined))
 const canAddExpense = computed(() => access.value?.canAddExpense ?? false)
@@ -66,6 +70,30 @@ const focusRecordRepayment = () => entryActions.value?.focusRecordRepayment()
 
 const onDeleted = () => navigateTo(localePath('/tools/groups'))
 
+function confirmLeave() {
+  const current = shown.value
+  if (!current || leave.isPending.value) return
+  confirm.require({
+    header: t('groups.confirm.leaveTitle', { name: current.name }),
+    message: t('groups.confirm.leaveMessage'),
+    acceptLabel: t('groups.actions.leave'),
+    rejectLabel: t('shared.actions.cancel'),
+    acceptProps: { severity: 'danger' },
+    rejectProps: { severity: 'secondary', outlined: true },
+    accept: () =>
+      leave.mutate(current.id, {
+        onSuccess: () => {
+          notify.success(t('groups.toast.left'))
+          navigateTo(localePath('/tools/groups'))
+        },
+        onError: (error) => {
+          notify.error(error)
+          if (isMissing(error)) refresh()
+        },
+      }),
+  })
+}
+
 useHead({ title: () => title.value })
 </script>
 
@@ -88,6 +116,21 @@ useHead({ title: () => title.value })
         @add-expense="openNewExpense"
         @record-repayment="openNewRepayment"
       />
+      <template v-if="leavable">
+        <Button severity="secondary" outlined class="hidden! min-h-11 lg:inline-flex!" @click="confirmLeave">
+          <AppIcon name="logout" :size="16" />
+          {{ t('groups.actions.leave') }}
+        </Button>
+        <Button
+          severity="secondary"
+          outlined
+          class="size-11 lg:hidden!"
+          :aria-label="t('groups.actions.leave')"
+          @click="confirmLeave"
+        >
+          <AppIcon name="logout" :size="20" />
+        </Button>
+      </template>
       <template v-if="manageable">
         <Button severity="secondary" outlined class="hidden! min-h-11 lg:inline-flex!" @click="openMembers">
           <AppIcon name="groups" :size="16" />

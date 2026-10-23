@@ -17,7 +17,7 @@ export type DataChange =
 
 export const invalidationMap: Record<DataChange, readonly QueryKey[]> = {
   settings: [['overview'], ['budgets'], ['reports'], ['transactions'], ['accounts'], ['goals'], ['debts']],
-  profile: [['demo']],
+  profile: [['demo'], ['groups']],
   demo: [[]],
   accounts: [['accounts'], ['transfers'], ['transactions'], ['overview'], ['reports'], ['goals']],
   transfers: [['transfers'], ['accounts'], ['overview']],

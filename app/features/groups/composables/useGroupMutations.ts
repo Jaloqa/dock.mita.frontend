@@ -12,6 +12,10 @@ export function useGroupMutations() {
   const onMemberRefused = useMemberRefusal()
   const onSuccess = () => invalidateAfter(queryClient, 'groups')
   const groupKey = (id: string) => groupKeys.group(userScope(id))
+  const onGone = (_: unknown, id: string) => {
+    queryClient.removeQueries({ queryKey: groupKeys.scoped(userScope(id)) })
+    return queryClient.invalidateQueries({ queryKey: groupKeys.list })
+  }
 
   return {
     create: useMutation({ mutationFn: api.create, onSuccess }),
@@ -19,13 +23,10 @@ export function useGroupMutations() {
       mutationFn: ({ id, input }: { id: string; input: GroupUpdateInput }) => api.update(id, input),
       onSuccess,
     }),
-    remove: useMutation({
-      mutationFn: api.remove,
-      onSuccess: (_, id) => {
-        queryClient.removeQueries({ queryKey: groupKeys.scoped(userScope(id)) })
-        return queryClient.invalidateQueries({ queryKey: groupKeys.list })
-      },
-    }),
+    remove: useMutation({ mutationFn: api.remove, onSuccess: onGone }),
+    leave: useMutation({ mutationFn: api.leave, onSuccess: onGone }),
+    acceptInvite: useMutation({ mutationFn: api.acceptInvite, onSuccess }),
+    declineInvite: useMutation({ mutationFn: api.declineInvite, onSuccess }),
     share: useMutation({
       mutationFn: api.share,
       onSuccess: (group, id) => {

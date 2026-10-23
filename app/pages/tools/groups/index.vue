@@ -6,6 +6,9 @@ const localePath = useLocalePath()
 const { items, isPending, isError, refetch } = useGroups()
 
 const dialogOpen = ref(false)
+const header = ref<{ focus: () => void } | null>(null)
+
+const focusHeading = () => header.value?.focus()
 
 function openCreate() {
   dialogOpen.value = true
@@ -19,7 +22,7 @@ useHead({ title: () => t('groups.title') })
 </script>
 
 <template>
-  <PageHeader :title="t('groups.title')">
+  <PageHeader ref="header" :title="t('groups.title')">
     <template #eyebrow>
       <NuxtLinkLocale
         to="/tools"
@@ -44,6 +47,7 @@ useHead({ title: () => t('groups.title') })
       </Button>
     </template>
   </PageHeader>
+  <GroupInvites @cleared="focusHeading" />
   <ErrorState v-if="isError" @retry="refetch" />
   <div
     v-else-if="isPending"
