@@ -7,8 +7,8 @@ import {
   locales,
 } from '../../app/shared/api/contract'
 import type { Currency } from '../../app/shared/money/currencies'
-import type { GroupCategoryRow, GroupMemberRow, GroupRow, MockDb } from '../db'
-import { badRequest, notFound } from '../errors'
+import type { GroupCategoryRow, GroupMemberRow, GroupRow } from '../db'
+import { badRequest } from '../errors'
 import {
   GROUP_PAGE,
   type GroupScope,
@@ -17,12 +17,16 @@ import {
   hasEntries,
   isStandardCategory,
   memberInUse,
+  memberOf,
   membersOf,
+  memberView,
   newShareToken,
   onGroup,
   openGroup,
   openGroupForWrite,
+  ownerViewer,
   ownGroup,
+  viewerOf,
 } from '../groups'
 import { newId } from '../ids'
 import { paginate } from '../paginate'
@@ -92,14 +96,13 @@ function validateNewGroup(body: unknown): { name: string; currency: Currency; me
   }
 }
 
-const memberOf = (db: MockDb, group: GroupRow, memberId: string | undefined): GroupMemberRow =>
-  db.state.groupMembers.find((row) => row.id === memberId && row.groupId === group.id) ?? notFound()
-
 const nameTaken = (rows: readonly { name: string }[], name: string): boolean =>
   rows.some((row) => nameKey(row.name) === nameKey(name))
 
-const getGroup = ({ db }: MockContext, scope: GroupScope) =>
-  groupView(db.state, openGroup(db.state, scope), scope.kind === 'owner')
+function getGroup({ db }: MockContext, scope: GroupScope) {
+  const group = openGroup(db.state, scope)
+  return groupView(db.state, group, viewerOf(db.state, scope, group))
+}
 
 function addCategory({ db, body }: MockContext, scope: GroupScope): GroupCategoryDto {
   const name = validateName(body)
@@ -131,10 +134,20 @@ export function registerGroupHandlers(router: MockRouter) {
     }
     db.state.groups.push(group)
     db.state.groupMembers.push(
-      ...members.map((name, position) => ({ id: newId('mbr'), groupId: group.id, name, position })),
+      ...members.map(
+        (name, position): GroupMemberRow => ({
+          id: newId('mbr'),
+          groupId: group.id,
+          name,
+          position,
+          userId: null,
+          invitedEmail: null,
+          invitedAt: null,
+        }),
+      ),
     )
     db.save()
-    return groupView(db.state, group, true)
+    return groupView(db.state, group, ownerViewer(db.state, group))
   })
 
   onGroup(router, 'GET', '', getGroup)
@@ -147,14 +160,14 @@ export function registerGroupHandlers(router: MockRouter) {
     }
     Object.assign(group, fields)
     db.save()
-    return groupView(db.state, group, true)
+    return groupView(db.state, group, ownerViewer(db.state, group))
   })
 
   router.on('POST', '/v1/groups/:id/share', ({ db, userId, params }) => {
     const group = ownGroup(db.state, userId, params.id)
     group.shareToken = newShareToken()
     db.save()
-    return groupView(db.state, group, true)
+    return groupView(db.state, group, ownerViewer(db.state, group))
   })
 
   router.on('DELETE', '/v1/groups/:id/share', ({ db, userId, params }) => {
@@ -182,26 +195,34 @@ export function registerGroupHandlers(router: MockRouter) {
     if (nameTaken(members, name)) badRequest({ name: ['validation.memberNameTaken'] })
     if (members.length >= GROUP_MEMBERS_MAX) badRequest({ name: ['validation.tooManyMembers'] })
     const position = members.reduce((last, member) => Math.max(last, member.position), -1) + 1
-    const row: GroupMemberRow = { id: newId('mbr'), groupId: group.id, name, position }
+    const row: GroupMemberRow = {
+      id: newId('mbr'),
+      groupId: group.id,
+      name,
+      position,
+      userId: null,
+      invitedEmail: null,
+      invitedAt: null,
+    }
     db.state.groupMembers.push(row)
     db.save()
-    return { id: row.id, name: row.name, inUse: false }
+    return memberView(db.state, row, true)
   })
 
   router.on('PUT', '/v1/groups/:id/members/:memberId', ({ db, userId, params, body }): GroupMemberDto => {
     const name = validateName(body)
     const group = ownGroup(db.state, userId, params.id)
-    const member = memberOf(db, group, params.memberId)
+    const member = memberOf(db.state, group, params.memberId)
     const others = membersOf(db.state, group.id).filter((row) => row.id !== member.id)
     if (nameTaken(others, name)) badRequest({ name: ['validation.memberNameTaken'] })
     member.name = name
     db.save()
-    return { id: member.id, name: member.name, inUse: memberInUse(db.state, member.id) }
+    return memberView(db.state, member, true)
   })
 
   router.on('DELETE', '/v1/groups/:id/members/:memberId', ({ db, userId, params }) => {
     const group = ownGroup(db.state, userId, params.id)
-    const member = memberOf(db, group, params.memberId)
+    const member = memberOf(db.state, group, params.memberId)
     if (memberInUse(db.state, member.id)) badRequest({ memberId: ['validation.memberInUse'] })
     db.state.groupMembers = db.state.groupMembers.filter((row) => row.id !== member.id)
     db.save()

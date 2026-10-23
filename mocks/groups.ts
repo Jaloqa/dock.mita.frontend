@@ -7,8 +7,10 @@ import {
   type GroupEntryEvent,
   type GroupExpenseDto,
   type GroupExpenseState,
+  type GroupMemberDto,
   type GroupRepaymentDto,
   type GroupRepaymentState,
+  type GroupRole,
   type GroupShareDto,
   type GroupSummaryDto,
   type GroupTransferDto,
@@ -37,8 +39,19 @@ export const GROUP_PAGE = { defaultPageSize: 100, maxPageSize: 100 }
 const SHARE_TOKEN_BYTES = 32
 
 export type GroupScope =
-  | { kind: 'owner'; userId: string; groupId: string | undefined }
+  | { kind: 'user'; userId: string; groupId: string | undefined }
   | { kind: 'link'; token: string | undefined; member: string | undefined }
+
+type GroupViewer = { role: GroupRole; myMemberId: string | null }
+
+type MemberFigures = {
+  memberId: string
+  paid: number
+  share: number
+  sent: number
+  received: number
+  balance: number
+}
 
 export type EventActor = Pick<GroupEventRow, 'actorUserId' | 'actorMemberId'>
 
@@ -60,11 +73,17 @@ type OpenBalance = { memberId: string; balance: number }
 export const isStandardCategory = (value: string): value is StandardGroupCategory =>
   standardGroupCategories.includes(value as StandardGroupCategory)
 
+export const linkedMemberOf = (state: MockState, groupId: string, userId: string): GroupMemberRow | undefined =>
+  state.groupMembers.find((row) => row.groupId === groupId && row.userId === userId)
+
+const opensFor = (state: MockState, row: GroupRow, userId: string): boolean =>
+  row.userId === userId || linkedMemberOf(state, row.id, userId) !== undefined
+
 const findGroup = (state: MockState, userId: string, id: string | undefined): GroupRow | undefined =>
-  state.groups.find((row) => row.id === id && row.userId === userId)
+  state.groups.find((row) => row.id === id && opensFor(state, row, userId))
 
 export const ownGroup = (state: MockState, userId: string, id: string | undefined): GroupRow =>
-  findGroup(state, userId, id) ?? notFound()
+  state.groups.find((row) => row.id === id && row.userId === userId) ?? notFound()
 
 export const newShareToken = (): string =>
   btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(SHARE_TOKEN_BYTES))))
@@ -73,7 +92,7 @@ export const newShareToken = (): string =>
     .replaceAll('=', '')
 
 export const findScopedGroup = (state: MockState, scope: GroupScope): GroupRow | undefined =>
-  scope.kind === 'owner'
+  scope.kind === 'user'
     ? findGroup(state, scope.userId, scope.groupId)
     : state.groups.find((row) => row.shareToken === scope.token)
 
@@ -81,15 +100,19 @@ export const openGroup = (state: MockState, scope: GroupScope): GroupRow => find
 
 export function openGroupForWrite(state: MockState, scope: GroupScope): { group: GroupRow; actor: EventActor } {
   const group = openGroup(state, scope)
-  if (scope.kind === 'owner') return { group, actor: { actorUserId: scope.userId, actorMemberId: null } }
+  if (scope.kind === 'user') {
+    if (group.userId === scope.userId) return { group, actor: { actorUserId: scope.userId, actorMemberId: null } }
+    const linked = linkedMemberOf(state, group.id, scope.userId) ?? notFound()
+    return { group, actor: { actorUserId: null, actorMemberId: linked.id } }
+  }
   const member =
     state.groupMembers.find((row) => row.id === scope.member && row.groupId === group.id) ??
     forbidden('group.memberRequired')
   return { group, actor: { actorUserId: null, actorMemberId: member.id } }
 }
 
-const ownerScope = ({ userId, params }: MockContext): GroupScope => ({
-  kind: 'owner',
+const userScope = ({ userId, params }: MockContext): GroupScope => ({
+  kind: 'user',
   userId,
   groupId: params.id,
 })
@@ -106,12 +129,15 @@ export function onLinkGroup(router: MockRouter, method: HttpMethod, suffix: stri
 }
 
 export function onGroup(router: MockRouter, method: HttpMethod, suffix: string, handler: GroupHandler): void {
-  router.on(method, `/v1/groups/:id${suffix}`, (context) => handler(context, ownerScope(context)))
+  router.on(method, `/v1/groups/:id${suffix}`, (context) => handler(context, userScope(context)))
   onLinkGroup(router, method, suffix, handler)
 }
 
 export const membersOf = (state: MockState, groupId: string): GroupMemberRow[] =>
   state.groupMembers.filter((row) => row.groupId === groupId).sort((a, b) => a.position - b.position)
+
+export const memberOf = (state: MockState, group: GroupRow, memberId: string | undefined): GroupMemberRow =>
+  state.groupMembers.find((row) => row.id === memberId && row.groupId === group.id) ?? notFound()
 
 export const hasEntries = (state: MockState, groupId: string): boolean =>
   state.groupExpenses.some((row) => row.groupId === groupId) ||
@@ -128,41 +154,69 @@ const stateNames = (entryState: GroupEventRow['state'], memberId: string): boole
 export const memberInUse = (state: MockState, memberId: string): boolean =>
   state.groupEvents.some((row) => row.actorMemberId === memberId || stateNames(row.state, memberId))
 
-export function groupView(state: MockState, row: GroupRow, includeShareToken: boolean): GroupDto {
+export function viewerOf(state: MockState, scope: GroupScope, group: GroupRow): GroupViewer {
+  if (scope.kind === 'link') return { role: 'link', myMemberId: null }
+  return {
+    role: group.userId === scope.userId ? 'owner' : 'member',
+    myMemberId: linkedMemberOf(state, group.id, scope.userId)?.id ?? null,
+  }
+}
+
+export const ownerViewer = (state: MockState, group: GroupRow): GroupViewer => ({
+  role: 'owner',
+  myMemberId: linkedMemberOf(state, group.id, group.userId)?.id ?? null,
+})
+
+export function memberView(state: MockState, member: GroupMemberRow, forOwner: boolean): GroupMemberDto {
+  return {
+    id: member.id,
+    name: member.name,
+    inUse: memberInUse(state, member.id),
+    linked: member.userId !== null,
+    linkedName: forOwner ? (state.users.find((user) => user.id === member.userId)?.name ?? null) : null,
+    invitedEmail: forOwner ? member.invitedEmail : null,
+  }
+}
+
+export function groupView(state: MockState, row: GroupRow, viewer: GroupViewer): GroupDto {
+  const forOwner = viewer.role === 'owner'
   return {
     id: row.id,
     name: row.name,
     currency: row.currency,
     currencyLocked: hasEntries(state, row.id),
     total: liveTotal(state, row.id),
-    members: membersOf(state, row.id).map((member) => ({
-      id: member.id,
-      name: member.name,
-      inUse: memberInUse(state, member.id),
-    })),
+    members: membersOf(state, row.id).map((member) => memberView(state, member, forOwner)),
     categories: [
       ...standardGroupCategories.map((key) => ({ id: key, standard: true, name: null })),
       ...state.groupCategories
         .filter((category) => category.groupId === row.id)
         .map((category) => ({ id: category.id, standard: false, name: category.name })),
     ],
-    shareToken: includeShareToken ? row.shareToken : null,
+    shareToken: forOwner ? row.shareToken : null,
+    role: viewer.role,
+    myMemberId: viewer.myMemberId,
   }
 }
 
-export function groupSummaries(state: MockState, userId: string): GroupSummaryDto[] {
-  return state.groups
+export const groupSummary = (state: MockState, row: GroupRow, userId: string): GroupSummaryDto => ({
+  id: row.id,
+  name: row.name,
+  currency: row.currency,
+  members: membersOf(state, row.id).length,
+  total: liveTotal(state, row.id),
+  role: row.userId === userId ? 'owner' : 'member',
+})
+
+const groupsOf = (state: MockState, userId: string): GroupRow[] =>
+  state.groups
     .map((row, index) => ({ row, index }))
-    .filter(({ row }) => row.userId === userId)
+    .filter(({ row }) => opensFor(state, row, userId))
     .sort((a, b) => b.row.createdAt.localeCompare(a.row.createdAt) || b.index - a.index)
-    .map(({ row }) => ({
-      id: row.id,
-      name: row.name,
-      currency: row.currency,
-      members: membersOf(state, row.id).length,
-      total: liveTotal(state, row.id),
-    }))
-}
+    .map(({ row }) => row)
+
+export const groupSummaries = (state: MockState, userId: string): GroupSummaryDto[] =>
+  groupsOf(state, userId).map((row) => groupSummary(state, row, userId))
 
 export function priceEntry(
   rates: readonly RateRow[],
@@ -324,11 +378,10 @@ export function settle(balances: readonly OpenBalance[]): GroupTransferDto[] {
   return transfers
 }
 
-export function balancesOf(state: MockState, group: GroupRow, viewCurrency: Currency, today: string): GroupBalancesDto {
-  const rate = rateOn(state.rates, today, group.currency, viewCurrency)
+function memberFigures(state: MockState, group: GroupRow): MemberFigures[] {
   const expenses = state.groupExpenses.filter((row) => row.groupId === group.id && !row.deleted)
   const repayments = state.groupRepayments.filter((row) => row.groupId === group.id && !row.deleted)
-  const members = membersOf(state, group.id).map(({ id: memberId }) => {
+  return membersOf(state, group.id).map(({ id: memberId }) => {
     const paid = sumMinor(expenses.filter((row) => row.payerId === memberId).map((row) => row.groupAmount))
     const share = sumMinor(
       expenses
@@ -340,6 +393,20 @@ export function balancesOf(state: MockState, group: GroupRow, viewCurrency: Curr
     const received = sumMinor(repayments.filter((row) => row.toMemberId === memberId).map((row) => row.groupAmount))
     return { memberId, paid, share, sent, received, balance: paid - share + sent - received }
   })
+}
+
+export function linkedBalances(state: MockState, userId: string): { group: GroupRow; balance: number }[] {
+  return groupsOf(state, userId).flatMap((group) => {
+    const member = linkedMemberOf(state, group.id, userId)
+    if (!member) return []
+    const figures = memberFigures(state, group).find((row) => row.memberId === member.id)
+    return [{ group, balance: figures?.balance ?? 0 }]
+  })
+}
+
+export function balancesOf(state: MockState, group: GroupRow, viewCurrency: Currency, today: string): GroupBalancesDto {
+  const rate = rateOn(state.rates, today, group.currency, viewCurrency)
+  const members = memberFigures(state, group)
   const inView = (amount: number): number => convertMinor(amount, rate, group.currency, viewCurrency)
   return {
     currency: viewCurrency,

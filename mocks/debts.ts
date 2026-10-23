@@ -4,6 +4,7 @@ import { convertMinor, roundRate } from '../app/shared/money/money'
 import type { DebtRepaymentRow, DebtRow, MockState, RateRow } from './db'
 import { badRequest, ratesUnavailable } from './errors'
 import { amountIn } from './goals'
+import { linkedBalances } from './groups'
 import { freshRateOn } from './rates'
 
 export type DebtPriceInput = {
@@ -135,10 +136,17 @@ export function summarizeDebts(state: MockState, userId: string, base: Currency,
     if (group.direction === 'lent') owedToMe += converted
     else owedByMe += converted
   }
+  const unsettled = linkedBalances(state, userId).filter(({ balance }) => balance !== 0)
+  for (const { group, balance } of unsettled) {
+    const converted = amountIn(state, Math.abs(balance), group.currency, base, today)
+    if (balance > 0) owedToMe += converted
+    else owedByMe += converted
+  }
   return {
     owedToMe,
     owedByMe,
     open: open.length,
     overdue: open.filter((row) => row.dueDate !== null && row.dueDate < today).length,
+    groups: unsettled.length,
   }
 }

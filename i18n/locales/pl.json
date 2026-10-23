@@ -1120,6 +1120,10 @@
     "sameMember": "Wybierz dwóch różnych uczestników.",
     "splitMismatch": "Suma kwot musi być równa całej kwocie.",
     "groupCurrencyLocked": "Waluty głównej nie można zmienić, gdy grupa ma wpisy.",
-    "tooManyCategories": "Grupa może mieć najwyżej 100 kategorii."
+    "tooManyCategories": "Grupa może mieć najwyżej 100 kategorii.",
+    "memberLinked": "Ten uczestnik jest już powiązany z kontem.",
+    "alreadyLinked": "Twoje konto jest już powiązane z innym uczestnikiem tej grupy.",
+    "inviteSelf": "To Twój własny adres e-mail. Użyj zamiast tego opcji „To ja”.",
+    "alreadyInvited": "Inny uczestnik tej grupy jest już zaproszony na ten adres e-mail."
   }
 }

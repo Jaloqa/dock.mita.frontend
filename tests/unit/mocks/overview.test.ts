@@ -315,7 +315,7 @@ describe('overview', () => {
     mock.db.state.accounts = mock.db.state.accounts.filter((row) => row.userId !== 'usr_anna')
     expect(await overview(mock)).toMatchObject({
       balance: { amount: 0, accounts: 0 },
-      debts: { owedToMe: 0, owedByMe: 0, open: 0, overdue: 0 },
+      debts: { owedToMe: 0, owedByMe: 0, open: 0, overdue: 0, groups: 0 },
       income: { amount: 0, count: 0, change: null },
       expense: { amount: 0, count: 0, change: null },
       averageExpense: null,
@@ -355,6 +355,7 @@ describe('overview', () => {
       owedByMe: 20_000,
       open: 3,
       overdue: 1,
+      groups: 0,
     })
     expect(result.balance.amount).toBe(before.balance.amount - 50_000 + 10_000 + 20_000)
     expect(result.income).toMatchObject({ amount: 0, count: 0 })

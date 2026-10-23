@@ -1120,6 +1120,10 @@
     "sameMember": "Choose two different members.",
     "splitMismatch": "The amounts must add up to the total.",
     "groupCurrencyLocked": "The main currency cannot change once the group has entries.",
-    "tooManyCategories": "A group can have at most 100 categories."
+    "tooManyCategories": "A group can have at most 100 categories.",
+    "memberLinked": "This member is already linked to an account.",
+    "alreadyLinked": "You are already linked to another member of this group.",
+    "inviteSelf": "This is your own email. Use “This is me” instead.",
+    "alreadyInvited": "Another member of this group is already invited with this email."
   }
 }

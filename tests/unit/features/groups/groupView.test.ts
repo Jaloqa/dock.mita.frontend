@@ -23,12 +23,23 @@ const group: GroupDto = {
   currency: 'EUR',
   currencyLocked: true,
   total: 19_070,
-  members: seeded.groupMembers.map((member) => ({ id: member.id, name: member.name, inUse: true })),
+  members: seeded.groupMembers
+    .filter((member) => member.groupId === 'grp_albania')
+    .map((member) => ({
+      id: member.id,
+      name: member.name,
+      inUse: true,
+      linked: false,
+      linkedName: null,
+      invitedEmail: null,
+    })),
   categories: [
     ...standardGroupCategories.map((key) => ({ id: key, standard: true, name: null })),
     { id: 'gcat_beach', standard: false, name: 'Beach' },
   ],
   shareToken: null,
+  role: 'owner',
+  myMemberId: null,
 }
 
 const expense = (id: string): Pick<GroupExpenseDto, 'split' | 'shares'> => {
@@ -86,7 +97,8 @@ describe('group view', () => {
   })
 
   it('no longer says everyone once a member joined after the expense', () => {
-    const grown: GroupDto = { ...group, members: [...group.members, { id: 'gmb_tomek', name: 'Tomek', inUse: false }] }
+    const joined = { id: 'gmb_tomek', name: 'Tomek', inUse: false, linked: false, linkedName: null, invitedEmail: null }
+    const grown: GroupDto = { ...group, members: [...group.members, joined] }
     expect(splitSummary(t, grown, expense('gex_dinner'))).toBe('groups.expense.summary.some(Anna, Olya, Max, Kasia)')
   })
 

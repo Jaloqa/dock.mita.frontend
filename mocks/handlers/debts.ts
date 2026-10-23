@@ -6,12 +6,14 @@ import {
   type DebtStatus,
   debtDirections,
   debtStatuses,
+  type GroupDebtDto,
 } from '../../app/shared/api/contract'
 import { AMOUNT_MINOR_MAX, type Currency, isCurrency } from '../../app/shared/money/currencies'
 import { isIsoDate, todayIso } from '../../app/shared/period/period'
 import type { AccountRow, DebtRepaymentRow, DebtRow, MockDb } from '../db'
 import { checkConverted, debtsOf, debtView, priceDebt, priceRepayment, repaymentsOf, summarizeDebts } from '../debts'
 import { badRequest, notFound } from '../errors'
+import { GROUP_PAGE, linkedBalances } from '../groups'
 import { newId } from '../ids'
 import { paginate } from '../paginate'
 import type { MockRouter } from '../router'
@@ -180,6 +182,21 @@ export function registerDebtHandlers(router: MockRouter) {
     const base = baseCurrencyOf(db.state, userId)
     return { ...page, currency: base, summary: summarizeDebts(db.state, userId, base, today) }
   })
+
+  router.on('GET', '/v1/debts/groups', ({ db, userId, query }) =>
+    paginate(
+      linkedBalances(db.state, userId).map(
+        ({ group, balance }): GroupDebtDto => ({
+          groupId: group.id,
+          name: group.name,
+          currency: group.currency,
+          balance,
+        }),
+      ),
+      query,
+      GROUP_PAGE,
+    ),
+  )
 
   router.on('POST', '/v1/debts', ({ db, userId, body }) => {
     const today = todayIso()

@@ -59,7 +59,20 @@ const ISO_MILLISECONDS = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/
 
 const owner = { kind: 'owner', memberId: null, name: 'Anna Nowak' }
 
-const groupKeys = ['categories', 'currency', 'currencyLocked', 'id', 'members', 'name', 'shareToken', 'total']
+const groupKeys = [
+  'categories',
+  'currency',
+  'currencyLocked',
+  'id',
+  'members',
+  'myMemberId',
+  'name',
+  'role',
+  'shareToken',
+  'total',
+]
+
+const unlinked = { linked: false, linkedName: null, invitedEmail: null }
 
 const stateKeys = [
   'amount',
@@ -143,6 +156,8 @@ describe('groups', () => {
       currencyLocked: false,
       total: 0,
       shareToken: null,
+      role: 'owner',
+      myMemberId: null,
     })
     expect(group.members.map((member) => [member.name, member.inUse])).toEqual([
       ['Anna', false],
@@ -204,8 +219,8 @@ describe('groups', () => {
 
     expect(page).toEqual({
       items: [
-        { id: second.id, name: 'Second', currency: 'PLN', members: 1, total: 0 },
-        { id: first.id, name: 'First', currency: 'EUR', members: 3, total: 12_000 },
+        { id: second.id, name: 'Second', currency: 'PLN', members: 1, total: 0, role: 'owner' },
+        { id: first.id, name: 'First', currency: 'EUR', members: 3, total: 12_000, role: 'owner' },
       ],
       page: 1,
       pageSize: 100,
@@ -267,8 +282,8 @@ describe('group members', () => {
     const { group } = await trip(mock)
     await refused(addMember(mock, group.id, ' anna '), { name: ['validation.memberNameTaken'] })
     const kasia = await addMember(mock, group.id, ' Kasia ')
-    expect(Object.keys(kasia).sort()).toEqual(['id', 'inUse', 'name'])
-    expect(kasia).toMatchObject({ name: 'Kasia', inUse: false })
+    expect(Object.keys(kasia).sort()).toEqual(['id', 'inUse', 'invitedEmail', 'linked', 'linkedName', 'name'])
+    expect(kasia).toMatchObject({ name: 'Kasia', inUse: false, ...unlinked })
     expect((await getGroup(mock, group.id)).members.map((member) => member.name)).toEqual([
       'Anna',
       'Olya',
@@ -290,7 +305,12 @@ describe('group members', () => {
     const mock = api()
     const { group, anna, olya } = await trip(mock)
     await refused(renameMember(mock, group.id, olya, 'ANNA'), { name: ['validation.memberNameTaken'] })
-    expect(await renameMember(mock, group.id, anna, ' ANNA ')).toEqual({ id: anna, name: 'ANNA', inUse: false })
+    expect(await renameMember(mock, group.id, anna, ' ANNA ')).toEqual({
+      id: anna,
+      name: 'ANNA',
+      inUse: false,
+      ...unlinked,
+    })
     await notFound(renameMember(mock, group.id, 'mbr_missing', 'Kasia'))
   })
 
@@ -313,11 +333,16 @@ describe('group members', () => {
     await notFound(removeMember(mock, group.id, max))
 
     expect((await getGroup(mock, group.id)).members).toEqual([
-      { id: anna, name: 'Anna', inUse: true },
-      { id: olya, name: 'Olya', inUse: true },
-      { id: kasia, name: 'Kasia', inUse: false },
+      { id: anna, name: 'Anna', inUse: true, ...unlinked },
+      { id: olya, name: 'Olya', inUse: true, ...unlinked },
+      { id: kasia, name: 'Kasia', inUse: false, ...unlinked },
     ])
-    expect(await renameMember(mock, group.id, olya, 'Ola')).toEqual({ id: olya, name: 'Ola', inUse: true })
+    expect(await renameMember(mock, group.id, olya, 'Ola')).toEqual({
+      id: olya,
+      name: 'Ola',
+      inUse: true,
+      ...unlinked,
+    })
   })
 
   it('keeps a member in use when only an earlier state of an expense names it', async () => {

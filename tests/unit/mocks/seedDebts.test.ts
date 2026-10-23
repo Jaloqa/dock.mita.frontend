@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'bun:test'
 import type { AccountDto, DebtPage, Page } from '../../../app/shared/api/contract'
+import { convertMinor } from '../../../app/shared/money/money'
 import { addDaysIso } from '../../../app/shared/period/period'
 import { debtsOf, summarizeDebts } from '../../../mocks/debts'
 import { accountBalances } from '../../../mocks/ledger'
+import { rateOn } from '../../../mocks/rates'
 import { seedState } from '../../../mocks/seed'
 import { demoDebts, withDebtHistory } from '../../../mocks/seed/debts'
 import { loggedInMockApi } from './session'
@@ -193,10 +195,11 @@ describe('seeded debts', () => {
     expect(names(state, 'usr_oleh', 'open', today)).toEqual(['Андрій'])
     expect(names(state, 'usr_oleh', 'settled', today)).toEqual([])
     expect(summarizeDebts(state, 'usr_oleh', 'UAH', today)).toEqual({
-      owedToMe: 0,
+      owedToMe: convertMinor(20_000, rateOn(state.rates, today, 'PLN', 'UAH'), 'PLN', 'UAH'),
       owedByMe: 300_000,
       open: 1,
       overdue: 0,
+      groups: 1,
     })
   })
 
