@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { entryAccess } from '~/features/groups/utils/groupView'
-import { canManage, ownerScope } from '~/features/groups/utils/scope'
+import { canManage, userScope } from '~/features/groups/utils/scope'
 import type { GroupExpenseDto, GroupRepaymentDto, GroupTransferDto } from '~/shared/api/contract'
 
 const HINT_ID = 'group-entry-hint'
@@ -8,7 +8,7 @@ const HINT_ID = 'group-entry-hint'
 const { t } = useI18n()
 const route = useRoute()
 const localePath = useLocalePath()
-const scope = computed(() => ownerScope(String(route.params.id)))
+const scope = computed(() => userScope(String(route.params.id)))
 provideGroupScope(scope)
 const { group, isPending, isError, notFound, refetch } = useGroup(scope)
 
@@ -23,7 +23,7 @@ const prefilledTransfer = ref<GroupTransferDto>()
 const entryActions = ref<{ focusAddExpense: () => void; focusRecordRepayment: () => void } | null>(null)
 
 const shown = computed(() => (notFound.value || isError.value ? undefined : group.value))
-const manageable = computed(() => shown.value !== undefined && canManage(scope.value))
+const manageable = computed(() => shown.value !== undefined && canManage(shown.value))
 const title = computed(() => shown.value?.name ?? t('groups.page.title'))
 const access = computed(() => (group.value ? entryAccess(group.value) : undefined))
 const canAddExpense = computed(() => access.value?.canAddExpense ?? false)

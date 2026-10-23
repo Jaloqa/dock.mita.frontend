@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'bun:test'
 import { groupsApi } from '../../../../app/features/groups/api/groupsApi'
-import { linkScope, ownerScope } from '../../../../app/features/groups/utils/scope'
+import { linkScope, userScope } from '../../../../app/features/groups/utils/scope'
 import { createApiClient } from '../../../../app/shared/api/client'
-import type { GroupDto } from '../../../../app/shared/api/contract'
+import type { GroupDto, GroupMemberDto } from '../../../../app/shared/api/contract'
 import type { ApiRequest } from '../../../../app/shared/api/transport'
 
 describe('groups api', () => {
@@ -15,7 +15,7 @@ describe('groups api', () => {
       }),
     )
 
-    await api.addCategory(ownerScope('grp/albania'), { name: 'Ferry' })
+    await api.addCategory(userScope('grp/albania'), { name: 'Ferry' })
 
     expect(requests).toEqual([{ method: 'POST', path: '/v1/groups/grp%2Falbania/categories', body: { name: 'Ferry' } }])
   })
@@ -82,6 +82,62 @@ describe('groups api', () => {
     expect(requests).toEqual([
       { method: 'POST', path: '/v1/groups/grp%2Falbania/share' },
       { method: 'DELETE', path: '/v1/groups/grp%2Falbania/share' },
+    ])
+  })
+
+  it('links and unlinks a member below the member path', async () => {
+    const requests: ApiRequest[] = []
+    const member: GroupMemberDto = {
+      id: 'gmb/anna',
+      name: 'Anna',
+      inUse: true,
+      linked: true,
+      linkedName: 'Anna Nowak',
+      invitedEmail: null,
+    }
+    const api = groupsApi(
+      createApiClient(async (request) => {
+        requests.push(request)
+        return request.method === 'PUT' ? member : undefined
+      }),
+    )
+
+    expect(await api.linkMe('grp/albania', 'gmb/anna')).toEqual(member)
+    await api.unlinkMember('grp/albania', 'gmb/anna')
+
+    expect(requests).toEqual([
+      { method: 'PUT', path: '/v1/groups/grp%2Falbania/members/gmb%2Fanna/link' },
+      { method: 'DELETE', path: '/v1/groups/grp%2Falbania/members/gmb%2Fanna/link' },
+    ])
+  })
+
+  it('sends and cancels an invitation below the member path', async () => {
+    const requests: ApiRequest[] = []
+    const member: GroupMemberDto = {
+      id: 'gmb/olya',
+      name: 'Olya',
+      inUse: false,
+      linked: false,
+      linkedName: null,
+      invitedEmail: 'olya@example.com',
+    }
+    const api = groupsApi(
+      createApiClient(async (request) => {
+        requests.push(request)
+        return request.method === 'PUT' ? member : undefined
+      }),
+    )
+
+    expect(await api.invite('grp/albania', 'gmb/olya', { email: 'olya@example.com' })).toEqual(member)
+    await api.cancelInvite('grp/albania', 'gmb/olya')
+
+    expect(requests).toEqual([
+      {
+        method: 'PUT',
+        path: '/v1/groups/grp%2Falbania/members/gmb%2Folya/invite',
+        body: { email: 'olya@example.com' },
+      },
+      { method: 'DELETE', path: '/v1/groups/grp%2Falbania/members/gmb%2Folya/invite' },
     ])
   })
 })

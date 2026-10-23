@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import { entriesApi } from '../../../../app/features/groups/api/entriesApi'
-import { type GroupScope, linkScope, ownerScope } from '../../../../app/features/groups/utils/scope'
+import { type GroupScope, linkScope, userScope } from '../../../../app/features/groups/utils/scope'
 import { createApiClient } from '../../../../app/shared/api/client'
 import type { GroupExpenseInput, GroupRepaymentInput } from '../../../../app/shared/api/contract'
 import type { ApiRequest } from '../../../../app/shared/api/transport'
@@ -83,7 +83,7 @@ describe('entries api', () => {
   })
 
   it('names no member when none is chosen and for the owner', async () => {
-    for (const scope of [linkScope(TOKEN, null), ownerScope('grp_albania')]) {
+    for (const scope of [linkScope(TOKEN, null), userScope('grp_albania')]) {
       for (const request of await requestsOf(scope)) expect('headers' in request).toBe(false)
     }
   })

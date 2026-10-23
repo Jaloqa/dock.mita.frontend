@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test'
-import { EMAIL_MAX, PROFILE_NAME_MAX, profileRules } from '../../../../app/features/settings/schemas/profileSchema'
+import { PROFILE_NAME_MAX, profileRules } from '../../../../app/features/settings/schemas/profileSchema'
+import { EMAIL_MAX } from '../../../../app/shared/utils/email'
 import { loggedInMockApi } from '../../mocks/session'
 
 type Rule = { $validator: unknown }

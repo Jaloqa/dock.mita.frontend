@@ -817,10 +817,34 @@
       "inUse": "Has entries, so it can only be renamed.",
       "newMember": "New member",
       "add": "Add",
+      "inviteHint": "Let them know: the invitation waits for them under Tools → Groups in their dock.mita app.",
+      "account": {
+        "you": "You",
+        "linkedTo": "Linked to {name}",
+        "invited": "Invited: {email}",
+        "thisIsMe": "This is me",
+        "thisIsMeFor": "This is me: {name}",
+        "invite": "Invite",
+        "inviteFor": "Invite {name}",
+        "emailField": "Email of {name}",
+        "send": "Send invitation",
+        "cancelInvite": "Cancel the invitation",
+        "cancelInviteFor": "Cancel the invitation of {name}",
+        "unlink": "Unlink",
+        "unlinkFor": "Unlink {name}",
+        "unlinkTitle": "Unlink {name}?",
+        "unlinkMessage": "They no longer see the group in their app. Their entries stay.",
+        "unlinkSelfTitle": "Unlink yourself from {name}?",
+        "unlinkSelfMessage": "You keep access to the group as its owner. Its entries stay."
+      },
       "toast": {
         "added": "Member added",
         "renamed": "Member renamed",
-        "removed": "Member removed"
+        "removed": "Member removed",
+        "linked": "Linked to you",
+        "invited": "Invitation sent",
+        "inviteCancelled": "Invitation cancelled",
+        "unlinked": "Member unlinked"
       }
     },
     "share": {

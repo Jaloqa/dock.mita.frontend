@@ -5,7 +5,7 @@ import { useUserSettings } from '~/shared/user/useUserSettings'
 
 export function useGroupCurrencies(group: MaybeRefOrGetter<GroupDto>): ComputedRef<Currency[]> {
   const scope = useGroupScope()
-  const settings = scope.value.kind === 'owner' ? useUserSettings() : undefined
+  const settings = scope.value.kind === 'user' ? useUserSettings() : undefined
 
   return computed(() => {
     const { currency } = toValue(group)
