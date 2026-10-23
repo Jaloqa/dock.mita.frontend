@@ -314,6 +314,33 @@ describe('group members', () => {
     expect(await renameMember(mock, group.id, olya, 'Ola')).toEqual({ id: olya, name: 'Ola', inUse: true })
   })
 
+  it('keeps a member in use when only an earlier state of an expense names it', async () => {
+    const mock = api()
+    const group = await createGroup(mock, { members: ['Anna', 'Olya', 'Max', 'Kasia'] })
+    const [anna, olya, max, kasia] = group.members.map((member) => member.id) as [string, string, string, string]
+    const created = await addExpense(mock, group.id, {
+      payerId: kasia,
+      amount: 9_000,
+      currency: 'EUR',
+      date: today,
+      split: { mode: 'equal', memberIds: [anna, olya, max] },
+    })
+
+    const edited = await editExpense(mock, group.id, created.id, {
+      payerId: anna,
+      amount: 9_000,
+      currency: 'EUR',
+      date: today,
+      split: { mode: 'equal', memberIds: [anna, olya] },
+    })
+
+    expect(sharesOf(edited).map(([memberId]) => memberId)).toEqual([anna, olya])
+    expect((await getGroup(mock, group.id)).members.map((member) => member.inUse)).toEqual([true, true, true, true])
+    await refused(removeMember(mock, group.id, max), { memberId: ['validation.memberInUse'] })
+    await refused(removeMember(mock, group.id, kasia), { memberId: ['validation.memberInUse'] })
+    expect((await getGroup(mock, group.id)).members).toHaveLength(4)
+  })
+
   it('keeps the shares of past expenses when a member is added', async () => {
     const mock = api()
     const { group, anna } = await trip(mock)
@@ -869,6 +896,20 @@ describe('expense changes', () => {
     ])
     await refused(listExpenses(mock, group.id, { deleted: 'yes' }), { deleted: ['validation.invalidValue'] })
     await refused(listExpenses(mock, group.id, { deleted: 'True' }), { deleted: ['validation.invalidValue'] })
+    await refused(listExpenses(mock, group.id, { deleted: '' }), { deleted: ['validation.invalidValue'] })
+    await refused(listExpenses(mock, group.id, { deleted: 'yes', page: '0' }), {
+      page: ['validation.invalidValue'],
+      deleted: ['validation.invalidValue'],
+    })
+    await refused(listExpenses(mock, group.id, { deleted: 'yes', page: '0', pageSize: '101' }), {
+      page: ['validation.invalidValue'],
+      pageSize: ['validation.invalidValue'],
+      deleted: ['validation.invalidValue'],
+    })
+    await refused(listExpenses(mock, 'grp_missing', { deleted: 'x', pageSize: '0' }), {
+      pageSize: ['validation.invalidValue'],
+      deleted: ['validation.invalidValue'],
+    })
     await refused(listExpenses(mock, 'grp_missing', { page: '0' }), { page: ['validation.invalidValue'] })
     await refused(history(mock, 'grp_missing', 'gexp_missing', { pageSize: '0' }), {
       pageSize: ['validation.invalidValue'],

@@ -1,18 +1,35 @@
 import {
   type GroupActorDto,
+  type GroupBalancesDto,
   type GroupDto,
   type GroupEntryAction,
+  type GroupEntryEvent,
   type GroupExpenseDto,
+  type GroupExpenseState,
+  type GroupRepaymentDto,
+  type GroupRepaymentState,
   type GroupShareDto,
   type GroupSummaryDto,
+  type GroupTransferDto,
   type StandardGroupCategory,
   standardGroupCategories,
 } from '../app/shared/api/contract'
 import { allocateMinor, type Currency, convertMinor, roundRate, sumMinor } from '../app/shared/money/money'
-import type { GroupEventRow, GroupExpenseRow, GroupMemberRow, GroupRow, MockState, RateRow } from './db'
+import type {
+  GroupEventRow,
+  GroupExpenseRow,
+  GroupMemberRow,
+  GroupRepaymentRow,
+  GroupRow,
+  MockState,
+  RateRow,
+} from './db'
 import { notFound, ratesUnavailable } from './errors'
 import { newId } from './ids'
-import { freshRateOn } from './rates'
+import { freshRateOn, rateOn } from './rates'
+import type { ErrorCollector } from './validation'
+
+export const GROUP_PAGE = { defaultPageSize: 100, maxPageSize: 100 }
 
 export type EntryPriceInput = {
   date: string
@@ -24,6 +41,8 @@ export type EntryPriceInput = {
 }
 
 type ExactShare = { memberId: string; amount: number }
+
+type OpenBalance = { memberId: string; balance: number }
 
 export const isStandardCategory = (value: string): value is StandardGroupCategory =>
   standardGroupCategories.includes(value as StandardGroupCategory)
@@ -44,12 +63,13 @@ export const hasEntries = (state: MockState, groupId: string): boolean =>
 const liveTotal = (state: MockState, groupId: string): number =>
   sumMinor(state.groupExpenses.filter((row) => row.groupId === groupId && !row.deleted).map((row) => row.groupAmount))
 
+const stateNames = (entryState: GroupEventRow['state'], memberId: string): boolean =>
+  'payerId' in entryState
+    ? entryState.payerId === memberId || entryState.shares.some((share) => share.memberId === memberId)
+    : entryState.fromMemberId === memberId || entryState.toMemberId === memberId
+
 export const memberInUse = (state: MockState, memberId: string): boolean =>
-  state.groupExpenses.some(
-    (row) => row.payerId === memberId || row.shares.some((share) => share.memberId === memberId),
-  ) ||
-  state.groupRepayments.some((row) => row.fromMemberId === memberId || row.toMemberId === memberId) ||
-  state.groupEvents.some((row) => row.actorMemberId === memberId)
+  state.groupEvents.some((row) => row.actorMemberId === memberId || stateNames(row.state, memberId))
 
 export function groupView(state: MockState, row: GroupRow): GroupDto {
   return {
@@ -151,19 +171,29 @@ export function actorView(state: MockState, group: GroupRow, event: GroupEventRo
 export const entryEvents = (state: MockState, kind: GroupEventRow['kind'], entryId: string): GroupEventRow[] =>
   state.groupEvents.filter((row) => row.kind === kind && row.entryId === entryId)
 
-export function expenseView(state: MockState, row: GroupExpenseRow): GroupExpenseDto {
-  const group = state.groups.find((candidate) => candidate.id === row.groupId) ?? notFound()
-  const [created, ...changes] = entryEvents(state, 'expense', row.id)
-  if (!created) throw new Error('Every expense has a creation event.')
+const groupOf = (state: MockState, groupId: string): GroupRow =>
+  state.groups.find((candidate) => candidate.id === groupId) ?? notFound()
+
+function entryAudit(state: MockState, group: GroupRow, kind: GroupEventRow['kind'], entryId: string) {
+  const [created, ...changes] = entryEvents(state, kind, entryId)
+  if (!created) throw new Error('Every entry has a creation event.')
   const updated = changes.at(-1)
-  const { groupId: _groupId, createdAt: _createdAt, ...expense } = row
   return {
-    ...expense,
     createdBy: actorView(state, group, created),
     createdAt: created.at,
     updatedBy: updated ? actorView(state, group, updated) : null,
     updatedAt: updated?.at ?? null,
   }
+}
+
+export function expenseView(state: MockState, row: GroupExpenseRow): GroupExpenseDto {
+  const { groupId, createdAt: _createdAt, ...expense } = row
+  return { ...expense, ...entryAudit(state, groupOf(state, groupId), 'expense', row.id) }
+}
+
+export function repaymentView(state: MockState, row: GroupRepaymentRow): GroupRepaymentDto {
+  const { groupId, createdAt: _createdAt, ...repayment } = row
+  return { ...repayment, ...entryAudit(state, groupOf(state, groupId), 'repayment', row.id) }
 }
 
 export function expensesOf(state: MockState, groupId: string, deleted: boolean): GroupExpenseDto[] {
@@ -172,6 +202,101 @@ export function expensesOf(state: MockState, groupId: string, deleted: boolean):
     .filter(({ row }) => row.groupId === groupId && row.deleted === deleted)
     .sort((a, b) => b.row.date.localeCompare(a.row.date) || b.index - a.index)
     .map(({ row }) => expenseView(state, row))
+}
+
+export function repaymentsOf(state: MockState, groupId: string, deleted: boolean): GroupRepaymentDto[] {
+  return state.groupRepayments
+    .map((row, index) => ({ row, index }))
+    .filter(({ row }) => row.groupId === groupId && row.deleted === deleted)
+    .sort((a, b) => b.row.date.localeCompare(a.row.date) || b.index - a.index)
+    .map(({ row }) => repaymentView(state, row))
+}
+
+export function historyOf<T extends GroupExpenseState | GroupRepaymentState>(
+  state: MockState,
+  group: GroupRow,
+  kind: GroupEventRow['kind'],
+  entryId: string,
+): GroupEntryEvent<T>[] {
+  return entryEvents(state, kind, entryId)
+    .reverse()
+    .map((event) => ({
+      id: event.id,
+      action: event.action,
+      at: event.at,
+      actor: actorView(state, group, event),
+      state: event.state as T,
+    }))
+}
+
+export function readDeleted(value: string | undefined, errors: ErrorCollector): boolean {
+  if (value === undefined || value === 'false') return false
+  if (value !== 'true') errors.add('deleted', 'validation.invalidValue')
+  return value === 'true'
+}
+
+const largest = (open: readonly OpenBalance[], sign: 1 | -1): OpenBalance | undefined =>
+  open.reduce<OpenBalance | undefined>(
+    (found, row) => (row.balance * sign > 0 && (!found || row.balance * sign > found.balance * sign) ? row : found),
+    undefined,
+  )
+
+export function settle(balances: readonly OpenBalance[]): GroupTransferDto[] {
+  if (sumMinor(balances.map((row) => row.balance)) !== 0) throw new Error('The balances must sum to zero.')
+  const open = balances.map(({ memberId, balance }) => ({ memberId, balance }))
+  const transfers: GroupTransferDto[] = []
+  for (const debtor of open) {
+    const owed = -debtor.balance
+    const creditor = owed > 0 ? open.find((row) => row.balance === owed) : undefined
+    if (!creditor) continue
+    transfers.push({ fromMemberId: debtor.memberId, toMemberId: creditor.memberId, amount: owed })
+    debtor.balance = 0
+    creditor.balance = 0
+  }
+  let debtor = largest(open, -1)
+  let creditor = largest(open, 1)
+  while (debtor && creditor) {
+    const amount = Math.min(-debtor.balance, creditor.balance)
+    transfers.push({ fromMemberId: debtor.memberId, toMemberId: creditor.memberId, amount })
+    debtor.balance += amount
+    creditor.balance -= amount
+    debtor = largest(open, -1)
+    creditor = largest(open, 1)
+  }
+  return transfers
+}
+
+export function balancesOf(state: MockState, group: GroupRow, viewCurrency: Currency, today: string): GroupBalancesDto {
+  const rate = rateOn(state.rates, today, group.currency, viewCurrency)
+  const expenses = state.groupExpenses.filter((row) => row.groupId === group.id && !row.deleted)
+  const repayments = state.groupRepayments.filter((row) => row.groupId === group.id && !row.deleted)
+  const members = membersOf(state, group.id).map(({ id: memberId }) => {
+    const paid = sumMinor(expenses.filter((row) => row.payerId === memberId).map((row) => row.groupAmount))
+    const share = sumMinor(
+      expenses
+        .flatMap((row) => row.shares)
+        .filter((row) => row.memberId === memberId)
+        .map((row) => row.groupAmount),
+    )
+    const sent = sumMinor(repayments.filter((row) => row.fromMemberId === memberId).map((row) => row.groupAmount))
+    const received = sumMinor(repayments.filter((row) => row.toMemberId === memberId).map((row) => row.groupAmount))
+    return { memberId, paid, share, sent, received, balance: paid - share + sent - received }
+  })
+  const inView = (amount: number): number => convertMinor(amount, rate, group.currency, viewCurrency)
+  return {
+    currency: viewCurrency,
+    groupCurrency: group.currency,
+    total: inView(sumMinor(members.map((member) => member.paid))),
+    members: members.map(({ memberId, paid, share, sent, received, balance }) => ({
+      memberId,
+      paid: inView(paid),
+      share: inView(share),
+      sent: inView(sent),
+      received: inView(received),
+      balance: inView(balance),
+    })),
+    transfers: settle(members).map((transfer) => ({ ...transfer, amount: inView(transfer.amount) })),
+  }
 }
 
 export function appendEvent(
