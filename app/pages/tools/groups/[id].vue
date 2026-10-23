@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import type { ComponentPublicInstance } from 'vue'
 import { canManage, ownerScope } from '~/features/groups/utils/scope'
+import type { GroupExpenseDto } from '~/shared/api/contract'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -10,6 +12,10 @@ const { group, isPending, isError, notFound, refetch } = useGroup(scope)
 
 const membersOpen = ref(false)
 const settingsOpen = ref(false)
+const expenseOpen = ref(false)
+const editedExpense = ref<GroupExpenseDto>()
+const addExpenseButton = ref<ComponentPublicInstance | null>(null)
+const addExpenseIconButton = ref<ComponentPublicInstance | null>(null)
 
 const shown = computed(() => (notFound.value || isError.value ? undefined : group.value))
 const manageable = computed(() => shown.value !== undefined && canManage(scope.value))
@@ -21,6 +27,23 @@ const openMembers = () => {
 
 const openSettings = () => {
   settingsOpen.value = true
+}
+
+const openNewExpense = () => {
+  editedExpense.value = undefined
+  expenseOpen.value = true
+}
+
+const openExpense = (expense: GroupExpenseDto) => {
+  editedExpense.value = expense
+  expenseOpen.value = true
+}
+
+function focusAddExpense() {
+  const target = [addExpenseButton.value?.$el, addExpenseIconButton.value?.$el].find(
+    (element): element is HTMLElement => element instanceof HTMLElement && element.checkVisibility(),
+  )
+  target?.focus()
 }
 
 const onDeleted = () => navigateTo(localePath('/tools/groups'))
@@ -38,33 +61,47 @@ useHead({ title: () => title.value })
         {{ t('groups.title') }}
       </NuxtLinkLocale>
     </template>
-    <template v-if="manageable" #actions>
-      <Button severity="secondary" outlined class="hidden! min-h-11 lg:inline-flex!" @click="openMembers">
-        <AppIcon name="groups" :size="16" />
-        {{ t('groups.actions.members') }}
+    <template v-if="shown" #actions>
+      <Button ref="addExpenseButton" class="hidden! min-h-11 lg:inline-flex!" @click="openNewExpense">
+        <AppIcon name="plus" :size="16" :stroke-width="2.2" />
+        {{ t('groups.actions.addExpense') }}
       </Button>
       <Button
-        severity="secondary"
-        outlined
+        ref="addExpenseIconButton"
         class="size-11 lg:hidden!"
-        :aria-label="t('groups.actions.members')"
-        @click="openMembers"
+        :aria-label="t('groups.actions.addExpense')"
+        @click="openNewExpense"
       >
-        <AppIcon name="groups" :size="20" />
+        <AppIcon name="plus" :size="20" :stroke-width="2.2" />
       </Button>
-      <Button severity="secondary" outlined class="hidden! min-h-11 lg:inline-flex!" @click="openSettings">
-        <AppIcon name="edit" :size="16" />
-        {{ t('groups.actions.edit') }}
-      </Button>
-      <Button
-        severity="secondary"
-        outlined
-        class="size-11 lg:hidden!"
-        :aria-label="t('groups.actions.edit')"
-        @click="openSettings"
-      >
-        <AppIcon name="edit" :size="20" />
-      </Button>
+      <template v-if="manageable">
+        <Button severity="secondary" outlined class="hidden! min-h-11 lg:inline-flex!" @click="openMembers">
+          <AppIcon name="groups" :size="16" />
+          {{ t('groups.actions.members') }}
+        </Button>
+        <Button
+          severity="secondary"
+          outlined
+          class="size-11 lg:hidden!"
+          :aria-label="t('groups.actions.members')"
+          @click="openMembers"
+        >
+          <AppIcon name="groups" :size="20" />
+        </Button>
+        <Button severity="secondary" outlined class="hidden! min-h-11 lg:inline-flex!" @click="openSettings">
+          <AppIcon name="edit" :size="16" />
+          {{ t('groups.actions.edit') }}
+        </Button>
+        <Button
+          severity="secondary"
+          outlined
+          class="size-11 lg:hidden!"
+          :aria-label="t('groups.actions.edit')"
+          @click="openSettings"
+        >
+          <AppIcon name="edit" :size="20" />
+        </Button>
+      </template>
     </template>
   </PageHeader>
   <EmptyState v-if="notFound" :title="t('groups.notFound.title')">
@@ -78,7 +115,10 @@ useHead({ title: () => title.value })
     </template>
   </EmptyState>
   <ErrorState v-else-if="isError" @retry="refetch" />
-  <GroupSummaryCards v-else-if="group" :group="group" />
+  <template v-else-if="group">
+    <GroupSummaryCards :group="group" />
+    <ExpenseList :group="group" @add="openNewExpense" @edit="openExpense" />
+  </template>
   <div
     v-else-if="isPending"
     class="grid grid-cols-[repeat(auto-fit,minmax(min(220px,100%),1fr))] gap-4"
@@ -88,4 +128,11 @@ useHead({ title: () => title.value })
   </div>
   <MembersDialog v-if="group" v-model:visible="membersOpen" :group="group" />
   <GroupDialog v-if="group" v-model:visible="settingsOpen" :group="group" @deleted="onDeleted" />
+  <ExpenseDialog
+    v-if="group"
+    v-model:visible="expenseOpen"
+    :group="group"
+    :expense="editedExpense"
+    @deleted="focusAddExpense"
+  />
 </template>

@@ -3,6 +3,8 @@ import type { GroupNameInput, GroupUpdateInput } from '~/shared/api/contract'
 import { invalidateAfter } from '~/shared/api/invalidation'
 import { isApiError } from '~/shared/api/problem'
 import { groupsApi } from '../api/groupsApi'
+import { groupKeys } from '../api/keys'
+import { type GroupScope, ownerScope } from '../utils/scope'
 
 export function useGroupMutations() {
   const api = groupsApi(useApi())
@@ -15,7 +17,13 @@ export function useGroupMutations() {
       mutationFn: ({ id, input }: { id: string; input: GroupUpdateInput }) => api.update(id, input),
       onSuccess,
     }),
-    remove: useMutation({ mutationFn: api.remove, onSuccess }),
+    remove: useMutation({
+      mutationFn: api.remove,
+      onSuccess: (_, id) => {
+        queryClient.removeQueries({ queryKey: groupKeys.scoped(ownerScope(id)) })
+        return queryClient.invalidateQueries({ queryKey: groupKeys.list })
+      },
+    }),
     addMember: useMutation({
       mutationFn: ({ id, input }: { id: string; input: GroupNameInput }) => api.addMember(id, input),
       onSuccess,
@@ -27,6 +35,10 @@ export function useGroupMutations() {
     }),
     removeMember: useMutation({
       mutationFn: ({ id, memberId }: { id: string; memberId: string }) => api.removeMember(id, memberId),
+      onSuccess,
+    }),
+    addCategory: useMutation({
+      mutationFn: ({ scope, input }: { scope: GroupScope; input: GroupNameInput }) => api.addCategory(scope, input),
       onSuccess,
     }),
     isMissing: (error: unknown) => isApiError(error) && error.status === 404,

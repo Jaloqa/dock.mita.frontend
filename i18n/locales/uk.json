@@ -793,7 +793,8 @@
       "addFirst": "Створити групу",
       "members": "Учасники",
       "edit": "Змінити групу",
-      "delete": "Видалити групу"
+      "delete": "Видалити групу",
+      "addExpense": "Додати витрату"
     },
     "card": {
       "members": "{count} учасник | {count} учасники | {count} учасників",
@@ -847,6 +848,71 @@
       "created": "Групу створено",
       "updated": "Групу змінено",
       "deleted": "Групу видалено"
+    },
+    "categories": {
+      "groceries": "Продукти",
+      "transport": "Транспорт",
+      "housing": "Житло",
+      "cafes": "Кафе",
+      "health": "Здоров'я",
+      "shopping": "Покупки",
+      "leisure": "Дозвілля",
+      "gifts": "Подарунки",
+      "other": "Інше"
+    },
+    "expenses": {
+      "title": "Витрати",
+      "view": "Які витрати показати",
+      "active": "Активні",
+      "deleted": "Видалені",
+      "empty": "Витрат поки немає",
+      "emptyDeleted": "Видалених витрат немає",
+      "showMore": "Показати ще"
+    },
+    "expense": {
+      "createTitle": "Нова витрата",
+      "editTitle": "Зміна витрати",
+      "payer": "Хто заплатив",
+      "payerPlaceholder": "Виберіть, хто заплатив",
+      "amount": "Сума",
+      "currency": "Валюта",
+      "date": "Дата",
+      "category": "Категорія",
+      "newCategory": "Нова категорія",
+      "addCategory": "Додати",
+      "tags": "Теги",
+      "tagsPlaceholder": "Введіть, щоб додати тег",
+      "createTag": "+ “{name}”",
+      "removeTag": "Видалити тег {name}",
+      "description": "Опис",
+      "rate": "Курс обміну ({from} → {to})",
+      "rateHint": "Офіційний курс НБП на цю дату. Змініть його, щоб указати власний.",
+      "groupAmount": "= {amount}",
+      "split": "Розподіл",
+      "splitEqual": "Порівну",
+      "splitExact": "Точні суми",
+      "left": "Залишилося розподілити: {amount}",
+      "over": "Розподілено забагато: {amount}",
+      "chooseMembers": "Виберіть хоча б одного учасника.",
+      "delete": "Видалити",
+      "edit": "Змінити {title}",
+      "paidBy": "Платник: {name}",
+      "addedBy": "Додав(ла): {name}",
+      "editedBy": "Змінив(ла): {name}",
+      "summary": {
+        "everyone": "Порівну між усіма",
+        "some": "Порівну: {names}",
+        "exact": "Точні суми"
+      },
+      "confirm": {
+        "deleteTitle": "Видалити цю витрату?",
+        "deleteMessage": "Вона переміститься до розділу «Видалені», звідки її можна відновити."
+      },
+      "toast": {
+        "created": "Витрату додано",
+        "updated": "Витрату змінено",
+        "deleted": "Витрату видалено"
+      }
     }
   },
   "auth": {

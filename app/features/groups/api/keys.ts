@@ -7,4 +7,5 @@ export const groupKeys = {
   list: ['groups', 'list'],
   scoped,
   group: (scope: GroupScope) => [...scoped(scope), 'group'] as const,
+  expenses: (scope: GroupScope, deleted: boolean) => [...scoped(scope), 'expenses', deleted] as const,
 } as const
