@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { GroupDto, GroupRepaymentDto } from '~/shared/api/contract'
-import { actorName, memberName, repaymentTitle } from '../utils/groupView'
+import { actorName, expenseTitle, memberName, repaymentTitle } from '../utils/groupView'
 
 const props = defineProps<{ group: GroupDto; repayment: GroupRepaymentDto; restoring?: boolean }>()
 const emit = defineEmits<{ edit: []; history: []; restore: [] }>()
@@ -23,6 +23,11 @@ const converted = computed(() =>
   props.repayment.currency === props.group.currency
     ? undefined
     : t('groups.repayment.groupAmount', { amount: format(props.repayment.groupAmount, props.group.currency) }),
+)
+const covers = computed(() =>
+  props.repayment.covers
+    .map((cover) => `${expenseTitle(t, props.group, cover)} ${format(cover.groupAmount, props.group.currency)}`)
+    .join(', '),
 )
 const addedBy = computed(() => t('groups.repayment.addedBy', { name: actorName(props.repayment.createdBy) }))
 const changedBy = computed(() => {
@@ -71,6 +76,7 @@ const changedBy = computed(() => {
       </div>
     </div>
     <p v-if="repayment.note" class="m-0 text-xs break-words text-muted">{{ repayment.note }}</p>
+    <p v-if="covers" class="m-0 text-xs break-words text-muted">{{ t('groups.repayment.covers', { list: covers }) }}</p>
     <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
       <p class="m-0 text-xs text-muted">
         {{ addedBy }}<template v-if="changedBy"> · {{ changedBy }}</template>

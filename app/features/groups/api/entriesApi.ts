@@ -8,6 +8,7 @@ import type {
   GroupRepaymentDto,
   GroupRepaymentInput,
   GroupRepaymentState,
+  OpenShareDto,
   Page,
 } from '~/shared/api/contract'
 import type { Currency } from '~/shared/money/currencies'
@@ -52,6 +53,7 @@ export const entriesApi = (api: ApiClient, scope: GroupScope) => {
         page,
         pageSize: ENTRIES_PAGE_SIZE,
       }),
+    openShares: () => api.get<OpenShareDto[]>(`${scopePath(scope)}/open-shares`),
     balances: (currency: Currency) => api.get<GroupBalancesDto>(`${scopePath(scope)}/balances`, { currency }),
   }
 }

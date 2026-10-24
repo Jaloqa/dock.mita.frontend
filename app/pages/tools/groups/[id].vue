@@ -15,6 +15,12 @@ provideGroupScope(scope)
 const { group, isPending, isError, notFound, refetch } = useGroup(scope)
 const { leave, isMissing, refresh } = useGroupMutations()
 
+const { shares: openShares } = useOpenShares(scope, () => group.value?.myMemberId != null)
+const canSettle = computed(
+  () => shown.value !== undefined && shown.value.myMemberId != null && openShares.value.length > 0,
+)
+
+const settleOpen = ref(false)
 const membersOpen = ref(false)
 const shareOpen = ref(false)
 const settingsOpen = ref(false)
@@ -24,6 +30,7 @@ const repaymentOpen = ref(false)
 const editedRepayment = ref<GroupRepaymentDto>()
 const prefilledTransfer = ref<GroupTransferDto>()
 const entryActions = ref<{ focusAddExpense: () => void; focusRecordRepayment: () => void } | null>(null)
+const header = ref<{ focus: () => void } | null>(null)
 
 const shown = computed(() => (notFound.value || isError.value ? undefined : group.value))
 const manageable = computed(() => shown.value !== undefined && canManage(shown.value))
@@ -66,6 +73,12 @@ const openNewRepayment = () => openRepayment()
 
 const focusAddExpense = () => entryActions.value?.focusAddExpense()
 
+const focusHeading = () => header.value?.focus()
+
+const onSettled = () => {
+  if (!canSettle.value) focusHeading()
+}
+
 const focusRecordRepayment = () => entryActions.value?.focusRecordRepayment()
 
 const onDeleted = () => navigateTo(localePath('/tools/groups'))
@@ -98,7 +111,7 @@ useHead({ title: () => title.value })
 </script>
 
 <template>
-  <PageHeader :title="title">
+  <PageHeader ref="header" :title="title">
     <template #eyebrow>
       <NuxtLinkLocale
         to="/tools/groups"
@@ -116,6 +129,21 @@ useHead({ title: () => title.value })
         @add-expense="openNewExpense"
         @record-repayment="openNewRepayment"
       />
+      <template v-if="canSettle">
+        <Button severity="secondary" outlined class="hidden! min-h-11 lg:inline-flex!" @click="settleOpen = true">
+          <AppIcon name="transfer" :size="16" />
+          {{ t('groups.actions.settle') }}
+        </Button>
+        <Button
+          severity="secondary"
+          outlined
+          class="size-11 lg:hidden!"
+          :aria-label="t('groups.actions.settle')"
+          @click="settleOpen = true"
+        >
+          <AppIcon name="transfer" :size="20" />
+        </Button>
+      </template>
       <template v-if="leavable">
         <Button severity="secondary" outlined class="hidden! min-h-11 lg:inline-flex!" @click="confirmLeave">
           <AppIcon name="logout" :size="16" />
@@ -205,6 +233,7 @@ useHead({ title: () => title.value })
   >
     <Skeleton v-for="index in 2" :key="index" height="6.5rem" border-radius="16px" />
   </div>
+  <SettleUpDialog v-if="group" v-model:visible="settleOpen" :group="group" @settled="onSettled" />
   <MembersDialog v-if="group" v-model:visible="membersOpen" :group="group" />
   <ShareDialog v-if="group" v-model:visible="shareOpen" :group="group" />
   <GroupDialog v-if="group" v-model:visible="settingsOpen" :group="group" @deleted="onDeleted" />
