@@ -1096,6 +1096,9 @@
         "some": "Po równo: {names}",
         "exact": "Dokładne kwoty: {shares}"
       }
+    },
+    "errors": {
+      "itemChanged": "Ten wpis się zmienił. Sprawdź go ponownie."
     }
   },
   "auth": {
@@ -1178,6 +1181,7 @@
     "memberLinked": "Ten uczestnik jest już powiązany z kontem.",
     "alreadyLinked": "Twoje konto jest już powiązane z innym uczestnikiem tej grupy.",
     "inviteSelf": "To Twój własny adres e-mail. Użyj zamiast tego opcji „To ja”.",
-    "alreadyInvited": "Inny uczestnik tej grupy jest już zaproszony na ten adres e-mail."
+    "alreadyInvited": "Inny uczestnik tej grupy jest już zaproszony na ten adres e-mail.",
+    "unknownShare": "Między tymi uczestnikami nie ma takiego nierozliczonego udziału."
   }
 }

@@ -1,12 +1,19 @@
 import type { GroupEntryAction, GroupExpenseState, GroupRepaymentState } from '../../app/shared/api/contract'
 import type { Currency } from '../../app/shared/money/currencies'
 import { addDaysIso } from '../../app/shared/period/period'
+import { allocateCovers, openShares, replaceCovers } from '../covers'
 import type { GroupEventRow, GroupExpenseRow, GroupRepaymentRow, MockState } from '../db'
 import { equalShares, priceEntry } from '../groups'
 
 type DemoGroups = Pick<
   MockState,
-  'groups' | 'groupMembers' | 'groupCategories' | 'groupExpenses' | 'groupRepayments' | 'groupEvents'
+  | 'groups'
+  | 'groupMembers'
+  | 'groupCategories'
+  | 'groupExpenses'
+  | 'groupRepayments'
+  | 'groupEvents'
+  | 'groupRepaymentCovers'
 >
 
 type PlannedMember = { id: string; name: string; userId?: string; invitedEmail?: string }
@@ -215,7 +222,12 @@ function buildGroup(plan: PlannedGroup, today: string): DemoGroups {
     return { id, ...current, deleted: expense.deleted ?? false, groupId: plan.id, createdAt }
   })
 
-  const groupRepayments = plan.repayments.map((repayment): GroupRepaymentRow => {
+  const covered: Pick<MockState, 'groupExpenses' | 'groupRepayments' | 'groupRepaymentCovers'> = {
+    groupExpenses,
+    groupRepayments: [],
+    groupRepaymentCovers: [],
+  }
+  for (const repayment of plan.repayments) {
     const id = `gpay_${repayment.key}`
     const date = addDaysIso(today, -repayment.daysAgo)
     const price = priceEntry([], {
@@ -225,7 +237,7 @@ function buildGroup(plan: PlannedGroup, today: string): DemoGroups {
       currency: repayment.currency,
       groupCurrency: plan.currency,
     })
-    const state: GroupRepaymentState = {
+    const fields: Omit<GroupRepaymentState, 'covers'> = {
       fromMemberId: repayment.fromMemberId,
       toMemberId: repayment.toMemberId,
       amount: repayment.amount,
@@ -234,10 +246,17 @@ function buildGroup(plan: PlannedGroup, today: string): DemoGroups {
       ...price,
       note: null,
     }
+    const covers = allocateCovers(
+      price.groupAmount,
+      openShares(covered, plan.id, repayment.fromMemberId, repayment.toMemberId),
+      [],
+    )
     const createdAt = when(repayment.daysAgo, '20:10:00')
-    record('repayment', id, 1, 'created', createdAt, state)
-    return { id, ...state, deleted: false, groupId: plan.id, createdAt }
-  })
+    const row: GroupRepaymentRow = { id, ...fields, deleted: false, groupId: plan.id, createdAt }
+    covered.groupRepayments.push(row)
+    replaceCovers(covered, row, covers)
+    record('repayment', id, 1, 'created', createdAt, { ...fields, covers })
+  }
 
   return {
     groups: [
@@ -266,8 +285,9 @@ function buildGroup(plan: PlannedGroup, today: string): DemoGroups {
       createdAt: when(plan.createdDaysAgo, '10:05:00'),
     })),
     groupExpenses,
-    groupRepayments,
+    groupRepayments: covered.groupRepayments,
     groupEvents: events,
+    groupRepaymentCovers: covered.groupRepaymentCovers,
   }
 }
 
@@ -280,5 +300,6 @@ export function demoGroups(today: string): DemoGroups {
     groupExpenses: built.flatMap((rows) => rows.groupExpenses),
     groupRepayments: built.flatMap((rows) => rows.groupRepayments),
     groupEvents: built.flatMap((rows) => rows.groupEvents).sort((a, b) => a.at.localeCompare(b.at)),
+    groupRepaymentCovers: built.flatMap((rows) => rows.groupRepaymentCovers),
   }
 }

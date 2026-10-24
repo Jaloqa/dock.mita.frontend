@@ -140,6 +140,7 @@ describe('repayment changes', () => {
       rateManual: true,
       groupAmount: 125,
       note: 'Cash',
+      covers: [],
     }
     expect(repaymentChanges(repayment, next)).toEqual(['from', 'to', 'amount', 'date', 'rate', 'note'])
   })

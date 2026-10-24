@@ -8,6 +8,7 @@ import type {
   GroupExpenseState,
   GroupRepaymentDto,
   GroupRepaymentState,
+  GroupTerms,
   RateDto,
   SettingsDto,
   TransactionDto,
@@ -26,7 +27,7 @@ export type AccountRow = Omit<AccountDto, 'balance' | 'inUse' | 'linkedGoals'> &
 
 export type TransferRow = TransferDto & { userId: string }
 
-export type CategoryRow = Omit<CategoryDto, 'inUse'> & { userId: string }
+export type CategoryRow = Omit<CategoryDto, 'inUse'> & { userId: string; standardKey: string | null }
 
 export type TagRow = { id: string; userId: string; name: string }
 
@@ -103,12 +104,22 @@ type EntryAudit = 'createdBy' | 'createdAt' | 'updatedBy' | 'updatedAt'
 
 export type GroupExpenseRow = Omit<GroupExpenseDto, EntryAudit> & { groupId: string; createdAt: string }
 
-export type GroupRepaymentRow = Omit<GroupRepaymentDto, EntryAudit> & { groupId: string; createdAt: string }
+export type GroupRepaymentRow = Omit<GroupRepaymentDto, EntryAudit | 'covers'> & { groupId: string; createdAt: string }
+
+export type GroupRepaymentCoverRow = {
+  repaymentId: string
+  expenseId: string
+  groupId: string
+  groupAmount: number
+  position: number
+}
+
+export type GroupEntryKind = 'expense' | 'repayment'
 
 export type GroupEventRow = {
   id: string
   groupId: string
-  kind: 'expense' | 'repayment'
+  kind: GroupEntryKind
   entryId: string
   action: GroupEntryAction
   at: string
@@ -117,10 +128,33 @@ export type GroupEventRow = {
   state: GroupExpenseState | GroupRepaymentState
 }
 
+export type GroupConfirmationRow = {
+  id: string
+  userId: string
+  groupId: string
+  kind: GroupEntryKind
+  entryId: string
+  handledTerms: GroupTerms | null
+  confirmedTerms: GroupTerms | null
+  accountId: string | null
+  decidedAt: string
+}
+
+export type GroupConfirmationTransactionRow = { transactionId: string; confirmationId: string; expenseId: string }
+
+export type GroupLegRow = {
+  id: string
+  userId: string
+  confirmationId: string
+  accountId: string
+  date: string
+  accountAmount: number
+}
+
 export type CredentialRow = { userId: string; password: string }
 
 export type MockState = {
-  version: 6
+  version: 7
   activeUserId: string | null
   simulateErrors: boolean
   users: UserRow[]
@@ -143,6 +177,10 @@ export type MockState = {
   groupExpenses: GroupExpenseRow[]
   groupRepayments: GroupRepaymentRow[]
   groupEvents: GroupEventRow[]
+  groupRepaymentCovers: GroupRepaymentCoverRow[]
+  groupConfirmations: GroupConfirmationRow[]
+  groupConfirmationTransactions: GroupConfirmationTransactionRow[]
+  groupLegs: GroupLegRow[]
 }
 
 export type KeyValueStorage = Pick<Storage, 'getItem' | 'setItem'>
@@ -155,7 +193,7 @@ const isState = (value: unknown, seed: MockState): value is MockState => {
   if (typeof value !== 'object' || value === null) return false
   const state = value as Record<string, unknown>
   return (
-    state.version === 6 &&
+    state.version === 7 &&
     Object.entries(seed).every(([key, seedValue]) => {
       if (key === 'activeUserId') return state[key] === null || typeof state[key] === 'string'
       return Array.isArray(seedValue) ? Array.isArray(state[key]) : typeof state[key] === typeof seedValue

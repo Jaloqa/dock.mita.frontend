@@ -14,6 +14,7 @@ import { registerOverviewHandlers } from './overview'
 import { registerRateHandlers } from './rates'
 import { registerReportHandlers } from './reports'
 import { registerTagHandlers } from './tags'
+import { registerToConfirmHandlers } from './toConfirm'
 import { registerTransactionHandlers } from './transactions'
 import { registerTransferHandlers } from './transfers'
 import { registerUserHandlers } from './users'
@@ -35,6 +36,7 @@ export const defaultHandlers: ((router: MockRouter) => void)[] = [
   registerGroupLinkHandlers,
   registerGroupExpenseHandlers,
   registerGroupRepaymentHandlers,
+  registerToConfirmHandlers,
   registerOverviewHandlers,
   registerReportHandlers,
 ]

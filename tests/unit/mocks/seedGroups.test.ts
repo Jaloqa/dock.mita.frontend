@@ -278,6 +278,18 @@ describe('seeded groups', () => {
     ])
   })
 
+  it.each(seedDays)('backfills the cover of the Dinner share paid back by Kasia on %s', (today) => {
+    expect(demoGroups(today).groupRepaymentCovers).toEqual([
+      {
+        repaymentId: 'gpay_kasia_anna',
+        expenseId: 'gex_dinner',
+        groupId: 'grp_albania',
+        groupAmount: 2_000,
+        position: 0,
+      },
+    ])
+  })
+
   it.each(seedDays)('records every change by the owner and keeps the last state equal to the row on %s', (today) => {
     const rows = demoGroups(today)
     const groupExpenses = rows.groupExpenses
@@ -315,7 +327,10 @@ describe('seeded groups', () => {
     for (const row of groupRepayments) {
       const last = rows.groupEvents.filter((event) => event.entryId === row.id).at(-1)
       const { id: _id, deleted: _deleted, groupId: _groupId, createdAt: _createdAt, ...state } = row
-      expect(last?.state).toEqual(state)
+      const covers = rows.groupRepaymentCovers
+        .filter((cover) => cover.repaymentId === row.id)
+        .map(({ expenseId, groupAmount }) => ({ expenseId, groupAmount }))
+      expect(last?.state).toEqual({ ...state, covers })
     }
   })
 
@@ -338,13 +353,17 @@ describe('seeded groups', () => {
   it.each(seedDays)('puts the demo group into the seed state on %s', (today) => {
     const state = seedState(today)
     const rows = demoGroups(today)
-    expect(state.version).toBe(6)
+    expect(state.version).toBe(7)
     expect(state.groups).toEqual(rows.groups)
     expect(state.groupMembers).toEqual(rows.groupMembers)
     expect(state.groupCategories).toEqual(rows.groupCategories)
     expect(state.groupExpenses).toEqual(rows.groupExpenses)
     expect(state.groupRepayments).toEqual(rows.groupRepayments)
     expect(state.groupEvents).toEqual(rows.groupEvents)
+    expect(state.groupRepaymentCovers).toEqual(rows.groupRepaymentCovers)
+    expect(state.groupConfirmations).toEqual([])
+    expect(state.groupConfirmationTransactions).toEqual([])
+    expect(state.groupLegs).toEqual([])
   })
 
   it('serves the demo group to Anna with its totals, members and categories', async () => {
@@ -437,6 +456,9 @@ describe('seeded groups', () => {
       ['gpay_kasia_anna', kasia, anna, 2_000],
     ])
     expect(repayments.items[0]).toMatchObject({ createdBy: owner, updatedBy: null })
+    expect(repayments.items[0]?.covers).toEqual([
+      { expenseId: 'gex_dinner', groupAmount: 2_000, description: 'Dinner', categoryId: 'cafes' },
+    ])
     const removed = (await mock.handle({
       method: 'GET',
       path: path('/repayments'),
@@ -473,6 +495,7 @@ describe('seeded groups', () => {
       path: path('/repayments/gpay_kasia_anna/history'),
     })) as Page<GroupEntryEvent<GroupRepaymentState>>
     expect(repayment.items.map((event) => [event.action, event.state.amount])).toEqual([['created', 2_000]])
+    expect(repayment.items[0]?.state.covers).toEqual([{ expenseId: 'gex_dinner', groupAmount: 2_000 }])
   })
 
   it('lets the demo group be edited like any other', async () => {

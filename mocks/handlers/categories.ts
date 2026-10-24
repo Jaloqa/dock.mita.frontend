@@ -39,7 +39,10 @@ const ordered = (rows: readonly CategoryRow[]): CategoryRow[] =>
 const ownCategory = (db: MockDb, userId: string, id: string | undefined): CategoryRow =>
   ownCategories(db, userId).find((row) => row.id === id) ?? notFound()
 
-const toDto = ({ userId: _userId, ...row }: CategoryRow, inUse: Set<string>): CategoryDto => ({
+const toDto = (
+  { userId: _userId, standardKey: _standardKey, ...row }: CategoryRow,
+  inUse: Set<string>,
+): CategoryDto => ({
   ...row,
   inUse: inUse.has(row.id),
 })
@@ -88,6 +91,7 @@ export function registerCategoryHandlers(router: MockRouter) {
       id: newId('cat'),
       userId,
       system: null,
+      standardKey: null,
       ...validateCategory(ownCategories(db, userId), body),
     }
     db.state.categories.push(row)
