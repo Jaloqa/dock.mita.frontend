@@ -1111,6 +1111,73 @@
     },
     "errors": {
       "itemChanged": "This item changed. Review it again."
+    },
+    "toConfirm": {
+      "title": "To confirm",
+      "showMore": "Show more",
+      "by": "by {name}",
+      "confirm": "Confirm",
+      "confirmItem": "Confirm {title}",
+      "rejectItem": "Reject {title}",
+      "reject": {
+        "action": "Reject",
+        "title": "Reject this item?",
+        "message": "Nothing is added to your accounts. The group stays as it is."
+      },
+      "change": {
+        "new": "New",
+        "changed": "Changed",
+        "removed": "Removed"
+      },
+      "changes": "What changed",
+      "changed": {
+        "amount": "Amount: {before} → {after}",
+        "share": "Your share: {before} → {after}",
+        "date": "Date: {before} → {after}",
+        "category": "Category: {before} → {after}",
+        "tags": "Tags: {before} → {after}",
+        "description": "Description: {before} → {after}",
+        "covers": "Covers: {before} → {after}",
+        "coverShares": "Covered shares: {before} → {after}",
+        "groupAmount": "Amount in the group currency: {before} → {after}",
+        "currency": "Currency: {before} → {after}",
+        "member": "Payment: {before} → {after}"
+      },
+      "with": {
+        "paid": "paid to {name}",
+        "received": "received from {name}"
+      },
+      "none": "none",
+      "deleted": "This entry was deleted or no longer involves you.",
+      "paymentTo": "Payment to {name}",
+      "paymentFrom": "Payment from {name}",
+      "count": "{count} to confirm",
+      "dialog": {
+        "title": "Confirm {title}",
+        "account": "Account",
+        "accountPlaceholder": "Choose an account",
+        "rate": "Exchange rate ({from} → {to})",
+        "rateHint": "Official NBP rate of the date. Change it to use your own.",
+        "removed": "This entry was deleted or no longer involves you. Confirming removes it from your accounts."
+      },
+      "summary": {
+        "expense": "You paid {amount} · your share {share} · owed to you {other}",
+        "paid": "You paid back {amount}",
+        "received": "{name} paid you back {amount}"
+      },
+      "line": {
+        "legend": "{title} · {amount}",
+        "category": "Category",
+        "categoryPlaceholder": "Choose a category",
+        "newCategory": "New category: {name}",
+        "title": "Title",
+        "tags": "Tags"
+      },
+      "toast": {
+        "added": "Added to your accounts",
+        "removed": "Removed from your accounts",
+        "rejected": "Item rejected"
+      }
     }
   },
   "auth": {

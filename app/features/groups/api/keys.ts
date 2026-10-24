@@ -7,6 +7,8 @@ export const groupKeys = {
   all: ['groups'],
   list: ['groups', 'list'],
   invites: ['groups', 'invites'],
+  toConfirm: ['groups', 'toConfirm'],
+  toConfirmCount: ['groups', 'toConfirm', 'count'],
   scoped,
   group: (scope: GroupScope) => [...scoped(scope), 'group'] as const,
   expenses: (scope: GroupScope, deleted: boolean) => [...scoped(scope), 'expenses', deleted] as const,

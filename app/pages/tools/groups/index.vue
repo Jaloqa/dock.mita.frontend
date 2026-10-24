@@ -47,6 +47,7 @@ useHead({ title: () => t('groups.title') })
       </Button>
     </template>
   </PageHeader>
+  <ToConfirmList @cleared="focusHeading" />
   <GroupInvites @cleared="focusHeading" />
   <ErrorState v-if="isError" @retry="refetch" />
   <div
