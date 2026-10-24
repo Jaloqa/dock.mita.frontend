@@ -802,6 +802,7 @@
       "edit": "Edit group",
       "delete": "Delete group",
       "leave": "Leave group",
+      "settle": "Settle up",
       "addExpense": "Add expense",
       "recordRepayment": "Record repayment"
     },
@@ -1022,6 +1023,16 @@
       "viewFailed": "The balances could not be converted into {currency}. They are shown in {main}.",
       "you": "{name} (you)"
     },
+    "settle": {
+      "title": "Settle up",
+      "empty": "You have no open shares in this group.",
+      "owe": "You owe {name}",
+      "total": "Total {amount}",
+      "pay": "Mark as paid",
+      "toast": {
+        "paid": "Payment recorded | {count} payments recorded"
+      }
+    },
     "repayments": {
       "title": "Repayments",
       "view": "Repayments to show",
@@ -1049,6 +1060,7 @@
       "delete": "Delete",
       "edit": "Edit repayment from {from} to {to}",
       "addedBy": "Added by {name}",
+      "covers": "Covers: {list}",
       "editedBy": "Edited by {name}",
       "confirm": {
         "deleteTitle": "Delete this repayment?",

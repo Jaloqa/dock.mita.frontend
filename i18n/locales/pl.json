@@ -802,6 +802,7 @@
       "edit": "Edytuj grupę",
       "delete": "Usuń grupę",
       "leave": "Opuść grupę",
+      "settle": "Rozlicz się",
       "addExpense": "Dodaj wydatek",
       "recordRepayment": "Zapisz spłatę"
     },
@@ -1022,6 +1023,16 @@
       "viewFailed": "Nie udało się przeliczyć sald na {currency}. Pokazujemy je w {main}.",
       "you": "{name} (Ty)"
     },
+    "settle": {
+      "title": "Rozlicz się",
+      "empty": "Nie masz otwartych udziałów w tej grupie.",
+      "owe": "Wisisz: {name}",
+      "total": "Razem: {amount}",
+      "pay": "Oznacz jako zapłacone",
+      "toast": {
+        "paid": "Płatność zapisana | {count} płatności zapisane | {count} płatności zapisanych"
+      }
+    },
     "repayments": {
       "title": "Spłaty",
       "view": "Które spłaty pokazać",
@@ -1049,6 +1060,7 @@
       "delete": "Usuń",
       "edit": "Edytuj spłatę: {from} → {to}",
       "addedBy": "Dodał(a): {name}",
+      "covers": "Pokrywa: {list}",
       "editedBy": "Zmienił(a): {name}",
       "confirm": {
         "deleteTitle": "Usunąć tę spłatę?",

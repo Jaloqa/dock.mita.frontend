@@ -166,7 +166,8 @@ function fail(error: unknown) {
 }
 
 async function showServerErrors(error: unknown) {
-  if (server.apply(error, fields)) {
+  if (server.apply(error, [...fields, 'settles'])) {
+    if (server.messages('settles').length > 0) refresh()
     await nextTick()
     focusFirstInvalid(formEl.value)
   } else fail(error)
@@ -191,6 +192,9 @@ async function submit() {
     note: note || null,
   }
   const repayment = props.repayment
+  if (repayment && repayment.fromMemberId === form.fromMemberId && repayment.toMemberId === form.toMemberId) {
+    input.settles = repayment.covers.map((cover) => cover.expenseId)
+  }
   const onError = unlessMemberRefusal(showServerErrors)
   if (repayment) {
     update.mutate({ id: repayment.id, input }, { onSuccess: () => close(t('groups.repayment.toast.updated')), onError })
@@ -355,6 +359,14 @@ function confirmDelete() {
           />
         </template>
       </FormRow>
+      <p
+        v-for="message in server.messages('settles')"
+        :key="message"
+        role="alert"
+        class="m-0 text-xs font-medium text-accent"
+      >
+        {{ message }}
+      </p>
     </form>
     <template #footer>
       <div class="flex w-full flex-wrap items-center justify-between gap-2">
