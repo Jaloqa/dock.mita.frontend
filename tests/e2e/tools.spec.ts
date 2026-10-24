@@ -106,3 +106,44 @@ for (const { path, menu, title, entry, groups } of localized) {
     }
   })
 }
+
+const linkAnna = async (page: Page) => {
+  await page.goto('/tools/groups/grp_albania')
+  await page.getByRole('button', { name: 'Members', exact: true }).click()
+  const members = page.getByRole('dialog', { name: 'Members', exact: true })
+  await members.getByRole('button', { name: 'This is me: Anna', exact: true }).click()
+  await expect(page.getByText('Linked to you', { exact: true })).toBeVisible()
+}
+
+test('the Groups entry shows no count while nothing waits for confirmation', async ({ page }) => {
+  await page.goto('/tools')
+  const groups = toolList(page, 'Tools').getByRole('link', { name: 'Groups', exact: true })
+  await expect(groups).toBeVisible()
+  await expect(groups).not.toContainText('to confirm')
+  await expect(groups).toHaveAccessibleDescription('Shared expenses with friends and who owes whom')
+})
+
+test('the Groups entry counts what waits for confirmation', async ({ page }) => {
+  await linkAnna(page)
+  await page.goto('/tools')
+  const groups = toolList(page, 'Tools').getByRole('link', { name: 'Groups', exact: true })
+  await expect(groups).toContainText('2 to confirm')
+  await expect(groups).toHaveAccessibleDescription(/Shared expenses with friends and who owes whom.*2 to confirm/)
+  expect((await groups.boundingBox())?.height).toBeGreaterThanOrEqual(44)
+})
+
+test('the Groups entry counts what waits for confirmation in the user language', async ({ page }) => {
+  await linkAnna(page)
+  await page.goto('/pl/tools')
+  await expect(toolList(page, 'Narzędzia').getByRole('link', { name: 'Grupy', exact: true })).toContainText(
+    '2 do potwierdzenia',
+  )
+  await page.goto('/ru/tools')
+  await expect(toolList(page, 'Инструменты').getByRole('link', { name: 'Группы', exact: true })).toContainText(
+    '2 на подтверждение',
+  )
+  await page.goto('/uk/tools')
+  await expect(toolList(page, 'Інструменти').getByRole('link', { name: 'Групи', exact: true })).toContainText(
+    '2 на підтвердження',
+  )
+})

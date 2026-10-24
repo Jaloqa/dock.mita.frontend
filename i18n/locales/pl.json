@@ -1111,6 +1111,73 @@
     },
     "errors": {
       "itemChanged": "Ten wpis się zmienił. Sprawdź go ponownie."
+    },
+    "toConfirm": {
+      "title": "Do potwierdzenia",
+      "showMore": "Pokaż więcej",
+      "by": "przez {name}",
+      "confirm": "Potwierdź",
+      "confirmItem": "Potwierdź: {title}",
+      "rejectItem": "Odrzuć: {title}",
+      "reject": {
+        "action": "Odrzuć",
+        "title": "Odrzucić ten wpis?",
+        "message": "Nic nie trafi na Twoje konta. Grupa pozostanie bez zmian."
+      },
+      "change": {
+        "new": "Nowe",
+        "changed": "Zmienione",
+        "removed": "Usunięte"
+      },
+      "changes": "Co się zmieniło",
+      "changed": {
+        "amount": "Kwota: {before} → {after}",
+        "share": "Twój udział: {before} → {after}",
+        "date": "Data: {before} → {after}",
+        "category": "Kategoria: {before} → {after}",
+        "tags": "Tagi: {before} → {after}",
+        "description": "Opis: {before} → {after}",
+        "covers": "Pokrywa: {before} → {after}",
+        "coverShares": "Pokryte udziały: {before} → {after}",
+        "groupAmount": "Kwota w walucie grupy: {before} → {after}",
+        "currency": "Waluta: {before} → {after}",
+        "member": "Płatność: {before} → {after}"
+      },
+      "with": {
+        "paid": "{name} (odbiorca)",
+        "received": "{name} (nadawca)"
+      },
+      "none": "brak",
+      "deleted": "Ten wpis został usunięty lub już Cię nie dotyczy.",
+      "paymentTo": "Płatność dla {name}",
+      "paymentFrom": "Płatność od {name}",
+      "count": "{count} do potwierdzenia",
+      "dialog": {
+        "title": "Potwierdź: {title}",
+        "account": "Konto",
+        "accountPlaceholder": "Wybierz konto",
+        "rate": "Kurs wymiany ({from} → {to})",
+        "rateHint": "Oficjalny kurs NBP z tego dnia. Zmień go, aby użyć własnego.",
+        "removed": "Ten wpis został usunięty lub już Cię nie dotyczy. Potwierdzenie usunie go z Twoich kont."
+      },
+      "summary": {
+        "expense": "Zapłata: {amount} · Twój udział: {share} · do zwrotu dla Ciebie: {other}",
+        "paid": "Zwrot przez Ciebie: {amount}",
+        "received": "Zwrot od {name}: {amount}"
+      },
+      "line": {
+        "legend": "{title} · {amount}",
+        "category": "Kategoria",
+        "categoryPlaceholder": "Wybierz kategorię",
+        "newCategory": "Nowa kategoria: {name}",
+        "title": "Tytuł",
+        "tags": "Tagi"
+      },
+      "toast": {
+        "added": "Dodano do Twoich kont",
+        "removed": "Usunięto z Twoich kont",
+        "rejected": "Wpis odrzucony"
+      }
     }
   },
   "auth": {

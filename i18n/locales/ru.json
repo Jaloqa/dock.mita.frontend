@@ -1111,6 +1111,73 @@
     },
     "errors": {
       "itemChanged": "Эта запись изменилась. Проверьте её ещё раз."
+    },
+    "toConfirm": {
+      "title": "На подтверждение",
+      "showMore": "Показать ещё",
+      "by": "от {name}",
+      "confirm": "Подтвердить",
+      "confirmItem": "Подтвердить: {title}",
+      "rejectItem": "Отклонить: {title}",
+      "reject": {
+        "action": "Отклонить",
+        "title": "Отклонить эту запись?",
+        "message": "На ваши счета ничего не добавится. Группа останется без изменений."
+      },
+      "change": {
+        "new": "Новая",
+        "changed": "Изменена",
+        "removed": "Удалена"
+      },
+      "changes": "Что изменилось",
+      "changed": {
+        "amount": "Сумма: {before} → {after}",
+        "share": "Ваша доля: {before} → {after}",
+        "date": "Дата: {before} → {after}",
+        "category": "Категория: {before} → {after}",
+        "tags": "Теги: {before} → {after}",
+        "description": "Описание: {before} → {after}",
+        "covers": "Покрывает: {before} → {after}",
+        "coverShares": "Покрытые доли: {before} → {after}",
+        "groupAmount": "Сумма в валюте группы: {before} → {after}",
+        "currency": "Валюта: {before} → {after}",
+        "member": "Платёж: {before} → {after}"
+      },
+      "with": {
+        "paid": "{name} (получатель)",
+        "received": "{name} (отправитель)"
+      },
+      "none": "нет",
+      "deleted": "Эта запись удалена или больше вас не касается.",
+      "paymentTo": "Платёж для {name}",
+      "paymentFrom": "Платёж от {name}",
+      "count": "{count} на подтверждение",
+      "dialog": {
+        "title": "Подтвердить: {title}",
+        "account": "Счёт",
+        "accountPlaceholder": "Выберите счёт",
+        "rate": "Курс обмена ({from} → {to})",
+        "rateHint": "Официальный курс НБП на эту дату. Измените его, чтобы использовать свой.",
+        "removed": "Эта запись удалена или больше вас не касается. Подтверждение уберёт её с ваших счетов."
+      },
+      "summary": {
+        "expense": "Оплачено: {amount} · ваша доля: {share} · вам должны: {other}",
+        "paid": "Вы вернули: {amount}",
+        "received": "Возврат от {name}: {amount}"
+      },
+      "line": {
+        "legend": "{title} · {amount}",
+        "category": "Категория",
+        "categoryPlaceholder": "Выберите категорию",
+        "newCategory": "Новая категория: {name}",
+        "title": "Название",
+        "tags": "Теги"
+      },
+      "toast": {
+        "added": "Добавлено на ваши счета",
+        "removed": "Убрано с ваших счетов",
+        "rejected": "Запись отклонена"
+      }
     }
   },
   "auth": {

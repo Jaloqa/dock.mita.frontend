@@ -1111,6 +1111,73 @@
     },
     "errors": {
       "itemChanged": "Цей запис змінився. Перегляньте його ще раз."
+    },
+    "toConfirm": {
+      "title": "На підтвердження",
+      "showMore": "Показати ще",
+      "by": "від {name}",
+      "confirm": "Підтвердити",
+      "confirmItem": "Підтвердити: {title}",
+      "rejectItem": "Відхилити: {title}",
+      "reject": {
+        "action": "Відхилити",
+        "title": "Відхилити цей запис?",
+        "message": "На ваші рахунки нічого не додасться. Група залишиться без змін."
+      },
+      "change": {
+        "new": "Новий",
+        "changed": "Змінений",
+        "removed": "Видалений"
+      },
+      "changes": "Що змінилося",
+      "changed": {
+        "amount": "Сума: {before} → {after}",
+        "share": "Ваша частка: {before} → {after}",
+        "date": "Дата: {before} → {after}",
+        "category": "Категорія: {before} → {after}",
+        "tags": "Теги: {before} → {after}",
+        "description": "Опис: {before} → {after}",
+        "covers": "Покриває: {before} → {after}",
+        "coverShares": "Покриті частки: {before} → {after}",
+        "groupAmount": "Сума у валюті групи: {before} → {after}",
+        "currency": "Валюта: {before} → {after}",
+        "member": "Платіж: {before} → {after}"
+      },
+      "with": {
+        "paid": "{name} (отримувач)",
+        "received": "{name} (відправник)"
+      },
+      "none": "немає",
+      "deleted": "Цей запис видалено або він більше вас не стосується.",
+      "paymentTo": "Платіж для {name}",
+      "paymentFrom": "Платіж від {name}",
+      "count": "{count} на підтвердження",
+      "dialog": {
+        "title": "Підтвердити: {title}",
+        "account": "Рахунок",
+        "accountPlaceholder": "Оберіть рахунок",
+        "rate": "Курс обміну ({from} → {to})",
+        "rateHint": "Офіційний курс НБП на цю дату. Змініть його, щоб використати свій.",
+        "removed": "Цей запис видалено або він більше вас не стосується. Підтвердження прибере його з ваших рахунків."
+      },
+      "summary": {
+        "expense": "Сплачено: {amount} · ваша частка: {share} · вам винні: {other}",
+        "paid": "Ви повернули: {amount}",
+        "received": "Повернення від {name}: {amount}"
+      },
+      "line": {
+        "legend": "{title} · {amount}",
+        "category": "Категорія",
+        "categoryPlaceholder": "Оберіть категорію",
+        "newCategory": "Нова категорія: {name}",
+        "title": "Назва",
+        "tags": "Теги"
+      },
+      "toast": {
+        "added": "Додано на ваші рахунки",
+        "removed": "Прибрано з ваших рахунків",
+        "rejected": "Запис відхилено"
+      }
     }
   },
   "auth": {

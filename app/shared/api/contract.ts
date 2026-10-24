@@ -576,6 +576,8 @@ export type ToConfirmInput = {
   lines?: ToConfirmLineInput[] | null
 }
 
+export type ToConfirmRejectInput = { version: string }
+
 export type GroupEntryAction = 'created' | 'updated' | 'deleted' | 'restored'
 
 export const groupEntryActions: readonly GroupEntryAction[] = ['created', 'updated', 'deleted', 'restored']

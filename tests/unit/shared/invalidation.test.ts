@@ -28,6 +28,20 @@ describe('invalidation map', () => {
     }
   })
 
+  it('refreshes every figure a booked group record touches after a confirmation', () => {
+    expect(invalidationMap.groupRecords).toEqual([
+      ['groups'],
+      ['transactions'],
+      ['tags'],
+      ['accounts'],
+      ['categories'],
+      ['budgets'],
+      ['overview'],
+      ['reports'],
+      ['debts'],
+    ])
+  })
+
   it('refreshes debts after a settings change because their summary is in the base currency', () => {
     expect(invalidationMap.settings).toEqual([
       ['overview'],
