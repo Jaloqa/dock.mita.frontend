@@ -150,6 +150,7 @@ export function starterCategories(
     kind: starter.kind,
     color: starter.color,
     system: starter.system,
+    standardKey: starter.key,
   }))
 }
 
@@ -160,7 +161,15 @@ const seededId =
 
 export const demoCategories = (): CategoryRow[] => [
   ...starterCategories('usr_anna', 'pl', seededId('anna')),
-  { id: 'cat_anna_expense_sport', userId: 'usr_anna', name: 'Sport', kind: 'expense', color: 'chart-3', system: null },
+  {
+    id: 'cat_anna_expense_sport',
+    userId: 'usr_anna',
+    name: 'Sport',
+    kind: 'expense',
+    color: 'chart-3',
+    system: null,
+    standardKey: null,
+  },
   ...starterCategories('usr_oleh', 'uk', seededId('oleh')),
   {
     id: 'cat_oleh_expense_subscriptions',
@@ -169,5 +178,6 @@ export const demoCategories = (): CategoryRow[] => [
     kind: 'expense',
     color: 'chart-4',
     system: null,
+    standardKey: null,
   },
 ]

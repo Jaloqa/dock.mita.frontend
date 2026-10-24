@@ -19,6 +19,7 @@ import {
 } from '../app/shared/api/contract'
 import type { HttpMethod } from '../app/shared/api/transport'
 import { allocateMinor, type Currency, convertMinor, roundRate, sumMinor } from '../app/shared/money/money'
+import { coverViews } from './covers'
 import type {
   GroupEventRow,
   GroupExpenseRow,
@@ -304,8 +305,13 @@ export function expenseView(state: MockState, row: GroupExpenseRow): GroupExpens
 }
 
 export function repaymentView(state: MockState, row: GroupRepaymentRow): GroupRepaymentDto {
-  const { groupId, createdAt: _createdAt, ...repayment } = row
-  return { ...repayment, ...entryAudit(state, groupOf(state, groupId), 'repayment', row.id) }
+  const { groupId, createdAt: _createdAt, deleted, ...repayment } = row
+  return {
+    ...repayment,
+    covers: coverViews(state, row.id),
+    deleted,
+    ...entryAudit(state, groupOf(state, groupId), 'repayment', row.id),
+  }
 }
 
 export function expensesOf(state: MockState, groupId: string, deleted: boolean): GroupExpenseDto[] {

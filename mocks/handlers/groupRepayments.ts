@@ -1,6 +1,14 @@
-import { GROUP_NOTE_MAX, type GroupEntryAction, type GroupRepaymentState } from '../../app/shared/api/contract'
+import {
+  GROUP_NOTE_MAX,
+  GROUP_SETTLES_MAX,
+  type GroupCoverDto,
+  type GroupEntryAction,
+  type GroupRepaymentState,
+  type OpenShareDto,
+} from '../../app/shared/api/contract'
 import { type Currency, isCurrency } from '../../app/shared/money/currencies'
 import { todayIso } from '../../app/shared/period/period'
+import { allocateCovers, coversOf, openShares, reallocateCovers, replaceCovers } from '../covers'
 import type { GroupRepaymentRow, GroupRow, MockDb, MockState } from '../db'
 import { checkConverted } from '../debts'
 import { badRequest, notFound } from '../errors'
@@ -12,6 +20,7 @@ import {
   GROUP_PAGE,
   type GroupScope,
   historyOf,
+  linkedMemberOf,
   membersOf,
   onGroup,
   openGroup,
@@ -30,6 +39,7 @@ import { checkAmount, checkCurrency, checkDate, checkRate } from './debts'
 
 const INVALID = 'validation.invalidValue'
 const UNKNOWN_MEMBER = 'validation.unknownMember'
+const UNKNOWN_SHARE = 'validation.unknownShare'
 
 type RepaymentInput = {
   fromMemberId: string
@@ -39,6 +49,7 @@ type RepaymentInput = {
   date: string
   rate: number | undefined
   note: string | null
+  settles: string[]
 }
 
 type RepaymentFields = Omit<GroupRepaymentRow, 'id' | 'deleted' | 'groupId' | 'createdAt'>
@@ -57,8 +68,20 @@ function checkNote(value: unknown, errors: ErrorCollector): void {
   else if (value.trim().length > GROUP_NOTE_MAX) errors.add('note', 'validation.noteTooLong')
 }
 
+function readSettles(value: unknown): string[] | undefined {
+  if (value === undefined || value === null) return []
+  if (!Array.isArray(value) || value.length > GROUP_SETTLES_MAX) return undefined
+  const expenseIds: string[] = []
+  for (const item of value) {
+    const expenseId = memberIdOf(item)
+    if (expenseId === undefined || expenseIds.includes(expenseId)) return undefined
+    expenseIds.push(expenseId)
+  }
+  return expenseIds
+}
+
 function validateRepayment(body: unknown, today: string): RepaymentInput {
-  const { fromMemberId, toMemberId, amount, currency, date, rate, note } = objectBody(body)
+  const { fromMemberId, toMemberId, amount, currency, date, rate, note, settles } = objectBody(body)
   const errors = collectErrors()
   checkMember(fromMemberId, 'fromMemberId', errors)
   checkMember(toMemberId, 'toMemberId', errors)
@@ -70,6 +93,8 @@ function validateRepayment(body: unknown, today: string): RepaymentInput {
   checkDate(date, today, errors)
   checkRate(rate, errors)
   checkNote(note, errors)
+  const settled = readSettles(settles)
+  if (settled === undefined) errors.add('settles', INVALID)
   errors.throwIfAny()
   return {
     fromMemberId: from as string,
@@ -79,14 +104,29 @@ function validateRepayment(body: unknown, today: string): RepaymentInput {
     date: date as string,
     rate: typeof rate === 'number' ? rate : undefined,
     note: isMissing(note) ? null : (note as string).trim(),
+    settles: settled ?? [],
   }
 }
 
-function prepareRepayment(state: MockState, group: GroupRow, input: RepaymentInput, today: string): RepaymentFields {
+function prepareRepayment(
+  state: MockState,
+  group: GroupRow,
+  input: RepaymentInput,
+  today: string,
+  repaymentId?: string,
+): { fields: RepaymentFields; covers: GroupCoverDto[] } {
   const memberIds = membersOf(state, group.id).map((member) => member.id)
+  const open = openShares(state, group.id, input.fromMemberId, input.toMemberId, repaymentId)
   const errors = collectErrors()
   if (!memberIds.includes(input.fromMemberId)) errors.add('fromMemberId', UNKNOWN_MEMBER)
   if (!memberIds.includes(input.toMemberId)) errors.add('toMemberId', UNKNOWN_MEMBER)
+  const ownCovers = repaymentId === undefined ? [] : coversOf(state, repaymentId).map((cover) => cover.expenseId)
+  const settles = input.settles.filter(
+    (expenseId) => open.some((share) => share.expenseId === expenseId) || !ownCovers.includes(expenseId),
+  )
+  if (settles.some((expenseId) => !open.some((share) => share.expenseId === expenseId))) {
+    errors.add('settles', UNKNOWN_SHARE)
+  }
   errors.throwIfAny()
   const price = priceEntry(state.rates, {
     date: input.date,
@@ -98,17 +138,20 @@ function prepareRepayment(state: MockState, group: GroupRow, input: RepaymentInp
   })
   checkConverted([price.groupAmount])
   return {
-    fromMemberId: input.fromMemberId,
-    toMemberId: input.toMemberId,
-    amount: input.amount,
-    currency: input.currency,
-    date: input.date,
-    ...price,
-    note: input.note,
+    fields: {
+      fromMemberId: input.fromMemberId,
+      toMemberId: input.toMemberId,
+      amount: input.amount,
+      currency: input.currency,
+      date: input.date,
+      ...price,
+      note: input.note,
+    },
+    covers: allocateCovers(price.groupAmount, open, settles),
   }
 }
 
-const repaymentState = (row: GroupRepaymentRow): GroupRepaymentState => ({
+const repaymentState = (state: MockState, row: GroupRepaymentRow): GroupRepaymentState => ({
   fromMemberId: row.fromMemberId,
   toMemberId: row.toMemberId,
   amount: row.amount,
@@ -118,6 +161,7 @@ const repaymentState = (row: GroupRepaymentRow): GroupRepaymentState => ({
   rateManual: row.rateManual,
   groupAmount: row.groupAmount,
   note: row.note,
+  covers: coversOf(state, row.id),
 })
 
 const groupRepayment = (
@@ -136,7 +180,7 @@ function record(
   action: GroupEntryAction,
   actor: EventActor,
 ): void {
-  appendEvent(db.state, group, 'repayment', row.id, action, repaymentState(row), actor)
+  appendEvent(db.state, group, 'repayment', row.id, action, repaymentState(db.state, row), actor)
   db.save()
 }
 
@@ -153,14 +197,16 @@ function createRepayment({ db, body }: MockContext, scope: GroupScope) {
   const today = todayIso()
   const input = validateRepayment(body, today)
   const { group, actor } = openGroupForWrite(db.state, scope)
+  const { fields, covers } = prepareRepayment(db.state, group, input, today)
   const row: GroupRepaymentRow = {
     id: newId('gpay'),
-    ...prepareRepayment(db.state, group, input, today),
+    ...fields,
     deleted: false,
     groupId: group.id,
     createdAt: new Date().toISOString(),
   }
   db.state.groupRepayments.push(row)
+  replaceCovers(db.state, row, covers)
   record(db, group, row, 'created', actor)
   return repaymentView(db.state, row)
 }
@@ -170,7 +216,9 @@ function updateRepayment({ db, params, body }: MockContext, scope: GroupScope) {
   const input = validateRepayment(body, today)
   const { group, actor } = openGroupForWrite(db.state, scope)
   const row = groupRepayment(db.state, group, params.repaymentId, false)
-  Object.assign(row, prepareRepayment(db.state, group, input, today))
+  const { fields, covers } = prepareRepayment(db.state, group, input, today, row.id)
+  Object.assign(row, fields)
+  replaceCovers(db.state, row, covers)
   record(db, group, row, 'updated', actor)
   return repaymentView(db.state, row)
 }
@@ -185,7 +233,13 @@ function deleteRepayment({ db, params }: MockContext, scope: GroupScope) {
 function restoreRepayment({ db, params }: MockContext, scope: GroupScope) {
   const { group, actor } = openGroupForWrite(db.state, scope)
   const row = groupRepayment(db.state, group, params.repaymentId, true)
+  const covers = reallocateCovers(
+    row.groupAmount,
+    openShares(db.state, group.id, row.fromMemberId, row.toMemberId, row.id),
+    coversOf(db.state, row.id).map((cover) => cover.expenseId),
+  )
   row.deleted = false
+  replaceCovers(db.state, row, covers)
   record(db, group, row, 'restored', actor)
   return repaymentView(db.state, row)
 }
@@ -210,6 +264,12 @@ function groupBalances({ db, query }: MockContext, scope: GroupScope) {
   return balancesOf(db.state, group, isCurrency(currency) ? currency : group.currency, todayIso())
 }
 
+function ownOpenShares({ db, userId, params }: MockContext): OpenShareDto[] {
+  const group = openGroup(db.state, { kind: 'user', userId, groupId: params.id })
+  const member = linkedMemberOf(db.state, group.id, userId)
+  return member ? openShares(db.state, group.id, member.id) : []
+}
+
 export function registerGroupRepaymentHandlers(router: MockRouter) {
   onGroup(router, 'GET', '/repayments', listRepayments)
   onGroup(router, 'POST', '/repayments', createRepayment)
@@ -218,4 +278,5 @@ export function registerGroupRepaymentHandlers(router: MockRouter) {
   onGroup(router, 'POST', '/repayments/:repaymentId/restore', restoreRepayment)
   onGroup(router, 'GET', '/repayments/:repaymentId/history', repaymentHistory)
   onGroup(router, 'GET', '/balances', groupBalances)
+  router.on('GET', '/v1/groups/:id/open-shares', ownOpenShares)
 }

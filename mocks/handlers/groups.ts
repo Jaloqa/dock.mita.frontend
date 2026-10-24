@@ -184,6 +184,7 @@ export function registerGroupHandlers(router: MockRouter) {
     state.groupCategories = outside(state.groupCategories)
     state.groupExpenses = outside(state.groupExpenses)
     state.groupRepayments = outside(state.groupRepayments)
+    state.groupRepaymentCovers = outside(state.groupRepaymentCovers)
     state.groupEvents = outside(state.groupEvents)
     db.save()
   })

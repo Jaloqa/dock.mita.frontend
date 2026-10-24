@@ -2,8 +2,14 @@ import { isApiError } from './problem'
 
 const validationCode = /^validation\.[A-Za-z0-9]+$/
 
+const messageByCode: Record<string, string> = {
+  'group.itemChanged': 'groups.errors.itemChanged',
+}
+
 export function errorMessageKey(error: unknown): string {
   if (!isApiError(error)) return 'shared.error.unknown'
+  const known = error.code === undefined ? undefined : messageByCode[error.code]
+  if (known) return known
   if (error.status === 400) {
     const code = Object.values(error.fieldErrors)
       .flat()

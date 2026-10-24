@@ -1096,6 +1096,9 @@
         "some": "Equally: {names}",
         "exact": "Exact amounts: {shares}"
       }
+    },
+    "errors": {
+      "itemChanged": "This item changed. Review it again."
     }
   },
   "auth": {
@@ -1178,6 +1181,7 @@
     "memberLinked": "This member is already linked to an account.",
     "alreadyLinked": "You are already linked to another member of this group.",
     "inviteSelf": "This is your own email. Use “This is me” instead.",
-    "alreadyInvited": "Another member of this group is already invited with this email."
+    "alreadyInvited": "Another member of this group is already invited with this email.",
+    "unknownShare": "This share is not open between these members."
   }
 }

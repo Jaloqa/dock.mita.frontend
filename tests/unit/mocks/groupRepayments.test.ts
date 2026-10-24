@@ -47,6 +47,10 @@ const api = (): MockApi => {
     groupExpenses: [],
     groupRepayments: [],
     groupEvents: [],
+    groupRepaymentCovers: [],
+    groupConfirmations: [],
+    groupConfirmationTransactions: [],
+    groupLegs: [],
   })
   quoteRate(mock, 'ALL', 0.044, rateDay)
   quoteRate(mock, 'EUR', 4.3, rateDay)
@@ -60,6 +64,7 @@ const owner = { kind: 'owner', memberId: null, name: 'Anna Nowak' }
 
 const stateKeys = [
   'amount',
+  'covers',
   'currency',
   'date',
   'fromMemberId',
@@ -161,6 +166,7 @@ describe('group repayments', () => {
       rateManual: false,
       groupAmount: 2_000,
       note: null,
+      covers: [],
       deleted: false,
       createdBy: owner,
       updatedBy: null,
@@ -596,14 +602,17 @@ describe('group repayments', () => {
     expect((await listRepayments(mock, group.id)).items).toEqual([repayment])
   })
 
-  it('removes the repayments and their history with the group', async () => {
+  it('removes the repayments, their covers and their history with the group', async () => {
     const mock = api()
     const { group, anna, max } = await trip(mock)
-    await addRepayment(mock, group.id, eur(max, anna, 2_000))
+    await addExpense(mock, group.id, { payerId: anna, amount: 9_000, currency: 'EUR', date: today })
+    const created = await addRepayment(mock, group.id, eur(max, anna, 2_000))
+    expect(created.covers.map((cover) => cover.groupAmount)).toEqual([2_000])
 
     await deleteGroup(mock, group.id)
 
     expect(mock.db.state.groupRepayments).toEqual([])
+    expect(mock.db.state.groupRepaymentCovers).toEqual([])
     expect(mock.db.state.groupEvents).toEqual([])
   })
 })

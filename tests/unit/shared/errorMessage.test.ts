@@ -42,6 +42,16 @@ describe('errorMessageKey', () => {
     expect(known).toEqual(expect.arrayContaining([...codes]))
   })
 
+  it('shows the message of a known error code instead of a field error', () => {
+    const changed = new ApiError({ status: 409, title: 'Conflict', code: 'group.itemChanged' })
+    expect(errorMessageKey(changed)).toBe('groups.errors.itemChanged')
+    expect(en.groups.errors.itemChanged).toBe('This item changed. Review it again.')
+    expect(en.validation.unknownShare).toBe('This share is not open between these members.')
+    expect(errorMessageKey(new ApiError({ status: 409, title: 'Conflict', code: 'user.concurrentUpdate' }))).toBe(
+      'shared.error.unknown',
+    )
+  })
+
   it('maps anything else to the generic message', () => {
     expect(errorMessageKey(new Error('boom'))).toBe('shared.error.unknown')
     expect(errorMessageKey(undefined)).toBe('shared.error.unknown')

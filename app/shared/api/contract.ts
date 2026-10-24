@@ -443,6 +443,12 @@ export type GroupExpenseState = {
   shares: GroupShareDto[]
 }
 
+export const GROUP_SETTLES_MAX = 50
+
+export type GroupCoverDto = { expenseId: string; groupAmount: number }
+
+export type GroupRepaymentCoverDto = GroupCoverDto & { description: string | null; categoryId: string }
+
 export type GroupRepaymentDto = {
   id: string
   fromMemberId: string
@@ -454,6 +460,7 @@ export type GroupRepaymentDto = {
   rateManual: boolean
   groupAmount: number
   note: string | null
+  covers: GroupRepaymentCoverDto[]
   deleted: boolean
   createdBy: GroupActorDto
   createdAt: string
@@ -469,6 +476,7 @@ export type GroupRepaymentInput = {
   date: string
   rate?: number
   note?: string | null
+  settles?: string[] | null
 }
 
 export type GroupRepaymentState = {
@@ -481,6 +489,91 @@ export type GroupRepaymentState = {
   rateManual: boolean
   groupAmount: number
   note: string | null
+  covers: GroupCoverDto[]
+}
+
+export type OpenShareDto = {
+  expenseId: string
+  payerId: string
+  date: string
+  description: string | null
+  categoryId: string
+  share: number
+  open: number
+}
+
+export type GroupExpenseTerms = {
+  amount: number
+  currency: Currency
+  date: string
+  share: number
+  categoryId: string
+  tags: string[]
+  description: string | null
+}
+
+export type GroupRepaymentDirection = 'paid' | 'received'
+
+export type GroupRepaymentTerms = {
+  direction: GroupRepaymentDirection
+  memberId: string
+  amount: number
+  currency: Currency
+  date: string
+  groupAmount?: number
+  covers?: GroupCoverDto[]
+}
+
+export type GroupTerms = GroupExpenseTerms | GroupRepaymentTerms
+
+export type ToConfirmKind = 'expense' | 'repayment'
+
+export type ToConfirmChange = 'new' | 'changed' | 'removed'
+
+export type ToConfirmSuggestionDto = {
+  categoryId: string | null
+  newCategory: string | null
+  title: string
+  tags: string[]
+}
+
+export type ToConfirmLineDto = {
+  expenseId: string
+  description: string | null
+  amount: number
+  currency: Currency
+  suggestion: ToConfirmSuggestionDto
+}
+
+export type ToConfirmItemDto = {
+  kind: ToConfirmKind
+  entryId: string
+  groupId: string
+  groupName: string
+  groupCurrency: Currency
+  change: ToConfirmChange
+  version: string
+  at: string
+  actor: GroupActorDto
+  current: GroupTerms | null
+  previous: GroupTerms | null
+  other: number
+  lines: ToConfirmLineDto[]
+  suggestedAccountId: string | null
+}
+
+export type ToConfirmLineInput = {
+  categoryId?: string | null
+  newCategory?: string | null
+  title?: string | null
+  tags?: string[] | null
+}
+
+export type ToConfirmInput = {
+  version: string
+  accountId?: string | null
+  rate?: number
+  lines?: ToConfirmLineInput[] | null
 }
 
 export type GroupEntryAction = 'created' | 'updated' | 'deleted' | 'restored'
