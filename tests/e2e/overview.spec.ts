@@ -297,7 +297,19 @@ test('mobile overview shows the balance, the spending donut with its legend and 
   isMobile,
 }) => {
   test.skip(!isMobile, 'mobile layout')
-  await page.goto('/')
+  const now = new Date()
+  await page.addInitScript((key) => {
+    if (window.sessionStorage.getItem('reseeded')) return
+    window.sessionStorage.setItem('reseeded', 'true')
+    window.localStorage.removeItem(key)
+  }, MOCK_DB)
+  await page.clock.install({ time: new Date(now.getFullYear(), now.getMonth(), 15, 12) })
+  await page.goto('/login')
+  await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeEnabled()
+  await page.getByLabel('Email', { exact: true }).fill('anna@demo.mita.app')
+  await page.getByLabel('Password', { exact: true }).fill('demo-password')
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click()
+  await expect(page).toHaveURL('/')
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(monthTitle)
   await expect(page.locator('header:visible').getByText('Overview', { exact: true })).toBeVisible()
   await expect(page.getByText('Budget for')).toHaveCount(0)
