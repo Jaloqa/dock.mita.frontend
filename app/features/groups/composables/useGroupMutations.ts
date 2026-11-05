@@ -67,7 +67,10 @@ export function useGroupMutations() {
     invite: useMutation({
       mutationFn: ({ id, memberId, input }: { id: string; memberId: string; input: GroupInviteInput }) =>
         api.invite(id, memberId, input),
-      onSuccess,
+      // Not awaited: the form closes as soon as the invitation is accepted, not after every refetch settles.
+      onSuccess: () => {
+        onSuccess()
+      },
     }),
     cancelInvite: useMutation({
       mutationFn: ({ id, memberId }: { id: string; memberId: string }) => api.cancelInvite(id, memberId),
